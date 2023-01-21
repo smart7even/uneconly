@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:l/l.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart' as bloc_concurrency;
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -20,7 +20,8 @@ class ScheduleEvent with _$ScheduleEvent {
       CreateScheduleEvent;
 
   /// Fetch
-  const factory ScheduleEvent.fetch({required int id}) = FetchScheduleEvent;
+  const factory ScheduleEvent.fetch({int? groupId, int? week}) =
+      FetchScheduleEvent;
 
   /// Update
   const factory ScheduleEvent.update({required Schedule item}) =
@@ -113,7 +114,10 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
       FetchScheduleEvent event, Emitter<ScheduleState> emit) async {
     try {
       emit(ScheduleState.processing(data: state.data));
-      final newData = await _repository.fetch(event.id);
+      final newData = await _repository.fetch(
+        groupId: event.groupId,
+        week: event.week,
+      );
       emit(ScheduleState.successful(data: newData));
     } on Object catch (err, stackTrace) {
       l.e('An error occurred in the ScheduleBLoC: $err', stackTrace);

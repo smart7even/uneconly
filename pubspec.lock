@@ -299,7 +299,7 @@ packages:
     source: hosted
     version: "6.6.0"
   l:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: l
       url: "https://pub.dartlang.org"
