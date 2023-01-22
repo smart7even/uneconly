@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
+import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
@@ -23,6 +26,7 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   void initState() {
     super.initState();
+    initializeDateFormatting('ru');
     // Initial state initialization
   }
 
@@ -84,18 +88,66 @@ class _SchedulePageState extends State<SchedulePage> {
                 );
               }
 
+              List<Widget> slivers = [];
+
+              for (var daySchedule in schedule.daySchedules) {
+                slivers.add(
+                  SliverToBoxAdapter(
+                    child: ListTile(
+                      title: Text(
+                          capitalize(
+                            DateFormat('EEEE, d MMMM', 'ru').format(
+                              daySchedule.day,
+                            ),
+                          ),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          )),
+                    ),
+                  ),
+                );
+
+                if (daySchedule.lessons.isEmpty) {
+                  slivers.add(
+                    const SliverToBoxAdapter(
+                      child: ListTile(
+                        title: Text('Нет пар'),
+                      ),
+                    ),
+                  );
+                } else {
+                  slivers.add(SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        return ListTile(
+                          title: Text(
+                            daySchedule.lessons[index].name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            daySchedule.lessons[index].professor,
+                          ),
+                          trailing: Text(
+                            DateFormat('HH:mm').format(
+                              daySchedule.lessons[index].start,
+                            ),
+                          ),
+                        );
+                      },
+                      childCount: daySchedule.lessons.length,
+                    ),
+                  ));
+                }
+              }
+
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Schedule idle'),
                 ),
-                body: ListView.builder(
-                  itemCount: schedule.lessons.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(schedule.lessons[index].name),
-                      subtitle: Text(schedule.lessons[index].professor),
-                    );
-                  },
+                body: CustomScrollView(
+                  slivers: slivers,
                 ),
               );
             },

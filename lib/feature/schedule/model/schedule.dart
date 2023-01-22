@@ -1,11 +1,11 @@
-import 'package:uneconly/feature/schedule/model/lesson.dart';
+import 'package:uneconly/feature/schedule/model/day_schedule.dart';
 
 class Schedule {
-  final List<Lesson> lessons;
+  final List<DaySchedule> daySchedules;
 
   const Schedule({
-    required this.lessons,
+    required this.daySchedules,
   });
 
-  const Schedule.empty() : lessons = const <Lesson>[];
+  const Schedule.empty() : daySchedules = const <DaySchedule>[];
 }
