@@ -111,7 +111,9 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
 
   /// Fetch event handler
   Future<void> _fetch(
-      FetchScheduleEvent event, Emitter<ScheduleState> emit) async {
+    FetchScheduleEvent event,
+    Emitter<ScheduleState> emit,
+  ) async {
     try {
       emit(ScheduleState.processing(data: state.data));
       final newData = await _repository.fetch(

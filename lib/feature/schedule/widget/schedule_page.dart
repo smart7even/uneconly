@@ -64,7 +64,8 @@ class _SchedulePageState extends State<SchedulePage> {
         );
 
         ScheduleRepository repository = ScheduleRepository(
-            networkDataProvider: scheduleNetworkDataProvider);
+          networkDataProvider: scheduleNetworkDataProvider,
+        );
 
         var bloc = ScheduleBLoC(repository: repository);
         bloc.add(const ScheduleEvent.fetch(groupId: 12837, week: 21));
@@ -95,15 +96,16 @@ class _SchedulePageState extends State<SchedulePage> {
                   SliverToBoxAdapter(
                     child: ListTile(
                       title: Text(
-                          capitalize(
-                            DateFormat('EEEE, d MMMM', 'ru').format(
-                              daySchedule.day,
-                            ),
+                        capitalize(
+                          DateFormat('EEEE, d MMMM', 'ru').format(
+                            daySchedule.day,
                           ),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          )),
+                        ),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
                     ),
                   ),
                 );
