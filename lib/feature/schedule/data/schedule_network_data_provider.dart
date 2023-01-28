@@ -20,19 +20,32 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
   Future<Schedule> fetch({int? groupId, int? week}) async {
     // fetch data from /group/:id/schedule?week=21 endpoint
     try {
+      final queryParameters = <String, dynamic>{};
+
+      if (week != null) {
+        queryParameters['week'] = week;
+      }
+
       final response = await _dio.get(
         '/group/$groupId/schedule',
-        queryParameters: {
-          'week': week,
-        },
+        queryParameters: queryParameters,
       );
 
       List<Lesson> lessons = (response.data['lessons'] as List<dynamic>)
           .map<Lesson>((lesson) => Lesson.fromJson(lesson))
           .toList();
 
+      int responseWeek = response.data['week'];
+
+      if (week != null && week != responseWeek) {
+        throw Exception('Weeks do not match');
+      }
+
       if (lessons.isEmpty) {
-        return const Schedule.empty();
+        return Schedule(
+          daySchedules: [],
+          week: responseWeek,
+        );
       }
 
       var weekStart = getWeekStart(lessons.first.day);
@@ -98,6 +111,7 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
 
       return Schedule(
         daySchedules: daySchedules,
+        week: responseWeek,
       );
     } on Object catch (e, stackTrace) {
       l.e('An error occured in ScheduleNetworkDataProvider', stackTrace);

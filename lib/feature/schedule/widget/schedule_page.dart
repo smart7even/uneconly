@@ -68,7 +68,7 @@ class _SchedulePageState extends State<SchedulePage> {
         );
 
         var bloc = ScheduleBLoC(repository: repository);
-        bloc.add(const ScheduleEvent.fetch(groupId: 12837, week: 21));
+        bloc.add(const ScheduleEvent.fetch(groupId: pi2002groupId));
 
         return bloc;
       },
