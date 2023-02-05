@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 
@@ -27,15 +28,28 @@ class ScheduleWidget extends StatelessWidget {
     }
 
     for (var daySchedule in currentSchedule.daySchedules) {
+      String sectionTitle = capitalize(
+        DateFormat('EEEE, d MMMM', 'ru').format(
+          daySchedule.day,
+        ),
+      );
+
+      final today = DateTime.now();
+      final difference = calculateDifferenceInDays(daySchedule.day, today);
+
+      if (difference == 0) {
+        sectionTitle = 'Сегодня, $sectionTitle';
+      } else if (difference == 1) {
+        sectionTitle = 'Завтра, $sectionTitle';
+      } else if (difference == -1) {
+        sectionTitle = 'Вчера, $sectionTitle';
+      }
+
       slivers.add(
         SliverToBoxAdapter(
           child: ListTile(
             title: Text(
-              capitalize(
-                DateFormat('EEEE, d MMMM', 'ru').format(
-                  daySchedule.day,
-                ),
-              ),
+              sectionTitle,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
