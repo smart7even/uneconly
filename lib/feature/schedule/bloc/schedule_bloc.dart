@@ -40,30 +40,38 @@ class ScheduleState with _$ScheduleState {
 
   /// Idling state
   const factory ScheduleState.idle({
-    required final Schedule? data,
+    required final int? currentWeek,
+    required final Map<int, Schedule> data,
+    final int? selectedWeek,
     @Default('Idle') final String message,
   }) = IdleScheduleState;
 
   /// Processing
   const factory ScheduleState.processing({
-    required final Schedule? data,
+    required final int? currentWeek,
+    required final Map<int, Schedule> data,
+    final int? selectedWeek,
     @Default('Processing') final String message,
   }) = ProcessingScheduleState;
 
   /// Successful
   const factory ScheduleState.successful({
-    required final Schedule? data,
+    required final int? currentWeek,
+    required final Map<int, Schedule> data,
+    final int? selectedWeek,
     @Default('Successful') final String message,
   }) = SuccessfulScheduleState;
 
   /// An error has occurred
   const factory ScheduleState.error({
-    required final Schedule? data,
+    required final int? currentWeek,
+    required final Map<int, Schedule> data,
+    final int? selectedWeek,
     @Default('An error has occurred') final String message,
   }) = ErrorScheduleState;
 
   /// Has data
-  bool get hasData => data != null;
+  bool get hasData => data.isNotEmpty;
 
   /// If an error has occurred
   bool get hasError => maybeMap<bool>(orElse: () => false, error: (_) => true);
@@ -86,7 +94,9 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         super(
           initialState ??
               const ScheduleState.idle(
-                data: Schedule.empty(),
+                selectedWeek: null,
+                currentWeek: null,
+                data: {},
                 message: 'Initial idle state',
               ),
         ) {
@@ -115,18 +125,43 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
     Emitter<ScheduleState> emit,
   ) async {
     try {
-      emit(ScheduleState.processing(data: state.data));
-      final newData = await _repository.fetch(
+      emit(ScheduleState.processing(
+        data: state.data,
+        currentWeek: state.currentWeek ?? event.week,
+        selectedWeek: event.week,
+      ));
+      final schedule = await _repository.fetch(
         groupId: event.groupId,
         week: event.week,
       );
-      emit(ScheduleState.successful(data: newData));
+
+      final newData = {
+        ...state.data,
+      };
+
+      newData[schedule.week] = schedule;
+
+      emit(ScheduleState.successful(
+        data: newData,
+        currentWeek: state.currentWeek ?? schedule.week,
+        selectedWeek: event.week,
+      ));
     } on Object catch (err, stackTrace) {
       l.e('An error occurred in the ScheduleBLoC: $err', stackTrace);
-      emit(ScheduleState.error(data: state.data));
+      emit(ScheduleState.error(
+        data: state.data,
+        currentWeek: state.currentWeek,
+        selectedWeek: state.selectedWeek,
+      ));
       rethrow;
     } finally {
-      emit(ScheduleState.idle(data: state.data));
+      emit(
+        ScheduleState.idle(
+          data: state.data,
+          currentWeek: state.currentWeek,
+          selectedWeek: state.selectedWeek,
+        ),
+      );
     }
   }
 }

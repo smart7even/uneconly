@@ -13,7 +13,7 @@ class Lesson with _$Lesson {
         required final String dayOfWeek,
     required final DateTime start,
     required final DateTime end,
-    required final String professor,
+    required final String? professor,
     required final String location,
   }) = _Lesson;
 

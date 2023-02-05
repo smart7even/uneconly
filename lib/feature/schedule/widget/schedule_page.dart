@@ -2,12 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
-import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
+import 'package:uneconly/feature/schedule/model/schedule.dart';
+import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 
 /// {@template schedule_page}
 /// SchedulePage widget
@@ -22,6 +22,12 @@ class SchedulePage extends StatefulWidget {
 
 /// State for widget SchedulePage
 class _SchedulePageState extends State<SchedulePage> {
+  static const initialPageIndex = 4242;
+
+  final controller = PageController(
+    initialPage: initialPageIndex,
+  );
+
   /* #region Lifecycle */
   @override
   void initState() {
@@ -50,6 +56,87 @@ class _SchedulePageState extends State<SchedulePage> {
   }
   /* #endregion */
 
+  Future<void> onPageChanged(
+    BuildContext context,
+    int newIndex,
+    int? week,
+    Map<int, Schedule> data,
+  ) async {
+    if (week == null) {
+      return;
+    }
+
+    int newWeek = week + newIndex - initialPageIndex;
+
+    context.read<ScheduleBLoC>().add(
+          ScheduleEvent.fetch(
+            groupId: pi2002groupId,
+            week: newWeek,
+          ),
+        );
+  }
+
+  Widget _buildPageView(
+    BuildContext context,
+    ScheduleState state,
+  ) {
+    int? week = state.currentWeek;
+    int? selectedWeek = state.selectedWeek;
+    Map<int, Schedule> data = state.data;
+    String message = state.message;
+
+    if (week == 0) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('PI-2002'),
+        ),
+        body: Center(
+          child: Text(message),
+        ),
+      );
+    }
+
+    String title = 'PI-2002';
+
+    if (selectedWeek != null) {
+      title += ', week $selectedWeek';
+
+      if (week != null && week == selectedWeek) {
+        title += ' (now)';
+      }
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: PageView.builder(
+        controller: controller,
+        scrollDirection: Axis.horizontal,
+        onPageChanged: (int newIndex) =>
+            onPageChanged(context, newIndex, week, data),
+        itemBuilder: (context, index) {
+          debugPrint('index: ${index - initialPageIndex}');
+          int? currentWeek;
+
+          if (week != null) {
+            currentWeek = week + index - initialPageIndex;
+          }
+
+          if (currentWeek == null) {
+            return const ScheduleWidget(schedule: Schedule.empty());
+          }
+
+          if (currentWeek < 0 || currentWeek > 52) {
+            return const ScheduleWidget(schedule: Schedule.empty());
+          }
+
+          return ScheduleWidget(schedule: data[currentWeek]);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -74,106 +161,20 @@ class _SchedulePageState extends State<SchedulePage> {
       },
       child: BlocBuilder<ScheduleBLoC, ScheduleState>(
         builder: (context, state) {
-          return state.when<Widget>(
-            idle: (data, message) {
-              var schedule = data;
-
-              if (schedule == null) {
-                return Scaffold(
-                  appBar: AppBar(
-                    title: const Text('Schedule idle'),
-                  ),
-                  body: const Center(
-                    child: Text('Schedule'),
-                  ),
-                );
-              }
-
-              List<Widget> slivers = [];
-
-              for (var daySchedule in schedule.daySchedules) {
-                slivers.add(
-                  SliverToBoxAdapter(
-                    child: ListTile(
-                      title: Text(
-                        capitalize(
-                          DateFormat('EEEE, d MMMM', 'ru').format(
-                            daySchedule.day,
-                          ),
-                        ),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-
-                if (daySchedule.lessons.isEmpty) {
-                  slivers.add(
-                    const SliverToBoxAdapter(
-                      child: ListTile(
-                        title: Text('Нет пар'),
-                      ),
-                    ),
-                  );
-                } else {
-                  slivers.add(SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        return ListTile(
-                          title: Text(
-                            daySchedule.lessons[index].name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: Text(
-                            daySchedule.lessons[index].professor,
-                          ),
-                          trailing: Text(
-                            DateFormat('HH:mm').format(
-                              daySchedule.lessons[index].start,
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: daySchedule.lessons.length,
-                    ),
-                  ));
-                }
-              }
-
-              return Scaffold(
-                appBar: AppBar(
-                  title: const Text('Schedule idle'),
-                ),
-                body: CustomScrollView(
-                  slivers: slivers,
-                ),
-              );
-            },
-            processing: (data, message) {
-              return Scaffold(
-                appBar: AppBar(
-                  title: const Text('Schedule processing'),
-                ),
-                body: const Center(
-                  child: Text('Schedule'),
-                ),
-              );
-            },
-            successful: (data, message) {
-              return Scaffold(
-                appBar: AppBar(
-                  title: const Text('Schedule successful'),
-                ),
-                body: const Center(
-                  child: Text('Schedule'),
-                ),
-              );
-            },
-            error: (data, message) {
+          return state.map<Widget>(
+            idle: (state) => _buildPageView(
+              context,
+              state,
+            ),
+            processing: (state) => _buildPageView(
+              context,
+              state,
+            ),
+            successful: (state) => _buildPageView(
+              context,
+              state,
+            ),
+            error: (state) {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Schedule error'),
