@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uneconly/common/app_scroll_configuration.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
 
 void main() {
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      scrollBehavior: AppScrollBehavior(),
       home: const SchedulePage(),
     );
   }
