@@ -71,20 +71,33 @@ class ScheduleWidget extends StatelessWidget {
         slivers.add(SliverList(
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
+              final lesson = daySchedule.lessons[index];
+              String subtitle = '';
+
+              String? professor = lesson.professor;
+
+              if (professor != null) {
+                subtitle = professor;
+              }
+
+              String location = lesson.location.replaceAll('\n', ' ').trim();
+
+              subtitle = '$subtitle $location';
+
               return ListTile(
                 title: Text(
-                  daySchedule.lessons[index].name,
+                  lesson.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 subtitle: Text(
-                  daySchedule.lessons[index].professor ?? '-',
+                  subtitle,
                 ),
                 trailing: Text(
                   '${DateFormat('HH:mm').format(
-                    daySchedule.lessons[index].start,
+                    lesson.start,
                   )} - ${DateFormat('HH:mm').format(
-                    daySchedule.lessons[index].end,
+                    lesson.end,
                   )}',
                 ),
               );
