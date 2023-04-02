@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:uneconly/common/database/database.dart';
+import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
@@ -144,6 +145,8 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) {
+        final currentTime = DateTime.now();
+
         Dio dio = Dio(BaseOptions(
           baseUrl: serverAddress,
         ));
@@ -164,7 +167,12 @@ class _SchedulePageState extends State<SchedulePage> {
         );
 
         var bloc = ScheduleBLoC(repository: repository);
-        bloc.add(const ScheduleEvent.fetch(groupId: pi2002groupId));
+        bloc.add(
+          ScheduleEvent.fetch(
+            groupId: pi2002groupId,
+            week: getStudyWeekNumber(currentTime, currentTime),
+          ),
+        );
 
         return bloc;
       },

@@ -6,7 +6,7 @@ import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 
 abstract class IScheduleNetworkDataProvider {
-  Future<Schedule> fetch({int? groupId, int? week});
+  Future<Schedule> fetch({required int groupId, int? week});
 }
 
 class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
@@ -17,7 +17,7 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
   final Dio _dio;
 
   @override
-  Future<Schedule> fetch({int? groupId, int? week}) async {
+  Future<Schedule> fetch({required int groupId, int? week}) async {
     // fetch data from /group/:id/schedule?week=21 endpoint
     try {
       final queryParameters = <String, dynamic>{};

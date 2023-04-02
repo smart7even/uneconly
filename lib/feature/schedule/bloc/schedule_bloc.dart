@@ -21,7 +21,7 @@ class ScheduleEvent with _$ScheduleEvent {
       CreateScheduleEvent;
 
   /// Fetch
-  const factory ScheduleEvent.fetch({required int groupId, int? week}) =
+  const factory ScheduleEvent.fetch({required int groupId, required int week}) =
       FetchScheduleEvent;
 
   /// Update
