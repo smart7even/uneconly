@@ -2,8 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
+import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
@@ -150,8 +152,14 @@ class _SchedulePageState extends State<SchedulePage> {
           dio: dio,
         );
 
+        MyDatabase database = MyDatabase();
+
+        IScheduleLocalDataProvider localDataProvider =
+            ScheduleLocalDataProvider(database);
+
         ScheduleRepository repository = ScheduleRepository(
           networkDataProvider: scheduleNetworkDataProvider,
+          localDataProvider: localDataProvider,
         );
 
         var bloc = ScheduleBLoC(repository: repository);

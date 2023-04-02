@@ -50,7 +50,6 @@ dart_code_metrics:
     - no-boolean-literal-compare
     - no-empty-block
     - prefer-trailing-comma
-    - prefer-conditional-expressions
     - no-equal-then-else
   anti-patterns:
     - long-method
