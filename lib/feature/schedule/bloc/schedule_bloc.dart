@@ -6,6 +6,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart' as bloc_concurrency;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
+import 'package:uneconly/feature/schedule/model/schedule_details.dart';
 
 part 'schedule_bloc.freezed.dart';
 
@@ -20,7 +21,7 @@ class ScheduleEvent with _$ScheduleEvent {
       CreateScheduleEvent;
 
   /// Fetch
-  const factory ScheduleEvent.fetch({int? groupId, int? week}) =
+  const factory ScheduleEvent.fetch({required int groupId, int? week}) =
       FetchScheduleEvent;
 
   /// Update
@@ -41,7 +42,7 @@ class ScheduleState with _$ScheduleState {
   /// Idling state
   const factory ScheduleState.idle({
     required final int? currentWeek,
-    required final Map<int, Schedule> data,
+    required final Map<int, ScheduleDetails> data,
     final int? selectedWeek,
     @Default('Idle') final String message,
   }) = IdleScheduleState;
@@ -49,7 +50,7 @@ class ScheduleState with _$ScheduleState {
   /// Processing
   const factory ScheduleState.processing({
     required final int? currentWeek,
-    required final Map<int, Schedule> data,
+    required final Map<int, ScheduleDetails> data,
     final int? selectedWeek,
     @Default('Processing') final String message,
   }) = ProcessingScheduleState;
@@ -57,7 +58,7 @@ class ScheduleState with _$ScheduleState {
   /// Successful
   const factory ScheduleState.successful({
     required final int? currentWeek,
-    required final Map<int, Schedule> data,
+    required final Map<int, ScheduleDetails> data,
     final int? selectedWeek,
     @Default('Successful') final String message,
   }) = SuccessfulScheduleState;
@@ -65,7 +66,7 @@ class ScheduleState with _$ScheduleState {
   /// An error has occurred
   const factory ScheduleState.error({
     required final int? currentWeek,
-    required final Map<int, Schedule> data,
+    required final Map<int, ScheduleDetails> data,
     final int? selectedWeek,
     @Default('An error has occurred') final String message,
   }) = ErrorScheduleState;
@@ -130,6 +131,29 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         currentWeek: state.currentWeek ?? event.week,
         selectedWeek: event.week,
       ));
+
+      final localSchedule = await _repository.getLocalSchedule(
+        groupId: event.groupId,
+        week: event.week,
+      );
+
+      if (localSchedule != null) {
+        final localData = {
+          ...state.data,
+        };
+
+        localData[localSchedule.week] = ScheduleDetails(
+          schedule: localSchedule,
+          isLocal: true,
+        );
+
+        emit(ScheduleState.successful(
+          data: localData,
+          currentWeek: state.currentWeek ?? localSchedule.week,
+          selectedWeek: event.week,
+        ));
+      }
+
       final schedule = await _repository.fetch(
         groupId: event.groupId,
         week: event.week,
@@ -139,7 +163,10 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         ...state.data,
       };
 
-      newData[schedule.week] = schedule;
+      newData[schedule.week] = ScheduleDetails(
+        schedule: schedule,
+        isLocal: false,
+      );
 
       emit(ScheduleState.successful(
         data: newData,

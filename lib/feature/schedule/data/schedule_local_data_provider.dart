@@ -6,7 +6,7 @@ import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 
 abstract class IScheduleLocalDataProvider {
-  Future<Schedule> getSchedule(int week);
+  Future<Schedule?> getSchedule(int week);
   Future<void> saveSchedule(Schedule schedule);
 }
 
@@ -16,7 +16,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
   ScheduleLocalDataProvider(this._database);
 
   @override
-  Future<Schedule> getSchedule(int week) async {
+  Future<Schedule?> getSchedule(int week) async {
     final nowTime = DateTime.now();
     final startOfWeekDateTime = getStartOfStudyWeek(week, nowTime);
     final endOfWeekDateTime = startOfWeekDateTime
@@ -52,7 +52,16 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
             location: e.location,
           ),
         )
+        .where((element) =>
+            (element.day.isAtSameMomentAs(startOfWeekDateTime) ||
+                element.day.isAfter(startOfWeekDateTime)) &&
+            (element.day.isAtSameMomentAs(endOfWeekDateTime) ||
+                element.day.isBefore(endOfWeekDateTime)))
         .toList();
+
+    if (domainLessons.isEmpty) {
+      return null;
+    }
 
     final days = [
       for (int i = 0; i < 7; i++) startOfWeekDateTime.add(Duration(days: i)),

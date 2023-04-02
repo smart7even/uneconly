@@ -9,6 +9,7 @@ import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
+import 'package:uneconly/feature/schedule/model/schedule_details.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 
 /// {@template schedule_page}
@@ -62,7 +63,7 @@ class _SchedulePageState extends State<SchedulePage> {
     BuildContext context,
     int newIndex,
     int? week,
-    Map<int, Schedule> data,
+    Map<int, ScheduleDetails> data,
   ) async {
     if (week == null) {
       return;
@@ -84,7 +85,7 @@ class _SchedulePageState extends State<SchedulePage> {
   ) {
     int? week = state.currentWeek;
     int? selectedWeek = state.selectedWeek;
-    Map<int, Schedule> data = state.data;
+    Map<int, ScheduleDetails> data = state.data;
     String message = state.message;
 
     if (week == 0) {
@@ -133,7 +134,7 @@ class _SchedulePageState extends State<SchedulePage> {
             return const ScheduleWidget(schedule: Schedule.empty());
           }
 
-          return ScheduleWidget(schedule: data[currentWeek]);
+          return ScheduleWidget(schedule: data[currentWeek]?.schedule);
         },
       ),
     );
