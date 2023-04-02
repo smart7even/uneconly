@@ -17,7 +17,21 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       scrollBehavior: AppScrollBehavior(),
-      home: const SchedulePage(),
+      home: Navigator(
+        pages: const [
+          MaterialPage(
+            key: ValueKey('SchedulePage'),
+            child: SchedulePage(),
+          ),
+        ],
+        onPopPage: (route, result) {
+          if (!route.didPop(result)) {
+            return false;
+          }
+
+          return true;
+        },
+      ),
     );
   }
 }
