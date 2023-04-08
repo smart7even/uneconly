@@ -6,6 +6,8 @@ part 'app_route_path.g.dart';
 /// AppRoutePath data class
 @freezed
 class AppRoutePath with _$AppRoutePath {
+  const factory AppRoutePath.select() = SelectAppRoutePath;
+
   const factory AppRoutePath.schedule({
     required final int groupId,
   }) = ScheduleAppRoutePath;

@@ -156,7 +156,7 @@ class _SchedulePageState extends State<SchedulePage> {
           dio: dio,
         );
 
-        MyDatabase database = MyDatabase();
+        MyDatabase database = context.read<MyDatabase>();
 
         IScheduleLocalDataProvider localDataProvider =
             ScheduleLocalDataProvider(database);

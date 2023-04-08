@@ -10,32 +10,31 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
     final location = routeInformation.location;
 
     if (location == null) {
-      // TODO: redirect to home page
-      return const AppRoutePath.schedule(
-        groupId: pi2002groupId,
-      );
+      return const AppRoutePath.select();
     }
 
     final uri = Uri.parse(location);
     // Handle '/'
     if (uri.pathSegments.isEmpty) {
-      // TODO: redirect to home page
-      return const AppRoutePath.schedule(
-        groupId: pi2002groupId,
-      );
+      return const AppRoutePath.select();
     }
 
-    // Handle '/schedule/:id'
-    if (uri.pathSegments.length == 2) {
-      if (uri.pathSegments[0] != 'schedule') {
-        // TODO: redirect to page not found page
+    // Handle '/group/:id/schedule/'
+    if (uri.pathSegments.length == 3) {
+      if (uri.pathSegments[0] != 'group') {
+        return const AppRoutePath.select();
+      }
+
+      var groupIdPath = uri.pathSegments[1];
+      var id = int.tryParse(groupIdPath);
+
+      if (id == null) {
+        // TODO: redirect to no id specified page
         return const AppRoutePath.schedule(groupId: pi2002groupId);
       }
 
-      var remaining = uri.pathSegments[1];
-      var id = int.tryParse(remaining);
-      if (id == null) {
-        // TODO: redirect to unknown group page
+      if (uri.pathSegments[2] != 'schedule') {
+        // TODO: redirect to page not found page
         return const AppRoutePath.schedule(groupId: pi2002groupId);
       }
 
@@ -49,8 +48,19 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
 
   @override
   RouteInformation restoreRouteInformation(AppRoutePath configuration) {
-    return configuration.map(schedule: (configuration) {
-      return RouteInformation(location: 'schedule/${configuration.groupId}');
-    });
+    return configuration.map(
+      schedule: (configuration) {
+        return RouteInformation(
+          location: '/group/${configuration.groupId}/schedule',
+          state: configuration.toJson(),
+        );
+      },
+      select: (_) {
+        return RouteInformation(
+          location: '/',
+          state: const AppRoutePath.select().toJson(),
+        );
+      },
+    );
   }
 }
