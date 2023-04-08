@@ -25,17 +25,23 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
       );
     }
 
-    // Handle '/schedule/:id'
-    if (uri.pathSegments.length == 2) {
-      if (uri.pathSegments[0] != 'schedule') {
+    // Handle '/group/:id/schedule/'
+    if (uri.pathSegments.length == 3) {
+      if (uri.pathSegments[0] != 'group') {
         // TODO: redirect to page not found page
         return const AppRoutePath.schedule(groupId: pi2002groupId);
       }
 
-      var remaining = uri.pathSegments[1];
-      var id = int.tryParse(remaining);
+      var groupIdPath = uri.pathSegments[1];
+      var id = int.tryParse(groupIdPath);
+
       if (id == null) {
-        // TODO: redirect to unknown group page
+        // TODO: redirect to no id specified page
+        return const AppRoutePath.schedule(groupId: pi2002groupId);
+      }
+
+      if (uri.pathSegments[2] != 'schedule') {
+        // TODO: redirect to page not found page
         return const AppRoutePath.schedule(groupId: pi2002groupId);
       }
 
@@ -50,7 +56,9 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
   @override
   RouteInformation restoreRouteInformation(AppRoutePath configuration) {
     return configuration.map(schedule: (configuration) {
-      return RouteInformation(location: 'schedule/${configuration.groupId}');
+      return RouteInformation(
+        location: '/group/${configuration.groupId}/schedule',
+      );
     });
   }
 }
