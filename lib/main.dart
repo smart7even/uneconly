@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uneconly/common/app_scroll_configuration.dart';
+import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/routing/app_route_information_parser.dart';
 import 'package:uneconly/common/routing/app_router_delegate.dart';
 
@@ -27,14 +29,17 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Schedule App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return RepositoryProvider(
+      create: (context) => MyDatabase(),
+      child: MaterialApp.router(
+        title: 'Schedule App',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        scrollBehavior: AppScrollBehavior(),
+        routerDelegate: _routerDelegate,
+        routeInformationParser: _routeInformationParser,
       ),
-      scrollBehavior: AppScrollBehavior(),
-      routerDelegate: _routerDelegate,
-      routeInformationParser: _routeInformationParser,
     );
   }
 }
