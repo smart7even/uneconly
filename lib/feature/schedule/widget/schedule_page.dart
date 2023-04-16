@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:uneconly/common/database/database.dart';
+import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
@@ -36,7 +37,7 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   void initState() {
     super.initState();
-    initializeDateFormatting('ru');
+    initializeDateFormatting('en');
     // Initial state initialization
   }
 
@@ -103,10 +104,10 @@ class _SchedulePageState extends State<SchedulePage> {
     String title = 'PI-2002';
 
     if (selectedWeek != null) {
-      title += ', week $selectedWeek';
+      title += ', ${AppLocalizations.of(context)!.week} $selectedWeek';
 
       if (week != null && week == selectedWeek) {
-        title += ' (now)';
+        title += ' (${AppLocalizations.of(context)!.now})';
       }
     }
 
@@ -194,10 +195,14 @@ class _SchedulePageState extends State<SchedulePage> {
             error: (state) {
               return Scaffold(
                 appBar: AppBar(
-                  title: const Text('Schedule error'),
+                  title: Text(
+                    AppLocalizations.of(context)!.scheduleError,
+                  ),
                 ),
-                body: const Center(
-                  child: Text('Schedule'),
+                body: Center(
+                  child: Text(
+                    AppLocalizations.of(context)!.schedule,
+                  ),
                 ),
               );
             },

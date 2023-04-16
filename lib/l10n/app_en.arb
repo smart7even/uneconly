@@ -1,0 +1,16 @@
+{
+    "helloWorld": "Hello World!",
+    "@helloWorld": {
+        "description": "The conventional newborn programmer greeting"
+    },
+    "scheduleError": "Schedule error",
+    "schedule": "Schedule",
+    "week": "week",
+    "now": "now",
+    "noSchedule": "No schedule",
+    "loadingSchedule": "Loading schedule",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday",
+    "noLessons": "No lessons"
+}
