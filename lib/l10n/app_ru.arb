@@ -1,3 +1,13 @@
 {
-    "helloWorld": "Привет Мир!"
+    "helloWorld": "Привет Мир!",
+    "scheduleError": "Ошибка загрузки расписания",
+    "schedule": "Расписание",
+    "week": "неделя",
+    "now": "сейчас",
+    "noSchedule": "Нет расписания",
+    "loadingSchedule": "Загружаем расписание",
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "yesterday": "Вчера",
+    "noLessons": "Нет пар"
 }

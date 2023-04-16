@@ -34,6 +34,7 @@ class _MyAppState extends State<MyApp> {
       create: (context) => MyDatabase(),
       child: MaterialApp.router(
         title: 'Schedule App',
+        locale: const Locale('ru'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
@@ -17,9 +18,9 @@ class ScheduleWidget extends StatelessWidget {
 
     if (currentSchedule == null) {
       slivers.add(
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: ListTile(
-            title: Text('Загружаем расписание...'),
+            title: Text('${AppLocalizations.of(context)!.loadingSchedule}...'),
           ),
         ),
       );
@@ -38,11 +39,13 @@ class ScheduleWidget extends StatelessWidget {
       final difference = calculateDifferenceInDays(daySchedule.day, today);
 
       if (difference == 0) {
-        sectionTitle = 'Сегодня, $sectionTitle';
+        sectionTitle = '${AppLocalizations.of(context)!.today}, $sectionTitle';
       } else if (difference == 1) {
-        sectionTitle = 'Завтра, $sectionTitle';
+        sectionTitle =
+            '${AppLocalizations.of(context)!.tomorrow}, $sectionTitle';
       } else if (difference == -1) {
-        sectionTitle = 'Вчера, $sectionTitle';
+        sectionTitle =
+            '${AppLocalizations.of(context)!.yesterday}, $sectionTitle';
       }
 
       slivers.add(
@@ -61,9 +64,9 @@ class ScheduleWidget extends StatelessWidget {
 
       if (daySchedule.lessons.isEmpty) {
         slivers.add(
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: ListTile(
-              title: Text('Нет пар'),
+              title: Text(AppLocalizations.of(context)!.noLessons),
             ),
           ),
         );
@@ -122,14 +125,14 @@ class ScheduleWidget extends StatelessWidget {
     final currentSchedule = schedule;
 
     if (currentSchedule == null) {
-      return const Center(
-        child: Text('Schedule'),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.schedule),
       );
     }
 
     if (currentSchedule.daySchedules.isEmpty) {
-      return const Center(
-        child: Text('Нет расписания'),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.noSchedule),
       );
     }
 
