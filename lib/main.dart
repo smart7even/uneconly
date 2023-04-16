@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uneconly/common/app_scroll_configuration.dart';
 import 'package:uneconly/common/database/database.dart';
@@ -33,6 +34,8 @@ class _MyAppState extends State<MyApp> {
       create: (context) => MyDatabase(),
       child: MaterialApp.router(
         title: 'Schedule App',
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
