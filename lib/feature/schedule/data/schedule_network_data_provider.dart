@@ -45,6 +45,7 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
         return Schedule(
           daySchedules: [],
           week: responseWeek,
+          groupId: groupId,
         );
       }
 
@@ -112,6 +113,7 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
       return Schedule(
         daySchedules: daySchedules,
         week: responseWeek,
+        groupId: groupId,
       );
     } on Object catch (e, stackTrace) {
       l.e('An error occured in ScheduleNetworkDataProvider', stackTrace);
