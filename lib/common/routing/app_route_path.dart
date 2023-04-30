@@ -10,6 +10,7 @@ class AppRoutePath with _$AppRoutePath {
 
   const factory AppRoutePath.schedule({
     required final int groupId,
+    required final String groupName,
   }) = ScheduleAppRoutePath;
 
   const AppRoutePath._();

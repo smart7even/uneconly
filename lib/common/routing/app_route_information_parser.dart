@@ -30,20 +30,32 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
 
       if (id == null) {
         // TODO: redirect to no id specified page
-        return const AppRoutePath.schedule(groupId: pi2002groupId);
+        return const AppRoutePath.schedule(
+          groupId: pi2002groupId,
+          groupName: pi2002groupName,
+        );
       }
 
       if (uri.pathSegments[2] != 'schedule') {
         // TODO: redirect to page not found page
-        return const AppRoutePath.schedule(groupId: pi2002groupId);
+        return const AppRoutePath.schedule(
+          groupId: pi2002groupId,
+          groupName: pi2002groupName,
+        );
       }
 
-      return AppRoutePath.schedule(groupId: id);
+      return AppRoutePath.schedule(
+        groupId: id,
+        groupName: pi2002groupName,
+      );
     }
 
     // Handle unknown routes
     // TODO: redirect to page not found page
-    return const AppRoutePath.schedule(groupId: pi2002groupId);
+    return const AppRoutePath.schedule(
+      groupId: pi2002groupId,
+      groupName: pi2002groupName,
+    );
   }
 
   @override

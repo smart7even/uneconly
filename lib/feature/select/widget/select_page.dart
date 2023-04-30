@@ -1,6 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
+import 'package:uneconly/constants.dart';
+import 'package:uneconly/feature/select/bloc/group_bloc.dart';
+import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
+import 'package:uneconly/feature/select/data/group_repository.dart';
 
 /// {@template select_page}
 /// SelectPage widget
@@ -42,26 +48,65 @@ class _SelectPageState extends State<SelectPage> {
   }
   /* #endregion */
 
-  void onPressed() {
+  void onPressed(int groupId, String groupName) {
     AppRouter.navigate(
       context,
-      (configuration) => const AppRoutePath.schedule(
-        groupId: 12837,
+      (configuration) => AppRoutePath.schedule(
+        groupId: groupId,
+        groupName: groupName,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('SelectPage'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: onPressed,
-          child: const Text('Go to SchedulePage'),
-        ),
+    return BlocProvider(
+      create: (context) {
+        final bloc = GroupBloc(
+          groupRepository: GroupRepository(
+            networkDataProvider: GroupNetworkDataProvider(
+              dio: Dio(
+                BaseOptions(
+                  baseUrl: serverAddress,
+                ),
+              ),
+            ),
+          ),
+        );
+        bloc.add(
+          const GroupEvent.intiial(),
+        );
+
+        return bloc;
+      },
+      child: BlocBuilder<GroupBloc, GroupState>(
+        builder: (context, state) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('SelectPage'),
+            ),
+            body: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: state.groups.length,
+                    itemBuilder: (context, index) {
+                      final group = state.groups[index];
+
+                      return ListTile(
+                        title: Text(group.name),
+                        onTap: () => onPressed(
+                          group.id,
+                          group.name,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

@@ -18,8 +18,15 @@ import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 /// SchedulePage widget
 /// {@endtemplate}
 class SchedulePage extends StatefulWidget {
+  final int groupId;
+  final String groupName;
+
   /// {@macro schedule_page}
-  const SchedulePage({super.key});
+  const SchedulePage({
+    super.key,
+    required this.groupId,
+    required this.groupName,
+  });
 
   @override
   State<SchedulePage> createState() => _SchedulePageState();
@@ -75,7 +82,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
     context.read<ScheduleBLoC>().add(
           ScheduleEvent.fetch(
-            groupId: pi2002groupId,
+            groupId: widget.groupId,
             week: newWeek,
           ),
         );
@@ -93,7 +100,7 @@ class _SchedulePageState extends State<SchedulePage> {
     if (week == 0) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('PI-2002'),
+          title: Text(widget.groupName),
         ),
         body: Center(
           child: Text(message),
@@ -101,7 +108,7 @@ class _SchedulePageState extends State<SchedulePage> {
       );
     }
 
-    String title = 'PI-2002';
+    String title = widget.groupName;
 
     if (selectedWeek != null) {
       title += ', ${AppLocalizations.of(context)!.week} $selectedWeek';
@@ -170,7 +177,7 @@ class _SchedulePageState extends State<SchedulePage> {
         var bloc = ScheduleBLoC(repository: repository);
         bloc.add(
           ScheduleEvent.fetch(
-            groupId: pi2002groupId,
+            groupId: widget.groupId,
             week: getStudyWeekNumber(currentTime, currentTime),
           ),
         );

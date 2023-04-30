@@ -19,11 +19,16 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   final PageObserver pageObserver;
   final ModalObserver modalObserver;
 
-  AppRoutePath currentPath =
-      const AppRoutePath.schedule(groupId: pi2002groupId);
+  AppRoutePath currentPath = const AppRoutePath.schedule(
+    groupId: pi2002groupId,
+    groupName: pi2002groupName,
+  );
 
-  void handleSchedulePageOpened(int groupId) {
-    currentPath = AppRoutePath.schedule(groupId: groupId);
+  void handleSchedulePageOpened(int groupId, String groupName) {
+    currentPath = AppRoutePath.schedule(
+      groupId: groupId,
+      groupName: groupName,
+    );
     notifyListeners();
   }
 
@@ -37,9 +42,12 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
         pages: path.map(
           schedule: (path) {
             return [
-              const MaterialPage(
-                key: ValueKey('SchedulePage'),
-                child: SchedulePage(),
+              MaterialPage(
+                key: const ValueKey('SchedulePage'),
+                child: SchedulePage(
+                  groupId: path.groupId,
+                  groupName: path.groupName,
+                ),
               ),
             ];
           },
