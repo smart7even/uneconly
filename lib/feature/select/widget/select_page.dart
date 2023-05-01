@@ -176,10 +176,10 @@ class _SelectPageState extends State<SelectPage> {
                     right: 8,
                     top: 8,
                   ),
-                  child: SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
+                  child: FractionallySizedBox(
+                    widthFactor: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         OutlinedButton(
                           onPressed: () async {
