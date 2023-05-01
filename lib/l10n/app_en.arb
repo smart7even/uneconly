@@ -15,5 +15,8 @@
     "noLessons": "No lessons",
     "faculty": "Faculty",
     "selectGroup": "Select group",
-    "selectFaculty": "Select faculty"
+    "selectFaculty": "Select faculty",
+    "nCourse": "{n} course",
+    "course": "Course",
+    "selectCourse": "Select course"
 }

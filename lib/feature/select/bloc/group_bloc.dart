@@ -12,8 +12,11 @@ part 'group_bloc.g.dart';
 class GroupEvent with _$GroupEvent {
   const factory GroupEvent.intiial() = _InitialGroupEvent;
   const factory GroupEvent.facultySelected({
-    required final Faculty faculty,
+    required final Faculty? faculty,
   }) = _FacultySelectedGroupEvent;
+  const factory GroupEvent.courseSelected({
+    required final int? course,
+  }) = _CourseSelectedGroupEvent;
 
   const GroupEvent._();
 
@@ -40,6 +43,7 @@ class GroupState with _$GroupState {
     required final List<Group> groups,
     required final List<Faculty> faculties,
     final int? selectedFacultyId,
+    final int? selectedCourse,
   }) = IdleGroupState;
 
   /// Processing state
@@ -48,6 +52,7 @@ class GroupState with _$GroupState {
     required final List<Group> groups,
     required final List<Faculty> faculties,
     final int? selectedFacultyId,
+    final int? selectedCourse,
   }) = ProcessingGroupState;
 
   /// Successful state
@@ -56,6 +61,7 @@ class GroupState with _$GroupState {
     required final List<Group> groups,
     required final List<Faculty> faculties,
     final int? selectedFacultyId,
+    final int? selectedCourse,
   }) = SuccessfulGroupState;
 
   /// Error state
@@ -64,6 +70,7 @@ class GroupState with _$GroupState {
     required final List<Group> groups,
     required final List<Faculty> faculties,
     final int? selectedFacultyId,
+    final int? selectedCourse,
   }) = ErrorGroupState;
 }
 
@@ -95,6 +102,9 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
           facultySelected: (e) async {
             await _mapFacultySelectedToState(e, emit);
           },
+          courseSelected: (e) async {
+            await _mapCourseSelectedToState(e, emit);
+          },
         );
       },
     );
@@ -108,6 +118,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
       groups: state.groups,
       faculties: state.faculties,
       selectedFacultyId: state.selectedFacultyId,
+      selectedCourse: state.selectedCourse,
     ));
     try {
       final faculties = await _groupRepository.fetchAllFaculties();
@@ -116,6 +127,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
         groups: groups,
         faculties: faculties,
         selectedFacultyId: state.selectedFacultyId,
+        selectedCourse: state.selectedCourse,
       ));
     } catch (e) {
       emit(
@@ -123,6 +135,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
           groups: state.groups,
           faculties: state.faculties,
           selectedFacultyId: state.selectedFacultyId,
+          selectedCourse: state.selectedCourse,
         ),
       );
     } finally {
@@ -131,6 +144,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
           groups: state.groups,
           faculties: state.faculties,
           selectedFacultyId: state.selectedFacultyId,
+          selectedCourse: state.selectedCourse,
         ),
       );
     }
@@ -144,7 +158,22 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
       GroupState.idle(
         groups: state.groups,
         faculties: state.faculties,
-        selectedFacultyId: event.faculty.id,
+        selectedFacultyId: event.faculty?.id,
+        selectedCourse: state.selectedCourse,
+      ),
+    );
+  }
+
+  Future<void> _mapCourseSelectedToState(
+    _CourseSelectedGroupEvent event,
+    Emitter<GroupState> emit,
+  ) async {
+    emit(
+      GroupState.idle(
+        groups: state.groups,
+        faculties: state.faculties,
+        selectedFacultyId: state.selectedFacultyId,
+        selectedCourse: event.course,
       ),
     );
   }

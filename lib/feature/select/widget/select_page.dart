@@ -10,6 +10,7 @@ import 'package:uneconly/feature/select/bloc/group_bloc.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
 import 'package:uneconly/feature/select/model/faculty.dart';
+import 'package:uneconly/feature/select/widget/select_course_page.dart';
 import 'package:uneconly/feature/select/widget/select_faculty_page.dart';
 
 /// {@template select_page}
@@ -87,6 +88,31 @@ class _SelectPageState extends State<SelectPage> {
     }
   }
 
+  Future<void> onCourseSelectPressed(
+    BuildContext context,
+    GroupState state,
+  ) async {
+    final bloc = context.read<GroupBloc>();
+
+    final result = await showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (context) {
+        return const SelectCoursePage(
+          courses: [1, 2, 3, 4],
+        );
+      },
+    );
+
+    if (result is int) {
+      bloc.add(
+        GroupEvent.courseSelected(
+          course: result,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -116,13 +142,25 @@ class _SelectPageState extends State<SelectPage> {
                   (faculty) => faculty.id == state.selectedFacultyId,
                 );
 
-          final selectedGroups = state.selectedFacultyId == null
-              ? state.groups
-              : state.groups
-                  .where(
-                    (group) => group.facultyId == state.selectedFacultyId,
-                  )
-                  .toList();
+          int? selectedCourse = state.selectedCourse;
+
+          var selectedGroups = state.groups;
+
+          if (selectedFaculty != null) {
+            selectedGroups = selectedGroups
+                .where(
+                  (group) => group.facultyId == selectedFaculty.id,
+                )
+                .toList();
+          }
+
+          if (selectedCourse != null) {
+            selectedGroups = selectedGroups
+                .where(
+                  (group) => group.course == selectedCourse,
+                )
+                .toList();
+          }
 
           return Scaffold(
             appBar: AppBar(
@@ -138,19 +176,37 @@ class _SelectPageState extends State<SelectPage> {
                     right: 8,
                     top: 8,
                   ),
-                  child: Row(
-                    children: [
-                      OutlinedButton(
-                        onPressed: () async {
-                          await onFacultySelectPressed(context, state);
-                        },
-                        child: Text(
-                          selectedFaculty != null
-                              ? selectedFaculty.name
-                              : AppLocalizations.of(context)!.faculty,
+                  child: SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        OutlinedButton(
+                          onPressed: () async {
+                            await onFacultySelectPressed(context, state);
+                          },
+                          child: Text(
+                            selectedFaculty != null
+                                ? selectedFaculty.name
+                                : AppLocalizations.of(context)!.faculty,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        OutlinedButton(
+                          onPressed: () async {
+                            await onCourseSelectPressed(context, state);
+                          },
+                          child: Text(
+                            selectedCourse != null
+                                ? AppLocalizations.of(context)!
+                                    .nCourse(selectedCourse)
+                                : AppLocalizations.of(context)!.course,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 Expanded(

@@ -12,5 +12,8 @@
     "noLessons": "Нет пар",
     "faculty": "Факультет",
     "selectGroup": "Выберите группу",
-    "selectFaculty": "Выберите факультет"
+    "selectFaculty": "Выберите факультет",
+    "nCourse": "{n} курс",
+    "course": "Курс",
+    "selectCourse": "Выберите курс"
 }
