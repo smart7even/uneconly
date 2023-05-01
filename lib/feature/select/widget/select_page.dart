@@ -1,12 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:collection/collection.dart';
+import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/select/bloc/group_bloc.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
+import 'package:uneconly/feature/select/model/faculty.dart';
+import 'package:uneconly/feature/select/widget/select_faculty_page.dart';
 
 /// {@template select_page}
 /// SelectPage widget
@@ -58,6 +62,31 @@ class _SelectPageState extends State<SelectPage> {
     );
   }
 
+  Future<void> onFacultySelectPressed(
+    BuildContext context,
+    GroupState state,
+  ) async {
+    final bloc = context.read<GroupBloc>();
+
+    final result = await showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (context) {
+        return SelectFacultyPage(
+          faculties: state.faculties,
+        );
+      },
+    );
+
+    if (result is Faculty) {
+      bloc.add(
+        GroupEvent.facultySelected(
+          faculty: result,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -81,17 +110,54 @@ class _SelectPageState extends State<SelectPage> {
       },
       child: BlocBuilder<GroupBloc, GroupState>(
         builder: (context, state) {
+          Faculty? selectedFaculty = state.selectedFacultyId == null
+              ? null
+              : state.faculties.firstWhereOrNull(
+                  (faculty) => faculty.id == state.selectedFacultyId,
+                );
+
+          final selectedGroups = state.selectedFacultyId == null
+              ? state.groups
+              : state.groups
+                  .where(
+                    (group) => group.facultyId == state.selectedFacultyId,
+                  )
+                  .toList();
+
           return Scaffold(
             appBar: AppBar(
-              title: const Text('SelectPage'),
+              title: Text(
+                AppLocalizations.of(context)!.selectGroup,
+              ),
             ),
             body: Column(
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 8,
+                    right: 8,
+                    top: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      OutlinedButton(
+                        onPressed: () async {
+                          await onFacultySelectPressed(context, state);
+                        },
+                        child: Text(
+                          selectedFaculty != null
+                              ? selectedFaculty.name
+                              : AppLocalizations.of(context)!.faculty,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: state.groups.length,
+                    itemCount: selectedGroups.length,
                     itemBuilder: (context, index) {
-                      final group = state.groups[index];
+                      final group = selectedGroups[index];
 
                       return ListTile(
                         title: Text(group.name),

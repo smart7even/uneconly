@@ -48,6 +48,7 @@ dependencies:
   path: ^1.8.2
   flutter_localizations:
     sdk: flutter
+  collection: ^1.17.0
 
 dev_dependencies:
   flutter_test:

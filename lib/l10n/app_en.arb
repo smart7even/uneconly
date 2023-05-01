@@ -12,5 +12,8 @@
     "today": "Today",
     "tomorrow": "Tomorrow",
     "yesterday": "Yesterday",
-    "noLessons": "No lessons"
+    "noLessons": "No lessons",
+    "faculty": "Faculty",
+    "selectGroup": "Select group",
+    "selectFaculty": "Select faculty"
 }
