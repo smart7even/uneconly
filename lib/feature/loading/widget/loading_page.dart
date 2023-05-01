@@ -29,6 +29,10 @@ class _LoadingPageState extends State<LoadingPage> {
 
     final group = await settingsRepository.getGroup();
 
+    if (!mounted) {
+      return;
+    }
+
     if (group == null) {
       AppRouter.navigate(
         context,
