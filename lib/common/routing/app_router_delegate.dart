@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/common/routing/navigation_observer.dart';
-import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/loading/widget/loading_page.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
 import 'package:uneconly/feature/select/widget/select_page.dart';

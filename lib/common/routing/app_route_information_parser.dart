@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
-import 'package:uneconly/constants.dart';
 
 class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
   @override

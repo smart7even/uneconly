@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
@@ -6,7 +5,6 @@ import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
-import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/select/bloc/group_bloc.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';

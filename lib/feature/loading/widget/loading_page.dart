@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
-import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
 
 /// {@template loading_page}

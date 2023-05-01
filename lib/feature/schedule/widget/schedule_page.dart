@@ -1,14 +1,11 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
-import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
