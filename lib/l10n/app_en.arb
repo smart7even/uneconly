@@ -18,5 +18,7 @@
     "selectFaculty": "Select faculty",
     "nCourse": "{n} course",
     "course": "Course",
-    "selectCourse": "Select course"
+    "selectCourse": "Select course",
+    "selectedGroup": "Selected group",
+    "selectAnotherGroup": "Select another group"
 }

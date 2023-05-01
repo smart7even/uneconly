@@ -5,6 +5,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
+import 'package:uneconly/common/routing/app_route_path.dart';
+import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
@@ -89,6 +91,49 @@ class _SchedulePageState extends State<SchedulePage> {
         );
   }
 
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        children: [
+          DrawerHeader(
+            margin: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.selectedGroup,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  widget.groupName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            title: Text(
+              AppLocalizations.of(context)!.selectAnotherGroup,
+            ),
+            onTap: () {
+              AppRouter.navigate(
+                context,
+                (configuration) => const AppRoutePath.select(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPageView(
     BuildContext context,
     ScheduleState state,
@@ -100,6 +145,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
     if (week == 0) {
       return Scaffold(
+        drawer: _buildDrawer(context),
         appBar: AppBar(
           title: Text(widget.groupName),
         ),
@@ -120,6 +166,7 @@ class _SchedulePageState extends State<SchedulePage> {
     }
 
     return Scaffold(
+      drawer: _buildDrawer(context),
       appBar: AppBar(
         title: Text(title),
       ),

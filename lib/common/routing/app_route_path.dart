@@ -13,6 +13,8 @@ class AppRoutePath with _$AppRoutePath {
     required final String groupName,
   }) = ScheduleAppRoutePath;
 
+  const factory AppRoutePath.loading() = LoadingAppRoutePath;
+
   const AppRoutePath._();
 
   /// Generate AppRoutePath class from Map<String, Object?>

@@ -11,6 +11,7 @@ import 'package:uneconly/feature/select/bloc/group_bloc.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
 import 'package:uneconly/feature/select/model/faculty.dart';
+import 'package:uneconly/feature/select/model/group.dart';
 import 'package:uneconly/feature/select/widget/select_course_page.dart';
 import 'package:uneconly/feature/select/widget/select_faculty_page.dart';
 
@@ -54,14 +55,19 @@ class _SelectPageState extends State<SelectPage> {
   }
   /* #endregion */
 
-  void onPressed(int groupId, String groupName) {
+  Future<void> onPressed(BuildContext context, Group group) async {
+    final settingsRepository =
+        context.read<DependenciesScope>().settingsRepository;
+
     AppRouter.navigate(
       context,
       (configuration) => AppRoutePath.schedule(
-        groupId: groupId,
-        groupName: groupName,
+        groupId: group.id,
+        groupName: group.name,
       ),
     );
+
+    await settingsRepository.saveGroup(group);
   }
 
   Future<void> onFacultySelectPressed(
@@ -217,8 +223,8 @@ class _SelectPageState extends State<SelectPage> {
                       return ListTile(
                         title: Text(group.name),
                         onTap: () => onPressed(
-                          group.id,
-                          group.name,
+                          context,
+                          group,
                         ),
                       );
                     },
