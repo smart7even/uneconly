@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/common/routing/navigation_observer.dart';
-import 'package:uneconly/constants.dart';
+import 'package:uneconly/feature/loading/widget/loading_page.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
 import 'package:uneconly/feature/select/widget/select_page.dart';
 
@@ -19,11 +19,13 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   final PageObserver pageObserver;
   final ModalObserver modalObserver;
 
-  AppRoutePath currentPath =
-      const AppRoutePath.schedule(groupId: pi2002groupId);
+  AppRoutePath currentPath = const AppRoutePath.loading();
 
-  void handleSchedulePageOpened(int groupId) {
-    currentPath = AppRoutePath.schedule(groupId: groupId);
+  void handleSchedulePageOpened(int groupId, String groupName) {
+    currentPath = AppRoutePath.schedule(
+      groupId: groupId,
+      groupName: groupName,
+    );
     notifyListeners();
   }
 
@@ -35,11 +37,22 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
       routerDelegate: this,
       child: Navigator(
         pages: path.map(
-          schedule: (path) {
+          loading: (value) {
             return [
               const MaterialPage(
-                key: ValueKey('SchedulePage'),
-                child: SchedulePage(),
+                key: ValueKey('LoadingPage'),
+                child: LoadingPage(),
+              ),
+            ];
+          },
+          schedule: (path) {
+            return [
+              MaterialPage(
+                key: const ValueKey('SchedulePage'),
+                child: SchedulePage(
+                  groupId: path.groupId,
+                  groupName: path.groupName,
+                ),
               ),
             ];
           },

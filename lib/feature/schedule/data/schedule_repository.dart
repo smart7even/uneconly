@@ -31,6 +31,9 @@ class ScheduleRepository implements IScheduleRepository {
     required int groupId,
     required int week,
   }) {
-    return _localDataProvider.getSchedule(week);
+    return _localDataProvider.getSchedule(
+      week,
+      groupId,
+    );
   }
 }

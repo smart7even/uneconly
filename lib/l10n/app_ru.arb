@@ -9,5 +9,13 @@
     "today": "Сегодня",
     "tomorrow": "Завтра",
     "yesterday": "Вчера",
-    "noLessons": "Нет пар"
+    "noLessons": "Нет пар",
+    "faculty": "Факультет",
+    "selectGroup": "Выберите группу",
+    "selectFaculty": "Выберите факультет",
+    "nCourse": "{n} курс",
+    "course": "Курс",
+    "selectCourse": "Выберите курс",
+    "selectedGroup": "Выбранная группа",
+    "selectAnotherGroup": "Выбрать другую группу"
 }

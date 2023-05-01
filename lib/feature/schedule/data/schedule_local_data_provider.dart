@@ -6,7 +6,7 @@ import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 
 abstract class IScheduleLocalDataProvider {
-  Future<Schedule?> getSchedule(int week);
+  Future<Schedule?> getSchedule(int week, int groupId);
   Future<void> saveSchedule(Schedule schedule);
 }
 
@@ -16,7 +16,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
   ScheduleLocalDataProvider(this._database);
 
   @override
-  Future<Schedule?> getSchedule(int week) async {
+  Future<Schedule?> getSchedule(int week, int groupId) async {
     final nowTime = DateTime.now();
     final startOfWeekDateTime = getStartOfStudyWeek(week, nowTime);
     final endOfWeekDateTime = startOfWeekDateTime
@@ -34,7 +34,8 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
                 // tbl.start.month
                 //     .isBiggerOrEqualValue(startOfWeekDateTime.month) &
                 // tbl.start.day.isBiggerOrEqualValue(startOfWeekDateTime.day) &
-                tbl.end.year.isSmallerOrEqualValue(endOfWeekDateTime.year);
+                tbl.end.year.isSmallerOrEqualValue(endOfWeekDateTime.year) &
+                tbl.groupId.equals(groupId);
             // tbl.end.month.isSmallerOrEqualValue(endOfWeekDateTime.month) &
             // tbl.end.day.isSmallerOrEqualValue(endOfWeekDateTime.day);
           }))
@@ -81,6 +82,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
     return Schedule(
       week: week,
       daySchedules: daySchedules,
+      groupId: groupId,
     );
   }
 
@@ -102,6 +104,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
                   start: Value(lesson.start),
                   end: Value(lesson.end),
                   createdAt: Value(currentDateTime),
+                  groupId: Value(schedule.groupId),
                 ),
               );
         }

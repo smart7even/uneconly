@@ -1,11 +1,11 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:uneconly/common/database/database.dart';
+import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
+import 'package:uneconly/common/routing/app_route_path.dart';
+import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
-import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
@@ -18,8 +18,15 @@ import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 /// SchedulePage widget
 /// {@endtemplate}
 class SchedulePage extends StatefulWidget {
+  final int groupId;
+  final String groupName;
+
   /// {@macro schedule_page}
-  const SchedulePage({super.key});
+  const SchedulePage({
+    super.key,
+    required this.groupId,
+    required this.groupName,
+  });
 
   @override
   State<SchedulePage> createState() => _SchedulePageState();
@@ -75,10 +82,53 @@ class _SchedulePageState extends State<SchedulePage> {
 
     context.read<ScheduleBLoC>().add(
           ScheduleEvent.fetch(
-            groupId: pi2002groupId,
+            groupId: widget.groupId,
             week: newWeek,
           ),
         );
+  }
+
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        children: [
+          DrawerHeader(
+            margin: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.selectedGroup,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  widget.groupName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            title: Text(
+              AppLocalizations.of(context)!.selectAnotherGroup,
+            ),
+            onTap: () {
+              AppRouter.navigate(
+                context,
+                (configuration) => const AppRoutePath.select(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildPageView(
@@ -92,8 +142,9 @@ class _SchedulePageState extends State<SchedulePage> {
 
     if (week == 0) {
       return Scaffold(
+        drawer: _buildDrawer(context),
         appBar: AppBar(
-          title: const Text('PI-2002'),
+          title: Text(widget.groupName),
         ),
         body: Center(
           child: Text(message),
@@ -101,7 +152,7 @@ class _SchedulePageState extends State<SchedulePage> {
       );
     }
 
-    String title = 'PI-2002';
+    String title = widget.groupName;
 
     if (selectedWeek != null) {
       title += ', ${AppLocalizations.of(context)!.week} $selectedWeek';
@@ -112,6 +163,7 @@ class _SchedulePageState extends State<SchedulePage> {
     }
 
     return Scaffold(
+      drawer: _buildDrawer(context),
       appBar: AppBar(
         title: Text(title),
       ),
@@ -148,19 +200,17 @@ class _SchedulePageState extends State<SchedulePage> {
       create: (context) {
         final currentTime = DateTime.now();
 
-        Dio dio = Dio(BaseOptions(
-          baseUrl: serverAddress,
-        ));
+        final dependenciesScope = context.read<DependenciesScope>();
 
         ScheduleNetworkDataProvider scheduleNetworkDataProvider =
             ScheduleNetworkDataProvider(
-          dio: dio,
+          dio: dependenciesScope.dio,
         );
 
-        MyDatabase database = context.read<MyDatabase>();
-
         IScheduleLocalDataProvider localDataProvider =
-            ScheduleLocalDataProvider(database);
+            ScheduleLocalDataProvider(
+          dependenciesScope.database,
+        );
 
         ScheduleRepository repository = ScheduleRepository(
           networkDataProvider: scheduleNetworkDataProvider,
@@ -170,7 +220,7 @@ class _SchedulePageState extends State<SchedulePage> {
         var bloc = ScheduleBLoC(repository: repository);
         bloc.add(
           ScheduleEvent.fetch(
-            groupId: pi2002groupId,
+            groupId: widget.groupId,
             week: getStudyWeekNumber(currentTime, currentTime),
           ),
         );

@@ -1,0 +1,49 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uneconly/feature/select/model/group.dart';
+
+abstract class ISettingsLocalDataProvider {
+  Future<void> saveGroup(Group group);
+  Future<Group?> getGroup();
+}
+
+class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
+  final SharedPreferences _prefs;
+
+  static const String _groupIdKey = 'groupId';
+  static const String _groupNameKey = 'groupName';
+  static const String _groupCourseKey = 'groupCourse';
+  static const String _groupFacultyIdKey = 'groupFacultyId';
+
+  SettingsLocalDataProvider({required SharedPreferences prefs})
+      : _prefs = prefs;
+
+  @override
+  Future<Group?> getGroup() async {
+    final groupId = _prefs.getInt(_groupIdKey);
+    final groupName = _prefs.getString(_groupNameKey);
+    final groupCourse = _prefs.getInt(_groupCourseKey);
+    final groupFacultyId = _prefs.getInt(_groupFacultyIdKey);
+
+    if (groupId == null ||
+        groupName == null ||
+        groupCourse == null ||
+        groupFacultyId == null) {
+      return null;
+    }
+
+    return Group(
+      id: groupId,
+      name: groupName,
+      course: groupCourse,
+      facultyId: groupFacultyId,
+    );
+  }
+
+  @override
+  Future<void> saveGroup(Group group) async {
+    await _prefs.setInt(_groupIdKey, group.id);
+    await _prefs.setString(_groupNameKey, group.name);
+    await _prefs.setInt(_groupCourseKey, group.course);
+    await _prefs.setInt(_groupFacultyIdKey, group.facultyId);
+  }
+}
