@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:uneconly/common/database/database.dart';
+import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/constants.dart';
@@ -155,19 +156,17 @@ class _SchedulePageState extends State<SchedulePage> {
       create: (context) {
         final currentTime = DateTime.now();
 
-        Dio dio = Dio(BaseOptions(
-          baseUrl: serverAddress,
-        ));
+        final dependenciesScope = context.read<DependenciesScope>();
 
         ScheduleNetworkDataProvider scheduleNetworkDataProvider =
             ScheduleNetworkDataProvider(
-          dio: dio,
+          dio: dependenciesScope.dio,
         );
 
-        MyDatabase database = context.read<MyDatabase>();
-
         IScheduleLocalDataProvider localDataProvider =
-            ScheduleLocalDataProvider(database);
+            ScheduleLocalDataProvider(
+          dependenciesScope.database,
+        );
 
         ScheduleRepository repository = ScheduleRepository(
           networkDataProvider: scheduleNetworkDataProvider,
