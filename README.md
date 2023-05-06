@@ -11,3 +11,19 @@ You can view upcoming tasks in [Uneconly project](https://github.com/users/smart
 As mentioned above, there is fully functioning Uneconly Telegram bot where you can access your schedule
 
 Github repository: https://github.com/smart7even/schedule-bot
+
+# Test coverage report
+
+Generate test coverage report
+
+```
+flutter test --coverage
+genhtml coverage/lcov.info -o coverage/html
+```
+
+Open test coverage report
+
+```
+open coverage/html/index.html
+```
+
