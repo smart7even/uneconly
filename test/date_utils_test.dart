@@ -30,4 +30,46 @@ void main() {
 
     expect(getStudyWeekNumber(dateTime, testNowTime), equals(26));
   });
+
+  test('getDate returns date with hours, minutes and seconds set at zero', () {
+    final dateTime = DateTime(2023, 2, 23, 20, 17, 0);
+
+    expect(getDate(dateTime), equals(DateTime(2023, 2, 23)));
+  });
+
+  test('getStartOfStudyWeek returns start of study week', () {
+    final nowTime = DateTime(2023, 5, 6, 21, 49, 11);
+
+    expect(getStartOfStudyWeek(36, nowTime), equals(DateTime(2023, 5, 1)));
+  });
+
+  test('getWeekStart returns start of week', () {
+    final nowTime = DateTime(2023, 5, 6, 21, 49, 11);
+
+    expect(getWeekStart(nowTime), equals(DateTime(2023, 5, 1, 21, 49, 11)));
+  });
+
+  test(
+    'getStartOfStudyYearDate returns start of study year when month number is less than September',
+    () {
+      final nowTime = DateTime(2023, 5, 6, 21, 49, 11);
+
+      expect(
+        getStartOfStudyYearDate(nowTime),
+        equals(DateTime(2022, 8, 29)),
+      );
+    },
+  );
+
+  test(
+    'getStartOfStudyYearDate returns start of study year when month number is bigger than September',
+    () {
+      final nowTime = DateTime(2022, 11, 11, 11, 11, 11);
+
+      expect(
+        getStartOfStudyYearDate(nowTime),
+        equals(DateTime(2022, 8, 29)),
+      );
+    },
+  );
 }
