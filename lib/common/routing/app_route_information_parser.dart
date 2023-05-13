@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 
 class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
@@ -42,8 +43,10 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
       }
 
       return AppRoutePath.schedule(
-        groupId: id,
-        groupName: name,
+        shortGroupInfo: ShortGroupInfo(
+          groupId: id,
+          groupName: name,
+        ),
       );
     }
 
@@ -63,7 +66,7 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
       schedule: (configuration) {
         return RouteInformation(
           location:
-              '/group/${configuration.groupId}/schedule?name=${configuration.groupName}',
+              '/group/${configuration.shortGroupInfo.groupId}/schedule?name=${configuration.shortGroupInfo.groupName}',
           state: configuration.toJson(),
         );
       },

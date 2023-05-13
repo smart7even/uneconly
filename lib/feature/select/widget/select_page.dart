@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
+import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/feature/select/bloc/group_bloc.dart';
@@ -60,8 +61,10 @@ class _SelectPageState extends State<SelectPage> {
     AppRouter.navigate(
       context,
       (configuration) => AppRoutePath.schedule(
-        groupId: group.id,
-        groupName: group.name,
+        shortGroupInfo: ShortGroupInfo(
+          groupId: group.id,
+          groupName: group.name,
+        ),
       ),
     );
 

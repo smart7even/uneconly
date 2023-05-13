@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
+import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
@@ -42,8 +43,10 @@ class _LoadingPageState extends State<LoadingPage> {
       AppRouter.navigate(
         context,
         (configuration) => AppRoutePath.schedule(
-          groupId: group.id,
-          groupName: group.name,
+          shortGroupInfo: ShortGroupInfo(
+            groupId: group.id,
+            groupName: group.name,
+          ),
         ),
       );
     }

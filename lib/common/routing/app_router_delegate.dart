@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/common/routing/navigation_observer.dart';
@@ -23,8 +24,10 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
 
   void handleSchedulePageOpened(int groupId, String groupName) {
     currentPath = AppRoutePath.schedule(
-      groupId: groupId,
-      groupName: groupName,
+      shortGroupInfo: ShortGroupInfo(
+        groupId: groupId,
+        groupName: groupName,
+      ),
     );
     notifyListeners();
   }
@@ -50,14 +53,24 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
               MaterialPage(
                 key: const ValueKey('SchedulePage'),
                 child: SchedulePage(
-                  groupId: path.groupId,
-                  groupName: path.groupName,
+                  groupId: path.shortGroupInfo.groupId,
+                  groupName: path.shortGroupInfo.groupName,
                 ),
               ),
             ];
           },
           select: (path) {
+            final shortGroupInfo = path.shortGroupInfo;
+
             return [
+              if (shortGroupInfo != null)
+                MaterialPage(
+                  key: const ValueKey('SchedulePage'),
+                  child: SchedulePage(
+                    groupId: shortGroupInfo.groupId,
+                    groupName: shortGroupInfo.groupName,
+                  ),
+                ),
               const MaterialPage(
                 key: ValueKey('SelectPage'),
                 child: SelectPage(),
@@ -69,6 +82,17 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
           if (!route.didPop(result)) {
             return false;
           }
+
+          currentPath.mapOrNull(
+            select: (value) {
+              var shortGroupInfo = value.shortGroupInfo;
+              if (shortGroupInfo != null) {
+                currentPath = AppRoutePath.schedule(
+                  shortGroupInfo: shortGroupInfo,
+                );
+              }
+            },
+          );
 
           notifyListeners();
 

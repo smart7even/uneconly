@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
+import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
@@ -123,7 +124,12 @@ class _SchedulePageState extends State<SchedulePage> {
             onTap: () {
               AppRouter.navigate(
                 context,
-                (configuration) => const AppRoutePath.select(),
+                (configuration) => AppRoutePath.select(
+                  shortGroupInfo: ShortGroupInfo(
+                    groupId: widget.groupId,
+                    groupName: widget.groupName,
+                  ),
+                ),
               );
             },
           ),

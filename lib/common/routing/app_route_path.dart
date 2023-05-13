@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:uneconly/common/model/short_group_info.dart';
 
 part 'app_route_path.freezed.dart';
 part 'app_route_path.g.dart';
@@ -6,11 +7,12 @@ part 'app_route_path.g.dart';
 /// AppRoutePath data class
 @freezed
 class AppRoutePath with _$AppRoutePath {
-  const factory AppRoutePath.select() = SelectAppRoutePath;
+  const factory AppRoutePath.select({
+    final ShortGroupInfo? shortGroupInfo,
+  }) = SelectAppRoutePath;
 
   const factory AppRoutePath.schedule({
-    required final int groupId,
-    required final String groupName,
+    required final ShortGroupInfo shortGroupInfo,
   }) = ScheduleAppRoutePath;
 
   const factory AppRoutePath.loading() = LoadingAppRoutePath;
