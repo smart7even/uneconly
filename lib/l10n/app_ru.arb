@@ -17,5 +17,8 @@
     "course": "Курс",
     "selectCourse": "Выберите курс",
     "selectedGroup": "Выбранная группа",
-    "selectAnotherGroup": "Выбрать другую группу"
+    "selectAnotherGroup": "Выбрать другую группу",
+    "group": "Группа",
+    "scheduleApp": "Uneconly, расписание для СПбГЭУ",
+    "options": "Опции"
 }

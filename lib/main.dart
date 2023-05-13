@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       child: MaterialApp.router(
-        title: 'Schedule App',
+        onGenerateTitle: (context) => AppLocalizations.of(context)!.scheduleApp,
         locale: const Locale('ru'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

@@ -90,6 +90,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
+      semanticLabel: AppLocalizations.of(context)!.options,
       child: ListView(
         children: [
           DrawerHeader(

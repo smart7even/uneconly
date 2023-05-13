@@ -219,7 +219,11 @@ class _SelectPageState extends State<SelectPage> {
                       final group = selectedGroups[index];
 
                       return ListTile(
-                        title: Text(group.name),
+                        title: Text(
+                          group.name,
+                          semanticsLabel:
+                              '${AppLocalizations.of(context)!.group} ${group.name}',
+                        ),
                         onTap: () => onPressed(
                           context,
                           group,

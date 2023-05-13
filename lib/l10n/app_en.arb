@@ -20,5 +20,8 @@
     "course": "Course",
     "selectCourse": "Select course",
     "selectedGroup": "Selected group",
-    "selectAnotherGroup": "Select another group"
+    "selectAnotherGroup": "Select another group",
+    "group": "Group",
+    "scheduleApp": "Uneconly, schedule for SPbSUE",
+    "options": "Options"
 }
