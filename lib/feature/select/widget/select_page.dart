@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
@@ -197,9 +199,10 @@ class _SelectPageState extends State<SelectPage> {
                                 : AppLocalizations.of(context)!.faculty,
                           ),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
+                        if (!(Platform.isAndroid || Platform.isIOS))
+                          const SizedBox(
+                            height: 8,
+                          ),
                         OutlinedButton(
                           onPressed: () async {
                             await onCourseSelectPressed(context, state);
