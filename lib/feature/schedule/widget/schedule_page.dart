@@ -19,14 +19,12 @@ import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 /// SchedulePage widget
 /// {@endtemplate}
 class SchedulePage extends StatefulWidget {
-  final int groupId;
-  final String groupName;
+  final ShortGroupInfo shortGroupInfo;
 
   /// {@macro schedule_page}
   const SchedulePage({
     super.key,
-    required this.groupId,
-    required this.groupName,
+    required this.shortGroupInfo,
   });
 
   @override
@@ -41,18 +39,76 @@ class _SchedulePageState extends State<SchedulePage> {
     initialPage: initialPageIndex,
   );
 
+  late final ScheduleBLoC scheduleBLoC;
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   /* #region Lifecycle */
   @override
   void initState() {
     super.initState();
     initializeDateFormatting('en');
     // Initial state initialization
+
+    scheduleBLoC = _initBloc(context);
+  }
+
+  int _getCurrentWeek() {
+    final currentTime = DateTime.now();
+
+    return getStudyWeekNumber(currentTime, currentTime);
+  }
+
+  ScheduleBLoC _initBloc(BuildContext context) {
+    final dependenciesScope = context.read<DependenciesScope>();
+
+    ScheduleNetworkDataProvider scheduleNetworkDataProvider =
+        ScheduleNetworkDataProvider(
+      dio: dependenciesScope.dio,
+    );
+
+    IScheduleLocalDataProvider localDataProvider = ScheduleLocalDataProvider(
+      dependenciesScope.database,
+    );
+
+    ScheduleRepository repository = ScheduleRepository(
+      networkDataProvider: scheduleNetworkDataProvider,
+      localDataProvider: localDataProvider,
+    );
+
+    var bloc = ScheduleBLoC(repository: repository);
+    bloc.add(
+      ScheduleEvent.fetch(
+        groupId: widget.shortGroupInfo.groupId,
+        week: _getCurrentWeek(),
+      ),
+    );
+
+    return bloc;
   }
 
   @override
   void didUpdateWidget(SchedulePage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Widget configuration changed
+
+    if (widget.shortGroupInfo != oldWidget.shortGroupInfo) {
+      scheduleBLoC.add(
+        ScheduleEvent.changeGroup(
+          groupId: widget.shortGroupInfo.groupId,
+          week: scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
+        ),
+      );
+
+      final scaffoldState = _scaffoldKey.currentState;
+
+      if (scaffoldState == null) {
+        return;
+      }
+
+      if (scaffoldState.isDrawerOpen) {
+        scaffoldState.closeDrawer();
+      }
+    }
   }
 
   @override
@@ -83,7 +139,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
     context.read<ScheduleBLoC>().add(
           ScheduleEvent.fetch(
-            groupId: widget.groupId,
+            groupId: widget.shortGroupInfo.groupId,
             week: newWeek,
           ),
         );
@@ -108,7 +164,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  widget.groupName,
+                  widget.shortGroupInfo.groupName,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -126,8 +182,8 @@ class _SchedulePageState extends State<SchedulePage> {
                 context,
                 (configuration) => AppRoutePath.select(
                   shortGroupInfo: ShortGroupInfo(
-                    groupId: widget.groupId,
-                    groupName: widget.groupName,
+                    groupId: widget.shortGroupInfo.groupId,
+                    groupName: widget.shortGroupInfo.groupName,
                   ),
                 ),
               );
@@ -149,9 +205,10 @@ class _SchedulePageState extends State<SchedulePage> {
 
     if (week == 0) {
       return Scaffold(
+        key: _scaffoldKey,
         drawer: _buildDrawer(context),
         appBar: AppBar(
-          title: Text(widget.groupName),
+          title: Text(widget.shortGroupInfo.groupName),
         ),
         body: Center(
           child: Text(message),
@@ -159,7 +216,7 @@ class _SchedulePageState extends State<SchedulePage> {
       );
     }
 
-    String title = widget.groupName;
+    String title = widget.shortGroupInfo.groupName;
 
     if (selectedWeek != null) {
       title += ', ${AppLocalizations.of(context)!.week} $selectedWeek';
@@ -170,6 +227,7 @@ class _SchedulePageState extends State<SchedulePage> {
     }
 
     return Scaffold(
+      key: _scaffoldKey,
       drawer: _buildDrawer(context),
       appBar: AppBar(
         title: Text(title),
@@ -203,37 +261,8 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        final currentTime = DateTime.now();
-
-        final dependenciesScope = context.read<DependenciesScope>();
-
-        ScheduleNetworkDataProvider scheduleNetworkDataProvider =
-            ScheduleNetworkDataProvider(
-          dio: dependenciesScope.dio,
-        );
-
-        IScheduleLocalDataProvider localDataProvider =
-            ScheduleLocalDataProvider(
-          dependenciesScope.database,
-        );
-
-        ScheduleRepository repository = ScheduleRepository(
-          networkDataProvider: scheduleNetworkDataProvider,
-          localDataProvider: localDataProvider,
-        );
-
-        var bloc = ScheduleBLoC(repository: repository);
-        bloc.add(
-          ScheduleEvent.fetch(
-            groupId: widget.groupId,
-            week: getStudyWeekNumber(currentTime, currentTime),
-          ),
-        );
-
-        return bloc;
-      },
+    return BlocProvider.value(
+      value: scheduleBLoC,
       child: BlocBuilder<ScheduleBLoC, ScheduleState>(
         builder: (context, state) {
           return state.map<Widget>(
