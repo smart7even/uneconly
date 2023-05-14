@@ -10,7 +10,7 @@ You can view upcoming tasks in [Uneconly project](https://github.com/users/smart
 
 As mentioned above, there is fully functioning Uneconly Telegram bot where you can access your schedule
 
-Github repository: https://github.com/smart7even/schedule-bot
+Github repository (Bot and Backend for Uneconly App): https://github.com/smart7even/schedule-bot
 
 # Test coverage report
 
