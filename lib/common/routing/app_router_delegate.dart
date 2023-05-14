@@ -53,8 +53,10 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
               MaterialPage(
                 key: const ValueKey('SchedulePage'),
                 child: SchedulePage(
-                  groupId: path.shortGroupInfo.groupId,
-                  groupName: path.shortGroupInfo.groupName,
+                  shortGroupInfo: ShortGroupInfo(
+                    groupId: path.shortGroupInfo.groupId,
+                    groupName: path.shortGroupInfo.groupName,
+                  ),
                 ),
               ),
             ];
@@ -67,8 +69,10 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
                 MaterialPage(
                   key: const ValueKey('SchedulePage'),
                   child: SchedulePage(
-                    groupId: shortGroupInfo.groupId,
-                    groupName: shortGroupInfo.groupName,
+                    shortGroupInfo: ShortGroupInfo(
+                      groupId: shortGroupInfo.groupId,
+                      groupName: shortGroupInfo.groupName,
+                    ),
                   ),
                 ),
               const MaterialPage(

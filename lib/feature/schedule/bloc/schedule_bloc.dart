@@ -24,6 +24,11 @@ class ScheduleEvent with _$ScheduleEvent {
   const factory ScheduleEvent.fetch({required int groupId, required int week}) =
       FetchScheduleEvent;
 
+  const factory ScheduleEvent.changeGroup({
+    required int groupId,
+    required int week,
+  }) = ChangeGroupScheduleEvent;
+
   /// Update
   const factory ScheduleEvent.update({required Schedule item}) =
       UpdateScheduleEvent;
@@ -113,6 +118,8 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         delete: (value) {
           throw UnimplementedError();
         },
+        changeGroup: (ChangeGroupScheduleEvent event) =>
+            _changeGroup(event, emit),
       ),
       transformer: bloc_concurrency.sequential(),
     );
@@ -125,6 +132,83 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
     FetchScheduleEvent event,
     Emitter<ScheduleState> emit,
   ) async {
+    try {
+      emit(ScheduleState.processing(
+        data: state.data,
+        currentWeek: state.currentWeek ?? event.week,
+        selectedWeek: event.week,
+      ));
+
+      final localSchedule = await _repository.getLocalSchedule(
+        groupId: event.groupId,
+        week: event.week,
+      );
+
+      if (localSchedule != null) {
+        final localData = {
+          ...state.data,
+        };
+
+        localData[localSchedule.week] = ScheduleDetails(
+          schedule: localSchedule,
+          isLocal: true,
+        );
+
+        emit(ScheduleState.successful(
+          data: localData,
+          currentWeek: state.currentWeek ?? localSchedule.week,
+          selectedWeek: event.week,
+        ));
+      }
+
+      final schedule = await _repository.fetch(
+        groupId: event.groupId,
+        week: event.week,
+      );
+
+      final newData = {
+        ...state.data,
+      };
+
+      newData[schedule.week] = ScheduleDetails(
+        schedule: schedule,
+        isLocal: false,
+      );
+
+      emit(ScheduleState.successful(
+        data: newData,
+        currentWeek: state.currentWeek ?? schedule.week,
+        selectedWeek: event.week,
+      ));
+    } on Object catch (err, stackTrace) {
+      l.e('An error occurred in the ScheduleBLoC: $err', stackTrace);
+      emit(ScheduleState.error(
+        data: state.data,
+        currentWeek: state.currentWeek,
+        selectedWeek: state.selectedWeek,
+      ));
+      rethrow;
+    } finally {
+      emit(
+        ScheduleState.idle(
+          data: state.data,
+          currentWeek: state.currentWeek,
+          selectedWeek: state.selectedWeek,
+        ),
+      );
+    }
+  }
+
+  Future<void> _changeGroup(
+    ChangeGroupScheduleEvent event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        data: {},
+      ),
+    );
+
     try {
       emit(ScheduleState.processing(
         data: state.data,
