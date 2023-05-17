@@ -2,9 +2,20 @@
 
 Uneconly is cross-platform schedule app for SPbSUE university meant to make accessing, sharing and remembering schedule simple and accessible from any device
 
-Currently Uneconly is in early development stage. If you need to access schedule now you can visit [official website](https://rasp.unecon.ru) or [Uneconly Telegram bot](https://t.me/schedule_unecon_bot)
+<a href="https://play.google.com/store/apps/details?id=com.roadmapik.uneconly">
+    <img
+        alt="Get it on Google Play"
+        src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
+        width="330"
+        height="128"
+    />
+</a>
 
-You can view upcoming tasks in [Uneconly project](https://github.com/users/smart7even/projects/2)
+Currently Uneconly is in early release stage with many features to come later. You can view upcoming tasks in [Uneconly project](https://github.com/users/smart7even/projects/2)
+
+Other options to view schedule: 
+- [Official website](https://rasp.unecon.ru) 
+- [Uneconly Telegram bot](https://t.me/schedule_unecon_bot)
 
 # Bot
 
