@@ -11,6 +11,15 @@ Uneconly is cross-platform schedule app for SPbSUE university meant to make acce
     />
 </a>
 
+<a href="https://apps.apple.com/ru/app/uneconly/id6448684369">
+    <img
+        alt="Get it on Mac App Store"
+        src="assets/Download_on_the_Mac_App_Store_Badge_US-UK_RGB_blk_092917.svg"
+        width="330"
+        height="128"
+    />
+</a>
+
 Currently Uneconly is in early release stage with many features to come later. You can view upcoming tasks in [Uneconly project](https://github.com/users/smart7even/projects/2)
 
 Other options to view schedule: 
