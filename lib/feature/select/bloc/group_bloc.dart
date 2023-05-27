@@ -17,6 +17,9 @@ class GroupEvent with _$GroupEvent {
   const factory GroupEvent.courseSelected({
     required final int? course,
   }) = _CourseSelectedGroupEvent;
+  const factory GroupEvent.searchTextChanged({
+    required final String newText,
+  }) = _SearchTextChangedGroupEvent;
 
   const GroupEvent._();
 
@@ -44,6 +47,7 @@ class GroupState with _$GroupState {
     required final List<Faculty> faculties,
     final int? selectedFacultyId,
     final int? selectedCourse,
+    final String? searchText,
   }) = IdleGroupState;
 
   /// Processing state
@@ -53,6 +57,7 @@ class GroupState with _$GroupState {
     required final List<Faculty> faculties,
     final int? selectedFacultyId,
     final int? selectedCourse,
+    final String? searchText,
   }) = ProcessingGroupState;
 
   /// Successful state
@@ -62,6 +67,7 @@ class GroupState with _$GroupState {
     required final List<Faculty> faculties,
     final int? selectedFacultyId,
     final int? selectedCourse,
+    final String? searchText,
   }) = SuccessfulGroupState;
 
   /// Error state
@@ -71,6 +77,7 @@ class GroupState with _$GroupState {
     required final List<Faculty> faculties,
     final int? selectedFacultyId,
     final int? selectedCourse,
+    final String? searchText,
   }) = ErrorGroupState;
 }
 
@@ -105,6 +112,9 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
           courseSelected: (e) async {
             await _mapCourseSelectedToState(e, emit);
           },
+          searchTextChanged: (e) async {
+            await _mapSearchTextChanged(e, emit);
+          },
         );
       },
     );
@@ -119,6 +129,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
       faculties: state.faculties,
       selectedFacultyId: state.selectedFacultyId,
       selectedCourse: state.selectedCourse,
+      searchText: state.searchText,
     ));
     try {
       final faculties = await _groupRepository.fetchAllFaculties();
@@ -128,6 +139,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
         faculties: faculties,
         selectedFacultyId: state.selectedFacultyId,
         selectedCourse: state.selectedCourse,
+        searchText: state.searchText,
       ));
     } catch (e) {
       emit(
@@ -136,6 +148,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
           faculties: state.faculties,
           selectedFacultyId: state.selectedFacultyId,
           selectedCourse: state.selectedCourse,
+          searchText: state.searchText,
         ),
       );
     } finally {
@@ -145,6 +158,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
           faculties: state.faculties,
           selectedFacultyId: state.selectedFacultyId,
           selectedCourse: state.selectedCourse,
+          searchText: state.searchText,
         ),
       );
     }
@@ -160,6 +174,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
         faculties: state.faculties,
         selectedFacultyId: event.faculty?.id,
         selectedCourse: state.selectedCourse,
+        searchText: state.searchText,
       ),
     );
   }
@@ -174,6 +189,22 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
         faculties: state.faculties,
         selectedFacultyId: state.selectedFacultyId,
         selectedCourse: event.course,
+        searchText: state.searchText,
+      ),
+    );
+  }
+
+  Future<void> _mapSearchTextChanged(
+    _SearchTextChangedGroupEvent event,
+    Emitter<GroupState> emit,
+  ) async {
+    emit(
+      GroupState.idle(
+        groups: state.groups,
+        faculties: state.faculties,
+        selectedFacultyId: state.selectedFacultyId,
+        selectedCourse: state.selectedCourse,
+        searchText: event.newText,
       ),
     );
   }
