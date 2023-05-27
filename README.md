@@ -13,6 +13,15 @@ Uneconly is cross-platform schedule app for SPbSUE university meant to make acce
 
 <a href="https://apps.apple.com/ru/app/uneconly/id6448684369">
     <img
+        alt="Get it on App Store"
+        src="assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg"
+        width="330"        
+        height="118"
+    />
+</a>
+
+<a href="https://apps.apple.com/ru/app/uneconly/id6448684369">
+    <img
         alt="Get it on Mac App Store"
         src="assets/Download_on_the_Mac_App_Store_Badge_US-UK_RGB_blk_092917.svg"
         width="330"
