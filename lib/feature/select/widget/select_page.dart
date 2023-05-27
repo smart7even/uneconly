@@ -29,11 +29,17 @@ class SelectPage extends StatefulWidget {
 
 /// State for widget SelectPage
 class _SelectPageState extends State<SelectPage> {
+  late final TextEditingController _searchController;
+  late final FocusNode _searchFocusNode;
+  bool _isSearch = false;
+
   /* #region Lifecycle */
   @override
   void initState() {
     super.initState();
     // Initial state initialization
+    _searchController = TextEditingController();
+    _searchFocusNode = FocusNode();
   }
 
   @override
@@ -154,6 +160,8 @@ class _SelectPageState extends State<SelectPage> {
 
           var selectedGroups = state.groups;
 
+          String? searchText = state.searchText;
+
           if (selectedFaculty != null) {
             selectedGroups = selectedGroups
                 .where(
@@ -170,11 +178,63 @@ class _SelectPageState extends State<SelectPage> {
                 .toList();
           }
 
+          if (_isSearch && searchText != null) {
+            final searchQuery = searchText.toLowerCase();
+
+            selectedGroups = selectedGroups
+                .where(
+                  (group) =>
+                      group.name.toLowerCase().contains(searchQuery) ||
+                      group.name
+                          .replaceAll('-', '')
+                          .toLowerCase()
+                          .contains(searchQuery),
+                )
+                .toList();
+          }
+
           return Scaffold(
             appBar: AppBar(
-              title: Text(
-                AppLocalizations.of(context)!.selectGroup,
-              ),
+              title: _isSearch
+                  ? TextField(
+                      controller: _searchController,
+                      focusNode: _searchFocusNode,
+                      style: const TextStyle(color: Colors.white),
+                      cursorColor: Colors.white,
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.searchThreeDots,
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        border: InputBorder.none,
+                      ),
+                      onChanged: (value) {
+                        context.read<GroupBloc>().add(
+                              GroupEvent.searchTextChanged(
+                                newText: value,
+                              ),
+                            );
+                      },
+                    )
+                  : Text(
+                      AppLocalizations.of(context)!.selectGroup,
+                    ),
+              actions: [
+                // search
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _isSearch = !_isSearch;
+                      if (_isSearch) {
+                        _searchFocusNode.requestFocus();
+                      } else {
+                        _searchFocusNode.unfocus();
+                      }
+                    });
+                  },
+                  icon: const Icon(
+                    Icons.search,
+                  ),
+                ),
+              ],
             ),
             body: Column(
               children: [
