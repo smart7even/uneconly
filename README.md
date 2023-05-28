@@ -35,6 +35,13 @@ Other options to view schedule:
 - [Official website](https://rasp.unecon.ru) 
 - [Uneconly Telegram bot](https://t.me/schedule_unecon_bot)
 
+# Screenshots
+
+Schedule page             |  Select your group page
+:-------------------------:|:-------------------------:
+![Schedule page screenshot](assets/ios/screenshots/schedule.png)  |  ![Select group page screenshot](assets/ios/screenshots/select.png)
+
+
 # Bot
 
 As mentioned above, there is fully functioning Uneconly Telegram bot where you can access your schedule
