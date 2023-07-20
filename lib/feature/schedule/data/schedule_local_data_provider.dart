@@ -91,9 +91,20 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
     DateTime currentDateTime = DateTime.now();
 
     return _database.transaction(() async {
-      for (final daySchedule in schedule.daySchedules) {
-        await _deleteDaySchedule(daySchedule);
+      final startOfWeekDateTime = getStartOfStudyWeek(
+        schedule.week,
+        currentDateTime,
+      );
 
+      final days = [
+        for (int i = 0; i < 7; i++) startOfWeekDateTime.add(Duration(days: i)),
+      ];
+
+      for (final day in days) {
+        await _deleteDay(day);
+      }
+
+      for (final daySchedule in schedule.daySchedules) {
         for (final lesson in daySchedule.lessons) {
           // save to db
           await _database.into(_database.lessons).insert(
@@ -119,6 +130,20 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
             tbl.start.year.equals(daySchedule.day.year) &
             tbl.start.month.equals(daySchedule.day.month) &
             tbl.start.day.equals(daySchedule.day.day),
+      );
+
+    await deleteStamement.go();
+
+    return;
+  }
+
+  Future<void> _deleteDay(DateTime day) async {
+    final deleteStamement = _database.delete(_database.lessons)
+      ..where(
+        (tbl) =>
+            tbl.start.year.equals(day.year) &
+            tbl.start.month.equals(day.month) &
+            tbl.start.day.equals(day.day),
       );
 
     await deleteStamement.go();
