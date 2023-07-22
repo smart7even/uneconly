@@ -123,20 +123,6 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
     });
   }
 
-  Future<void> _deleteDaySchedule(DaySchedule daySchedule) async {
-    final deleteStamement = _database.delete(_database.lessons)
-      ..where(
-        (tbl) =>
-            tbl.start.year.equals(daySchedule.day.year) &
-            tbl.start.month.equals(daySchedule.day.month) &
-            tbl.start.day.equals(daySchedule.day.day),
-      );
-
-    await deleteStamement.go();
-
-    return;
-  }
-
   Future<void> _deleteDay(DateTime day) async {
     final deleteStamement = _database.delete(_database.lessons)
       ..where(

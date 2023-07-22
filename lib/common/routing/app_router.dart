@@ -43,7 +43,6 @@ class AppRouter extends InheritedNotifier {
     return appRouter ?? _notInScope();
   }
 
-  @alwaysThrows
   static Never _notInScope() =>
       throw UnsupportedError('Not in AppRouter scope');
 
