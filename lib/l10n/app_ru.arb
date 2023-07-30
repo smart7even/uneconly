@@ -22,5 +22,10 @@
     "scheduleApp": "Uneconly, расписание для СПбГЭУ",
     "options": "Опции",
     "searchThreeDots": "Поиск...",
-    "settings": "Настройки"
+    "settings": "Настройки",
+    "language": "Язык",
+    "theme": "Тема",
+    "system": "Системная",
+    "light": "Светлая",
+    "dark": "Темная"
 }

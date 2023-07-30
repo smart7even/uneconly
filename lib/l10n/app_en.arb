@@ -25,5 +25,10 @@
     "scheduleApp": "Uneconly, schedule for SPbSUE",
     "options": "Options",
     "searchThreeDots": "Search...",
-    "settings": "Settings"
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
 }

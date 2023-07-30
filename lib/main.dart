@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -16,17 +18,23 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
 
+  final settingsRepository = SettingsRepository(
+    localDataProvider: SettingsLocalDataProvider(
+      prefs: prefs,
+    ),
+  );
+
   runApp(MyApp(
-    prefs: prefs,
+    settingsRepository: settingsRepository,
   ));
 }
 
 class MyApp extends StatefulWidget {
-  final SharedPreferences prefs;
+  final ISettingsRepository settingsRepository;
 
   const MyApp({
     super.key,
-    required this.prefs,
+    required this.settingsRepository,
   });
 
   @override
@@ -37,11 +45,33 @@ class _MyAppState extends State<MyApp> {
   late AppRouterDelegate _routerDelegate;
   late AppRouteInformationParser _routeInformationParser;
 
+  late String locale;
+
   @override
   void initState() {
+    super.initState();
+
     _routerDelegate = AppRouterDelegate();
     _routeInformationParser = AppRouteInformationParser();
-    super.initState();
+
+    final defaultLocale = Platform.localeName;
+    locale = defaultLocale.split('_')[0];
+
+    widget.settingsRepository.getLanguage().then(
+      (value) {
+        if (value != null) {
+          setState(() {
+            locale = value;
+          });
+        }
+      },
+    );
+
+    widget.settingsRepository.getLanguageChangedStream().listen((newLanguage) {
+      setState(() {
+        locale = newLanguage;
+      });
+    });
   }
 
   @override
@@ -54,15 +84,11 @@ class _MyAppState extends State<MyApp> {
             baseUrl: serverAddress,
           ),
         ),
-        settingsRepository: SettingsRepository(
-          localDataProvider: SettingsLocalDataProvider(
-            prefs: widget.prefs,
-          ),
-        ),
+        settingsRepository: widget.settingsRepository,
       ),
       child: MaterialApp.router(
         onGenerateTitle: (context) => AppLocalizations.of(context)!.scheduleApp,
-        locale: const Locale('ru'),
+        locale: Locale(locale),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
