@@ -6,6 +6,7 @@ import 'package:uneconly/common/routing/navigation_observer.dart';
 import 'package:uneconly/feature/loading/widget/loading_page.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
 import 'package:uneconly/feature/select/widget/select_page.dart';
+import 'package:uneconly/feature/settings/widget/settings_page.dart';
 
 class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppRoutePath> {
@@ -81,6 +82,25 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
               ),
             ];
           },
+          settings: (SettingsAppRoutePath path) {
+            final shortGroupInfo = path.shortGroupInfo;
+
+            return [
+              MaterialPage(
+                key: const ValueKey('SchedulePage'),
+                child: SchedulePage(
+                  shortGroupInfo: ShortGroupInfo(
+                    groupId: shortGroupInfo.groupId,
+                    groupName: shortGroupInfo.groupName,
+                  ),
+                ),
+              ),
+              const MaterialPage(
+                key: ValueKey('SettingsPage'),
+                child: SettingsPage(),
+              ),
+            ];
+          },
         ),
         onPopPage: (route, result) {
           if (!route.didPop(result)) {
@@ -95,6 +115,12 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
                   shortGroupInfo: shortGroupInfo,
                 );
               }
+            },
+            settings: (value) {
+              var shortGroupInfo = value.shortGroupInfo;
+              currentPath = AppRoutePath.schedule(
+                shortGroupInfo: shortGroupInfo,
+              );
             },
           );
 
