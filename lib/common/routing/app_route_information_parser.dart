@@ -70,10 +70,16 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
           state: configuration.toJson(),
         );
       },
-      select: (_) {
+      select: (configuration) {
         return RouteInformation(
           location: '/select',
-          state: const AppRoutePath.select().toJson(),
+          state: configuration.toJson(),
+        );
+      },
+      settings: (configuration) {
+        return RouteInformation(
+          location: '/settings',
+          state: configuration.toJson(),
         );
       },
     );

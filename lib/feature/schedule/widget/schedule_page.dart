@@ -189,6 +189,20 @@ class _SchedulePageState extends State<SchedulePage> {
               );
             },
           ),
+          // ListTile for settings
+          ListTile(
+            title: Text(
+              AppLocalizations.of(context)!.settings,
+            ),
+            onTap: () {
+              AppRouter.navigate(
+                context,
+                (configuration) => AppRoutePath.settings(
+                  shortGroupInfo: widget.shortGroupInfo,
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

@@ -4,6 +4,8 @@ import 'package:uneconly/feature/select/model/group.dart';
 abstract class ISettingsLocalDataProvider {
   Future<void> saveGroup(Group group);
   Future<Group?> getGroup();
+  Future<void> saveLanguage(String language);
+  Future<String?> getLanguage();
 }
 
 class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
@@ -13,6 +15,7 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
   static const String _groupNameKey = 'groupName';
   static const String _groupCourseKey = 'groupCourse';
   static const String _groupFacultyIdKey = 'groupFacultyId';
+  static const String _languageKey = 'language';
 
   SettingsLocalDataProvider({required SharedPreferences prefs})
       : _prefs = prefs;
@@ -45,5 +48,15 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
     await _prefs.setString(_groupNameKey, group.name);
     await _prefs.setInt(_groupCourseKey, group.course);
     await _prefs.setInt(_groupFacultyIdKey, group.facultyId);
+  }
+
+  @override
+  Future<String?> getLanguage() async {
+    return _prefs.getString(_languageKey);
+  }
+
+  @override
+  Future<void> saveLanguage(String language) {
+    return _prefs.setString(_languageKey, language);
   }
 }

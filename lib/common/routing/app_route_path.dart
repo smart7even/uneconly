@@ -17,6 +17,10 @@ class AppRoutePath with _$AppRoutePath {
 
   const factory AppRoutePath.loading() = LoadingAppRoutePath;
 
+  const factory AppRoutePath.settings({
+    required final ShortGroupInfo shortGroupInfo,
+  }) = SettingsAppRoutePath;
+
   const AppRoutePath._();
 
   /// Generate AppRoutePath class from Map<String, Object?>
