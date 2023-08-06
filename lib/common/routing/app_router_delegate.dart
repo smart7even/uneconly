@@ -40,6 +40,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     return AppRouter(
       routerDelegate: this,
       child: Navigator(
+        key: navigatorKey,
         pages: path.map(
           loading: (value) {
             return [
