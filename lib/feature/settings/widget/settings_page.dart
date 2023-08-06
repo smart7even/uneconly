@@ -177,6 +177,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ],
               ),
+              const SizedBox(height: 10),
               // horizontal list of themes
               Container(
                 height: 40,
