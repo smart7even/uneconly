@@ -118,10 +118,12 @@ class _SettingsPageState extends State<SettingsPage> {
                             .saveLanguage('en');
                       }
                     },
-                    children: List<Widget>.generate(_languageNames.length,
-                        (int index) {
-                      return Center(child: Text(_languageNames[index]));
-                    }),
+                    children: List<Widget>.generate(
+                      _languageNames.length,
+                      (int index) {
+                        return Center(child: Text(_languageNames[index]));
+                      },
+                    ),
                   ),
                 ),
                 // This displays the selected fruit name.
