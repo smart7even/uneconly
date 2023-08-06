@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,6 +39,11 @@ class _SettingsPageState extends State<SettingsPage> {
       } else if (value == 'en') {
         setState(() {
           _selectedLanguage = 1;
+        });
+      } else {
+        setState(() {
+          final defaultLocale = Platform.localeName;
+          _selectedLanguage = defaultLocale.split('_')[0] == 'ru' ? 0 : 1;
         });
       }
     });
