@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -49,6 +50,9 @@ class _MyAppState extends State<MyApp> {
   late String locale;
   late String theme;
 
+  late StreamSubscription<String> _languageChangedSubscription;
+  late StreamSubscription<String> _themeChangedSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -72,7 +76,9 @@ class _MyAppState extends State<MyApp> {
       },
     );
 
-    widget.settingsRepository.getLanguageChangedStream().listen((newLanguage) {
+    _languageChangedSubscription = widget.settingsRepository
+        .getLanguageChangedStream()
+        .listen((newLanguage) {
       setState(() {
         locale = newLanguage;
       });
@@ -88,11 +94,19 @@ class _MyAppState extends State<MyApp> {
       },
     );
 
-    widget.settingsRepository.getThemeChangedStream().listen((newTheme) {
+    _themeChangedSubscription =
+        widget.settingsRepository.getThemeChangedStream().listen((newTheme) {
       setState(() {
         theme = newTheme;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _languageChangedSubscription.cancel();
+    _themeChangedSubscription.cancel();
+    super.dispose();
   }
 
   @override

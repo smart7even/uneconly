@@ -45,10 +45,9 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
 
-    RepositoryProvider.of<DependenciesScope>(context)
-        .settingsRepository
-        .getLanguage()
-        .then((value) {
+    final dependenciesScope = RepositoryProvider.of<DependenciesScope>(context);
+
+    dependenciesScope.settingsRepository.getLanguage().then((value) {
       if (value == 'ru') {
         setState(() {
           _selectedLanguage = 0;
@@ -65,10 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
       }
     });
 
-    RepositoryProvider.of<DependenciesScope>(context)
-        .settingsRepository
-        .getTheme()
-        .then((value) {
+    dependenciesScope.settingsRepository.getTheme().then((value) {
       if (value == null) {
         setState(() {
           _selectedColor = 0;
