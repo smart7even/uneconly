@@ -186,6 +186,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: colors.length,
+                  // remove shrinkWrap if there will be a lot of themes
+                  shrinkWrap: true,
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: () async {
