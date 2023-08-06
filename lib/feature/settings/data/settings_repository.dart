@@ -9,6 +9,9 @@ abstract class ISettingsRepository {
   Future<void> saveLanguage(String language);
   Future<String?> getLanguage();
   Stream<String> getLanguageChangedStream();
+  Future<void> saveTheme(String theme);
+  Future<String?> getTheme();
+  Stream<String> getThemeChangedStream();
 }
 
 class SettingsRepository implements ISettingsRepository {
@@ -18,6 +21,9 @@ class SettingsRepository implements ISettingsRepository {
       : _localDataProvider = localDataProvider;
 
   final StreamController<String> _languageChangedController =
+      StreamController<String>.broadcast();
+
+  final StreamController<String> _themeChangedController =
       StreamController<String>.broadcast();
 
   @override
@@ -44,4 +50,20 @@ class SettingsRepository implements ISettingsRepository {
   @override
   Stream<String> getLanguageChangedStream() =>
       _languageChangedController.stream;
+
+  @override
+  Future<String?> getTheme() {
+    return _localDataProvider.getTheme();
+  }
+
+  @override
+  Stream<String> getThemeChangedStream() {
+    return _themeChangedController.stream;
+  }
+
+  @override
+  Future<void> saveTheme(String theme) async {
+    await _localDataProvider.saveTheme(theme);
+    _themeChangedController.add(theme);
+  }
 }

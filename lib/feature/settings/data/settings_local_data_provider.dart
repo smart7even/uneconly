@@ -6,6 +6,8 @@ abstract class ISettingsLocalDataProvider {
   Future<Group?> getGroup();
   Future<void> saveLanguage(String language);
   Future<String?> getLanguage();
+  Future<void> saveTheme(String theme);
+  Future<String?> getTheme();
 }
 
 class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
@@ -16,6 +18,7 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
   static const String _groupCourseKey = 'groupCourse';
   static const String _groupFacultyIdKey = 'groupFacultyId';
   static const String _languageKey = 'language';
+  static const String _themeKey = 'theme';
 
   SettingsLocalDataProvider({required SharedPreferences prefs})
       : _prefs = prefs;
@@ -58,5 +61,15 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
   @override
   Future<void> saveLanguage(String language) {
     return _prefs.setString(_languageKey, language);
+  }
+
+  @override
+  Future<String?> getTheme() async {
+    return _prefs.getString(_themeKey);
+  }
+
+  @override
+  Future<void> saveTheme(String theme) {
+    return _prefs.setString(_themeKey, theme);
   }
 }

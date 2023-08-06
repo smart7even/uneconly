@@ -10,6 +10,7 @@ import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/routing/app_route_information_parser.dart';
 import 'package:uneconly/common/routing/app_router_delegate.dart';
+import 'package:uneconly/common/utils/colors_utils.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
@@ -46,6 +47,7 @@ class _MyAppState extends State<MyApp> {
   late AppRouteInformationParser _routeInformationParser;
 
   late String locale;
+  late String theme;
 
   @override
   void initState() {
@@ -56,6 +58,9 @@ class _MyAppState extends State<MyApp> {
 
     final defaultLocale = Platform.localeName;
     locale = defaultLocale.split('_')[0];
+
+    const defaultTheme = 'blue';
+    theme = defaultTheme;
 
     widget.settingsRepository.getLanguage().then(
       (value) {
@@ -70,6 +75,22 @@ class _MyAppState extends State<MyApp> {
     widget.settingsRepository.getLanguageChangedStream().listen((newLanguage) {
       setState(() {
         locale = newLanguage;
+      });
+    });
+
+    widget.settingsRepository.getTheme().then(
+      (value) {
+        if (value != null) {
+          setState(() {
+            theme = value;
+          });
+        }
+      },
+    );
+
+    widget.settingsRepository.getThemeChangedStream().listen((newTheme) {
+      setState(() {
+        theme = newTheme;
       });
     });
   }
@@ -92,7 +113,9 @@ class _MyAppState extends State<MyApp> {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
-          primarySwatch: Colors.blue,
+          primarySwatch: getColorFromString(
+            theme,
+          ),
         ),
         scrollBehavior: AppScrollBehavior(),
         routerDelegate: _routerDelegate,
