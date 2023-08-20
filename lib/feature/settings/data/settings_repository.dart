@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:home_widget/home_widget.dart';
 import 'package:uneconly/feature/select/model/group.dart';
 import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
 
@@ -33,6 +34,14 @@ class SettingsRepository implements ISettingsRepository {
 
   @override
   Future<void> saveGroup(Group group) async {
+    await HomeWidget.saveWidgetData<int>(
+      'groupId',
+      group.id,
+    );
+    HomeWidget.updateWidget(
+      name: 'UWidget',
+      iOSName: 'UWidget',
+    );
     await _localDataProvider.saveGroup(group);
   }
 

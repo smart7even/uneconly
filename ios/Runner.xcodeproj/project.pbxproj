@@ -11,12 +11,43 @@
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		4AC4552286D0AE5C2D060267 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B630AA0B7629E0911B1F13C6 /* Pods_Runner.framework */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		7CBA2ACC2A9284E800F8DB4E /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CBA2ACB2A9284E800F8DB4E /* WidgetKit.framework */; };
+		7CBA2ACE2A9284E800F8DB4E /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CBA2ACD2A9284E800F8DB4E /* SwiftUI.framework */; };
+		7CBA2AD12A9284E800F8DB4E /* UWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBA2AD02A9284E800F8DB4E /* UWidgetBundle.swift */; };
+		7CBA2AD32A9284E800F8DB4E /* UWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBA2AD22A9284E800F8DB4E /* UWidget.swift */; };
+		7CBA2AD52A9284E900F8DB4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7CBA2AD42A9284E900F8DB4E /* Assets.xcassets */; };
+		7CBA2AD92A9284E900F8DB4E /* UWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7CBA2ACA2A9284E800F8DB4E /* UWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7CBA2AE22A929F8700F8DB4E /* Lesson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBA2AE12A929F8700F8DB4E /* Lesson.swift */; };
+		7CBA2AE32A92A00700F8DB4E /* Lesson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBA2AE12A929F8700F8DB4E /* Lesson.swift */; };
+		7CBA2AE52A92A04300F8DB4E /* LessonDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBA2AE42A92A04300F8DB4E /* LessonDataProvider.swift */; };
+		7CBA2AE62A92A04300F8DB4E /* LessonDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBA2AE42A92A04300F8DB4E /* LessonDataProvider.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		7CBA2AD72A9284E900F8DB4E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7CBA2AC92A9284E800F8DB4E;
+			remoteInfo = UWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
+		7CBA2ADA2A9284E900F8DB4E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				7CBA2AD92A9284E900F8DB4E /* UWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -36,6 +67,17 @@
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		7CBA2ACA2A9284E800F8DB4E /* UWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = UWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7CBA2ACB2A9284E800F8DB4E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		7CBA2ACD2A9284E800F8DB4E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		7CBA2AD02A9284E800F8DB4E /* UWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UWidgetBundle.swift; sourceTree = "<group>"; };
+		7CBA2AD22A9284E800F8DB4E /* UWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UWidget.swift; sourceTree = "<group>"; };
+		7CBA2AD42A9284E900F8DB4E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7CBA2AD62A9284E900F8DB4E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7CBA2ADF2A92864000F8DB4E /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
+		7CBA2AE02A92865B00F8DB4E /* UWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = UWidgetExtension.entitlements; sourceTree = "<group>"; };
+		7CBA2AE12A929F8700F8DB4E /* Lesson.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lesson.swift; sourceTree = "<group>"; };
+		7CBA2AE42A92A04300F8DB4E /* LessonDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonDataProvider.swift; sourceTree = "<group>"; };
 		7DB85C360E3799A58F222CB1 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		95EC4A24429F95F88B8DC0AC /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
@@ -50,6 +92,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		7CBA2AC72A9284E800F8DB4E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7CBA2ACE2A9284E800F8DB4E /* SwiftUI.framework in Frameworks */,
+				7CBA2ACC2A9284E800F8DB4E /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EB1CF9000F007C117D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -75,8 +126,23 @@
 			isa = PBXGroup;
 			children = (
 				B630AA0B7629E0911B1F13C6 /* Pods_Runner.framework */,
+				7CBA2ACB2A9284E800F8DB4E /* WidgetKit.framework */,
+				7CBA2ACD2A9284E800F8DB4E /* SwiftUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		7CBA2ACF2A9284E800F8DB4E /* UWidget */ = {
+			isa = PBXGroup;
+			children = (
+				7CBA2AD02A9284E800F8DB4E /* UWidgetBundle.swift */,
+				7CBA2AD22A9284E800F8DB4E /* UWidget.swift */,
+				7CBA2AD42A9284E900F8DB4E /* Assets.xcassets */,
+				7CBA2AD62A9284E900F8DB4E /* Info.plist */,
+				7CBA2AE12A929F8700F8DB4E /* Lesson.swift */,
+				7CBA2AE42A92A04300F8DB4E /* LessonDataProvider.swift */,
+			);
+			path = UWidget;
 			sourceTree = "<group>";
 		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
@@ -93,8 +159,10 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
+				7CBA2AE02A92865B00F8DB4E /* UWidgetExtension.entitlements */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
+				7CBA2ACF2A9284E800F8DB4E /* UWidget */,
 				97C146EF1CF9000F007C117D /* Products */,
 				1B10BD3F89AD47341336972F /* Pods */,
 				7C3462DB56091F59352D2F35 /* Frameworks */,
@@ -105,6 +173,7 @@
 			isa = PBXGroup;
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
+				7CBA2ACA2A9284E800F8DB4E /* UWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -112,6 +181,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				7CBA2ADF2A92864000F8DB4E /* Runner.entitlements */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
@@ -127,6 +197,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		7CBA2AC92A9284E800F8DB4E /* UWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7CBA2ADE2A9284E900F8DB4E /* Build configuration list for PBXNativeTarget "UWidgetExtension" */;
+			buildPhases = (
+				7CBA2AC62A9284E800F8DB4E /* Sources */,
+				7CBA2AC72A9284E800F8DB4E /* Frameworks */,
+				7CBA2AC82A9284E800F8DB4E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = UWidgetExtension;
+			productName = UWidgetExtension;
+			productReference = 7CBA2ACA2A9284E800F8DB4E /* UWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
@@ -139,10 +226,12 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				E31E8450920E3FC200A0C2C4 /* [CP] Embed Pods Frameworks */,
+				7CBA2ADA2A9284E900F8DB4E /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				7CBA2AD82A9284E900F8DB4E /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -155,9 +244,13 @@
 		97C146E61CF9000F007C117D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1430;
 				LastUpgradeCheck = 1300;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
+					7CBA2AC92A9284E800F8DB4E = {
+						CreatedOnToolsVersion = 14.3.1;
+					};
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
@@ -178,11 +271,20 @@
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
+				7CBA2AC92A9284E800F8DB4E /* UWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		7CBA2AC82A9284E800F8DB4E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7CBA2AD52A9284E900F8DB4E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EC1CF9000F007C117D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -270,16 +372,37 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		7CBA2AC62A9284E800F8DB4E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7CBA2AE62A92A04300F8DB4E /* LessonDataProvider.swift in Sources */,
+				7CBA2AD12A9284E800F8DB4E /* UWidgetBundle.swift in Sources */,
+				7CBA2AE32A92A00700F8DB4E /* Lesson.swift in Sources */,
+				7CBA2AD32A9284E800F8DB4E /* UWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EA1CF9000F007C117D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7CBA2AE52A92A04300F8DB4E /* LessonDataProvider.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				7CBA2AE22A929F8700F8DB4E /* Lesson.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7CBA2AD82A9284E900F8DB4E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7CBA2AC92A9284E800F8DB4E /* UWidgetExtension */;
+			targetProxy = 7CBA2AD72A9284E900F8DB4E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		97C146FA1CF9000F007C117D /* Main.storyboard */ = {
@@ -355,8 +478,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = XQZ47WXYMB;
 				ENABLE_BITCODE = NO;
@@ -373,6 +498,120 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Profile;
+		};
+		7CBA2ADB2A9284E900F8DB4E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = UWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XQZ47WXYMB;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = UWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roadmapik.uneconly.UWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7CBA2ADC2A9284E900F8DB4E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = UWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XQZ47WXYMB;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = UWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roadmapik.uneconly.UWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		7CBA2ADD2A9284E900F8DB4E /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = UWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XQZ47WXYMB;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = UWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roadmapik.uneconly.UWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Profile;
 		};
@@ -487,8 +726,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = XQZ47WXYMB;
 				ENABLE_BITCODE = NO;
@@ -513,8 +754,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = XQZ47WXYMB;
 				ENABLE_BITCODE = NO;
@@ -537,6 +780,16 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		7CBA2ADE2A9284E900F8DB4E /* Build configuration list for PBXNativeTarget "UWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7CBA2ADB2A9284E900F8DB4E /* Debug */,
+				7CBA2ADC2A9284E900F8DB4E /* Release */,
+				7CBA2ADD2A9284E900F8DB4E /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

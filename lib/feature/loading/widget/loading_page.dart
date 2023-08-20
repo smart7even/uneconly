@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
@@ -40,6 +41,15 @@ class _LoadingPageState extends State<LoadingPage> {
         (configuration) => const AppRoutePath.select(),
       );
     } else {
+      HomeWidget.saveWidgetData<int>(
+        'groupId',
+        group.id,
+      ).then((value) {
+        HomeWidget.updateWidget(
+          name: 'UWidget',
+          iOSName: 'UWidget',
+        );
+      });
       AppRouter.navigate(
         context,
         (configuration) => AppRoutePath.schedule(

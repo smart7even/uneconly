@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uneconly/common/app_scroll_configuration.dart';
 import 'package:uneconly/common/database/database.dart';
@@ -56,6 +57,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    HomeWidget.setAppGroupId('group.roadmapik.test');
 
     _routerDelegate = AppRouterDelegate();
     _routeInformationParser = AppRouteInformationParser();
