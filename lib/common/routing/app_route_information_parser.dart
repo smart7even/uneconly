@@ -7,13 +7,7 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
   Future<AppRoutePath> parseRouteInformation(
     RouteInformation routeInformation,
   ) async {
-    final location = routeInformation.location;
-
-    if (location == null) {
-      return const AppRoutePath.loading();
-    }
-
-    final uri = Uri.parse(location);
+    final uri = routeInformation.uri;
     // Handle '/'
     if (uri.pathSegments.isEmpty) {
       return const AppRoutePath.loading();
@@ -73,26 +67,27 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
     return configuration.map(
       loading: (configuration) {
         return RouteInformation(
-          location: '/',
+          uri: Uri.parse('/'),
           state: configuration.toJson(),
         );
       },
       schedule: (configuration) {
         return RouteInformation(
-          location:
-              '/group/${configuration.shortGroupInfo.groupId}/schedule?name=${configuration.shortGroupInfo.groupName}',
+          uri: Uri.parse(
+            '/group/${configuration.shortGroupInfo.groupId}/schedule?name=${configuration.shortGroupInfo.groupName}',
+          ),
           state: configuration.toJson(),
         );
       },
       select: (configuration) {
         return RouteInformation(
-          location: '/select',
+          uri: Uri.parse('/select'),
           state: configuration.toJson(),
         );
       },
       settings: (configuration) {
         return RouteInformation(
-          location: '/settings',
+          uri: Uri.parse('/settings'),
           state: configuration.toJson(),
         );
       },
