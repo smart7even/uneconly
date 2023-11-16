@@ -10,11 +10,13 @@ class Lesson with _$Lesson {
     required final String name,
     required final DateTime day,
     @JsonKey(name: 'day_of_week', required: true, disallowNullValue: true)
-        required final String dayOfWeek,
+    required final String dayOfWeek,
     required final DateTime start,
     required final DateTime end,
     required final String? professor,
     required final String location,
+    @JsonKey(name: 'lesson_type', required: false, disallowNullValue: false)
+    required final String? lessonType,
   }) = _Lesson;
 
   const Lesson._();

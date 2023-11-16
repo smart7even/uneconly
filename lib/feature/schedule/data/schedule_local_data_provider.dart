@@ -51,6 +51,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
             end: e.end,
             professor: e.professor,
             location: e.location,
+            lessonType: e.lessonType,
           ),
         )
         .where((element) =>
@@ -116,6 +117,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
                   end: Value(lesson.end),
                   createdAt: Value(currentDateTime),
                   groupId: Value(schedule.groupId),
+                  lessonType: Value(lesson.lessonType),
                 ),
               );
         }

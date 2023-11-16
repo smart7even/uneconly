@@ -10,4 +10,5 @@ class Lessons extends Table {
   TextColumn get location => text()();
   DateTimeColumn get createdAt => dateTime()();
   IntColumn get groupId => integer().nullable()();
+  TextColumn get lessonType => text().nullable()();
 }
