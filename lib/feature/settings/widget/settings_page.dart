@@ -122,57 +122,59 @@ class _SettingsPageState extends State<SettingsPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text('${AppLocalizations.of(context)!.language}: '),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    // Display a CupertinoPicker with list of fruits.
-                    onPressed: () => _showDialog(
-                      CupertinoPicker(
-                        magnification: 1.22,
-                        squeeze: 1.2,
-                        useMagnifier: true,
-                        itemExtent: _kItemExtent,
-                        // This sets the initial item.
-                        scrollController: FixedExtentScrollController(
-                          initialItem: _selectedLanguage,
-                        ),
-                        // This is called when selected item is changed.
-                        onSelectedItemChanged: (int selectedItem) async {
-                          setState(() {
-                            _selectedLanguage = selectedItem;
-                          });
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: <Widget>[
+              //     Text('${AppLocalizations.of(context)!.language}: '),
+              //     CupertinoButton(
+              //       padding: EdgeInsets.zero,
+              //       // Display a CupertinoPicker with list of fruits.
+              //       onPressed: () => _showDialog(
+              //         CupertinoPicker(
+              //           magnification: 1.22,
+              //           squeeze: 1.2,
+              //           useMagnifier: true,
+              //           itemExtent: _kItemExtent,
+              //           // This sets the initial item.
+              //           scrollController: FixedExtentScrollController(
+              //             initialItem: _selectedLanguage,
+              //           ),
+              //           // This is called when selected item is changed.
+              //           onSelectedItemChanged: (int selectedItem) async {
+              //             setState(() {
+              //               _selectedLanguage = selectedItem;
+              //             });
 
-                          if (_selectedLanguage == 0) {
-                            await RepositoryProvider.of<DependenciesScope>(
-                              context,
-                            ).settingsRepository.saveLanguage('ru');
-                          } else {
-                            await RepositoryProvider.of<DependenciesScope>(
-                              context,
-                            ).settingsRepository.saveLanguage('en');
-                          }
-                        },
-                        children: List<Widget>.generate(
-                          _languageNames.length,
-                          (int index) {
-                            return Center(child: Text(_languageNames[index]));
-                          },
-                        ),
-                      ),
-                    ),
-                    // This displays the selected fruit name.
-                    child: Text(
-                      _languageNames[_selectedLanguage],
-                      style: const TextStyle(
-                        fontSize: 22.0,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              //             if (_selectedLanguage == 0) {
+              //               await RepositoryProvider.of<DependenciesScope>(
+              //                 context,
+              //               ).settingsRepository.saveLanguage('ru');
+              //             } else {
+              //               await RepositoryProvider.of<DependenciesScope>(
+              //                 context,
+              //               ).settingsRepository.saveLanguage('en');
+              //             }
+              //           },
+              //           children: List<Widget>.generate(
+              //             _languageNames.length,
+              //             (int index) {
+              //               return Center(child: Text(_languageNames[index]));
+              //             },
+              //           ),
+              //         ),
+              //       ),
+              //       // This displays the selected fruit name.
+              //       child: Text(
+              //         _languageNames[_selectedLanguage],
+              //         style: const TextStyle(
+              //           fontSize: 22.0,
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+
+              Text('${AppLocalizations.of(context)!.theme}: '),
               const SizedBox(height: 10),
               // horizontal list of themes
               Container(
