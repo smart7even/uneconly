@@ -4,6 +4,7 @@ import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
+import 'package:uneconly/feature/schedule/widget/lesson_tile.dart';
 
 /// {@template schedule_widget}
 /// ScheduleWidget widget
@@ -75,35 +76,8 @@ class ScheduleWidget extends StatelessWidget {
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
               final lesson = daySchedule.lessons[index];
-              String subtitle = '';
 
-              String? professor = lesson.professor;
-
-              if (professor != null) {
-                subtitle = professor;
-              }
-
-              String location = lesson.location.replaceAll('\n', ' ').trim();
-
-              subtitle = '$subtitle $location';
-
-              return ListTile(
-                title: Text(
-                  lesson.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(
-                  subtitle,
-                ),
-                trailing: Text(
-                  '${DateFormat('HH:mm').format(
-                    lesson.start,
-                  )} - ${DateFormat('HH:mm').format(
-                    lesson.end,
-                  )}',
-                ),
-              );
+              return LessonTile(lesson: lesson);
             },
             childCount: daySchedule.lessons.length,
           ),
@@ -140,4 +114,4 @@ class ScheduleWidget extends StatelessWidget {
       slivers: _buildSchedule(context),
     );
   }
-} // ScheduleWidget
+}
