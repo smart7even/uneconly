@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -32,7 +34,8 @@ class SchedulePage extends StatefulWidget {
 } // SchedulePage
 
 /// State for widget SchedulePage
-class _SchedulePageState extends State<SchedulePage> {
+class _SchedulePageState extends State<SchedulePage>
+    with WidgetsBindingObserver {
   static const initialPageIndex = 4242;
 
   final controller = PageController(
@@ -51,6 +54,33 @@ class _SchedulePageState extends State<SchedulePage> {
     // Initial state initialization
 
     scheduleBLoC = _initBloc(context);
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // Called when the application state changes
+
+    if (state == AppLifecycleState.resumed) {
+      scheduleBLoC.add(
+        ScheduleEvent.fetch(
+          groupId: widget.shortGroupInfo.groupId,
+          week: _getCurrentWeek(),
+        ),
+      );
+
+      setState(() {
+        log('app resumed');
+      });
+    }
   }
 
   int _getCurrentWeek() {
@@ -117,13 +147,6 @@ class _SchedulePageState extends State<SchedulePage> {
     // The configuration of InheritedWidgets has changed
     // Also called after initState but before build
   }
-
-  @override
-  void dispose() {
-    // Permanent removal of a tree stent
-    super.dispose();
-  }
-  /* #endregion */
 
   Future<void> onPageChanged(
     BuildContext context,
@@ -245,6 +268,19 @@ class _SchedulePageState extends State<SchedulePage> {
       drawer: _buildDrawer(context),
       appBar: AppBar(
         title: Text(title),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(
+              right: 10,
+            ),
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.edit,
+              ),
+            ),
+          ),
+        ],
       ),
       body: PageView.builder(
         controller: controller,
