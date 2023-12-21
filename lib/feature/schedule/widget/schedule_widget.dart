@@ -83,6 +83,27 @@ class ScheduleWidget extends StatelessWidget {
           ),
         ));
       }
+
+      // Check that day is the last day before new year
+      if (daySchedule.day.month == 12 && daySchedule.day.day == 31) {
+        slivers.add(
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 32.0),
+              child: ListTile(
+                title: Text(
+                  '${AppLocalizations.of(context)!.newYearCongratulation} 🎄',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
     }
 
     return slivers;
