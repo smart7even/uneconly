@@ -101,7 +101,7 @@ class _SchedulePageState extends State<SchedulePage>
       dependenciesScope.database,
     );
 
-    ScheduleRepository repository = ScheduleRepository(
+    IScheduleRepository repository = ScheduleRepository(
       networkDataProvider: scheduleNetworkDataProvider,
       localDataProvider: localDataProvider,
     );
@@ -268,19 +268,19 @@ class _SchedulePageState extends State<SchedulePage>
       drawer: _buildDrawer(context),
       appBar: AppBar(
         title: Text(title),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(
-              right: 10,
-            ),
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.edit,
-              ),
-            ),
-          ),
-        ],
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.only(
+        //       right: 10,
+        //     ),
+        //     child: IconButton(
+        //       onPressed: () {},
+        //       icon: const Icon(
+        //         Icons.edit,
+        //       ),
+        //     ),
+        //   ),
+        // ],
       ),
       body: PageView.builder(
         controller: controller,
