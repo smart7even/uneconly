@@ -265,7 +265,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         shortGroupInfo: state.shortGroupInfo,
       ));
 
-      if (event.shortGroupInfo != null && state.shortGroupInfo == null) {
+      if (event.shortGroupInfo != null) {
         emit(ScheduleState.successful(
           data: state.data,
           currentWeek: state.currentWeek ?? event.week,
