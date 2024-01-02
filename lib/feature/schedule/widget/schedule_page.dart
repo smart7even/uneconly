@@ -16,6 +16,8 @@ import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
+import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
+import 'package:uneconly/feature/select/data/group_repository.dart';
 
 /// {@template schedule_page}
 /// SchedulePage widget
@@ -106,11 +108,25 @@ class _SchedulePageState extends State<SchedulePage>
       localDataProvider: localDataProvider,
     );
 
-    var bloc = ScheduleBLoC(repository: repository);
+    IGroupNetworkDataProvider groupNetworkDataProvider =
+        GroupNetworkDataProvider(
+      dio: dependenciesScope.dio,
+    );
+
+    IGroupRepository groupRepository = GroupRepository(
+      networkDataProvider: groupNetworkDataProvider,
+    );
+
+    var bloc = ScheduleBLoC(
+      repository: repository,
+      groupRepository: groupRepository,
+    );
+
     bloc.add(
       ScheduleEvent.fetch(
         groupId: widget.shortGroupInfo.groupId,
         week: _getCurrentWeek(),
+        shortGroupInfo: widget.shortGroupInfo,
       ),
     );
 
@@ -126,6 +142,7 @@ class _SchedulePageState extends State<SchedulePage>
         ScheduleEvent.changeGroup(
           groupId: widget.shortGroupInfo.groupId,
           week: scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
+          shortGroupInfo: widget.shortGroupInfo,
         ),
       );
 
@@ -168,7 +185,10 @@ class _SchedulePageState extends State<SchedulePage>
         );
   }
 
-  Widget _buildDrawer(BuildContext context) {
+  Widget _buildDrawer(
+    BuildContext context,
+    ScheduleState state,
+  ) {
     return Drawer(
       semanticLabel: AppLocalizations.of(context)!.options,
       child: ListView(
@@ -187,7 +207,7 @@ class _SchedulePageState extends State<SchedulePage>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  widget.shortGroupInfo.groupName,
+                  state.shortGroupInfo?.groupName ?? '',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -220,9 +240,7 @@ class _SchedulePageState extends State<SchedulePage>
             onTap: () {
               AppRouter.navigate(
                 context,
-                (configuration) => AppRoutePath.settings(
-                  shortGroupInfo: widget.shortGroupInfo,
-                ),
+                (configuration) => const AppRoutePath.settings(),
               );
             },
           ),
@@ -243,9 +261,12 @@ class _SchedulePageState extends State<SchedulePage>
     if (week == 0) {
       return Scaffold(
         key: _scaffoldKey,
-        drawer: _buildDrawer(context),
+        drawer: _buildDrawer(
+          context,
+          state,
+        ),
         appBar: AppBar(
-          title: Text(widget.shortGroupInfo.groupName),
+          title: Text(state.shortGroupInfo?.groupName ?? ''),
         ),
         body: Center(
           child: Text(message),
@@ -253,7 +274,7 @@ class _SchedulePageState extends State<SchedulePage>
       );
     }
 
-    String title = widget.shortGroupInfo.groupName;
+    String title = state.shortGroupInfo?.groupName ?? '';
 
     if (selectedWeek != null) {
       title += ', ${AppLocalizations.of(context)!.week} $selectedWeek';
@@ -265,7 +286,10 @@ class _SchedulePageState extends State<SchedulePage>
 
     return Scaffold(
       key: _scaffoldKey,
-      drawer: _buildDrawer(context),
+      drawer: _buildDrawer(
+        context,
+        state,
+      ),
       appBar: AppBar(
         title: Text(title),
         // actions: [

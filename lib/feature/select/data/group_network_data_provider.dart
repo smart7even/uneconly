@@ -6,6 +6,7 @@ import 'package:uneconly/feature/select/model/group.dart';
 abstract class IGroupNetworkDataProvider {
   Future<List<Group>> fetchAll();
   Future<List<Faculty>> fetchAllFaculties();
+  Future<Group> fetchGroupById(int groupId);
 }
 
 class GroupNetworkDataProvider implements IGroupNetworkDataProvider {
@@ -41,6 +42,20 @@ class GroupNetworkDataProvider implements IGroupNetworkDataProvider {
           .toList();
 
       return faculties;
+    } catch (e, stackTrace) {
+      l.e('An error occured in GroupNetworkDataProvider', stackTrace);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Group> fetchGroupById(int groupId) async {
+    try {
+      final response = await _dio.get('/group/$groupId');
+
+      Group group = Group.fromJson(response.data);
+
+      return group;
     } catch (e, stackTrace) {
       l.e('An error occured in GroupNetworkDataProvider', stackTrace);
       rethrow;

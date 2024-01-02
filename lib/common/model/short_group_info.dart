@@ -8,7 +8,7 @@ part 'short_group_info.g.dart';
 class ShortGroupInfo with _$ShortGroupInfo {
   const factory ShortGroupInfo({
     required final int groupId,
-    required final String groupName,
+    required final String? groupName,
   }) = _ShortGroupInfo;
 
   const ShortGroupInfo._();

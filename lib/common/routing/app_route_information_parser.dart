@@ -20,16 +20,7 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
 
     // Handle '/settings'
     if (uri.pathSegments[0] == 'settings') {
-      final state = routeInformation.state;
-
-      if (state == null) {
-        return const AppRoutePath.loading();
-      }
-
-      return AppRoutePath.settings(
-        shortGroupInfo:
-            (state as Map<String, dynamic>)['shortGroupInfo'] as ShortGroupInfo,
-      );
+      return const AppRoutePath.settings();
     }
 
     // Handle '/group/:id/schedule/'
@@ -46,7 +37,7 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
         return const AppRoutePath.select();
       }
 
-      if (uri.pathSegments[2] != 'schedule' || name == null) {
+      if (uri.pathSegments[2] != 'schedule') {
         return const AppRoutePath.select();
       }
 

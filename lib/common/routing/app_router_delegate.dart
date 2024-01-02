@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
@@ -21,6 +22,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   final PageObserver pageObserver;
   final ModalObserver modalObserver;
 
+  List<AppRoutePath> _history = [];
   AppRoutePath currentPath = const AppRoutePath.loading();
 
   void handleSchedulePageOpened(int groupId, String groupName) {
@@ -46,7 +48,9 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
             return [
               const MaterialPage(
                 key: ValueKey('LoadingPage'),
-                child: LoadingPage(),
+                child: LoadingPage(
+                  isActive: true,
+                ),
               ),
             ];
           },
@@ -84,16 +88,42 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
             ];
           },
           settings: (SettingsAppRoutePath path) {
-            final shortGroupInfo = path.shortGroupInfo;
+            AppRoutePath? previousPath;
+
+            if (_history.isNotEmpty) {
+              previousPath = _history.lastWhereOrNull(
+                (element) => element is ScheduleAppRoutePath,
+              );
+            } else {
+              previousPath = null;
+            }
+
+            print(_history);
+            print(previousPath);
+
+            if (previousPath is ScheduleAppRoutePath) {
+              return [
+                MaterialPage(
+                  key: const ValueKey('SchedulePage'),
+                  child: SchedulePage(
+                    shortGroupInfo: ShortGroupInfo(
+                      groupId: previousPath.shortGroupInfo.groupId,
+                      groupName: previousPath.shortGroupInfo.groupName,
+                    ),
+                  ),
+                ),
+                const MaterialPage(
+                  key: ValueKey('SettingsPage'),
+                  child: SettingsPage(),
+                ),
+              ];
+            }
 
             return [
-              MaterialPage(
-                key: const ValueKey('SchedulePage'),
-                child: SchedulePage(
-                  shortGroupInfo: ShortGroupInfo(
-                    groupId: shortGroupInfo.groupId,
-                    groupName: shortGroupInfo.groupName,
-                  ),
+              const MaterialPage(
+                key: ValueKey('LoadingPage'),
+                child: LoadingPage(
+                  isActive: false,
                 ),
               ),
               const MaterialPage(
@@ -118,10 +148,26 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
               }
             },
             settings: (value) {
-              var shortGroupInfo = value.shortGroupInfo;
-              currentPath = AppRoutePath.schedule(
-                shortGroupInfo: shortGroupInfo,
-              );
+              AppRoutePath? previousPath;
+
+              if (_history.isNotEmpty) {
+                previousPath = _history.lastWhereOrNull(
+                  (element) => element is ScheduleAppRoutePath,
+                );
+              } else {
+                previousPath = null;
+              }
+
+              if (previousPath is ScheduleAppRoutePath) {
+                currentPath = AppRoutePath.schedule(
+                  shortGroupInfo: ShortGroupInfo(
+                    groupId: previousPath.shortGroupInfo.groupId,
+                    groupName: previousPath.shortGroupInfo.groupName,
+                  ),
+                );
+              } else {
+                currentPath = const AppRoutePath.loading();
+              }
             },
           );
 
@@ -136,6 +182,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   @override
   Future<void> setNewRoutePath(AppRoutePath configuration) async {
     currentPath = configuration;
+    _history.add(configuration);
     notifyListeners();
   }
 

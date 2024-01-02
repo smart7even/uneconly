@@ -5,6 +5,7 @@ import 'package:uneconly/feature/select/model/group.dart';
 abstract class IGroupRepository {
   Future<List<Group>> fetchAll();
   Future<List<Faculty>> fetchAllFaculties();
+  Future<Group> fetchGroupById(int groupId);
 }
 
 class GroupRepository implements IGroupRepository {
@@ -21,5 +22,10 @@ class GroupRepository implements IGroupRepository {
   @override
   Future<List<Faculty>> fetchAllFaculties() {
     return _networkDataProvider.fetchAllFaculties();
+  }
+
+  @override
+  Future<Group> fetchGroupById(int groupId) {
+    return _networkDataProvider.fetchGroupById(groupId);
   }
 }

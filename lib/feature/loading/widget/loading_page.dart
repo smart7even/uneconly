@@ -11,8 +11,13 @@ import 'package:uneconly/feature/settings/data/settings_repository.dart';
 /// LoadingPage widget
 /// {@endtemplate}
 class LoadingPage extends StatefulWidget {
+  final bool isActive;
+
   /// {@macro loading_page}
-  const LoadingPage({super.key});
+  const LoadingPage({
+    super.key,
+    required this.isActive,
+  });
 
   @override
   State<LoadingPage> createState() => _LoadingPageState();
@@ -22,7 +27,24 @@ class _LoadingPageState extends State<LoadingPage> {
   @override
   void initState() {
     super.initState();
-    onOpen();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (widget.isActive) {
+      onOpen();
+    }
+  }
+
+  @override
+  void didUpdateWidget(LoadingPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.isActive) {
+      onOpen();
+    }
   }
 
   Future<void> onOpen() async {

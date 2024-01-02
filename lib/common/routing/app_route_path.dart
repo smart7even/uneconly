@@ -17,9 +17,7 @@ class AppRoutePath with _$AppRoutePath {
 
   const factory AppRoutePath.loading() = LoadingAppRoutePath;
 
-  const factory AppRoutePath.settings({
-    required final ShortGroupInfo shortGroupInfo,
-  }) = SettingsAppRoutePath;
+  const factory AppRoutePath.settings() = SettingsAppRoutePath;
 
   const AppRoutePath._();
 
