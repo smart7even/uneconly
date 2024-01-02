@@ -75,7 +75,7 @@ class _SchedulePageState extends State<SchedulePage>
       scheduleBLoC.add(
         ScheduleEvent.fetch(
           groupId: widget.shortGroupInfo.groupId,
-          week: _getCurrentWeek(),
+          week: scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
         ),
       );
 
