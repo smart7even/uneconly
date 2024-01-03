@@ -7,8 +7,6 @@ import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
-import 'package:uneconly/common/routing/app_route_path.dart';
-import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
@@ -60,6 +58,11 @@ class _SchedulePageState extends State<SchedulePage>
     scheduleBLoC = _initBloc(context);
 
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   @override
@@ -160,13 +163,6 @@ class _SchedulePageState extends State<SchedulePage>
     }
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // The configuration of InheritedWidgets has changed
-    // Also called after initState but before build
-  }
-
   Future<void> onPageChanged(
     BuildContext context,
     int newIndex,
@@ -185,6 +181,12 @@ class _SchedulePageState extends State<SchedulePage>
             week: newWeek,
           ),
         );
+
+    context.octopus.setArguments(
+      (args) {
+        args['week'] = newWeek.toString();
+      },
+    );
   }
 
   Widget _buildDrawer(

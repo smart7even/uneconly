@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,8 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uneconly/common/app_scroll_configuration.dart';
 import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
-import 'package:uneconly/common/routing/app_route_information_parser.dart';
-import 'package:uneconly/common/routing/app_router_delegate.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/colors_utils.dart';
 import 'package:uneconly/constants.dart';
@@ -48,8 +46,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late AppRouterDelegate _routerDelegate;
-  late AppRouteInformationParser _routeInformationParser;
   final Key builderKey = GlobalKey(); // Disable recreate widget tree
   late final Octopus router;
 
@@ -63,9 +59,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     HomeWidget.setAppGroupId('group.roadmapik.test');
-
-    _routerDelegate = AppRouterDelegate();
-    _routeInformationParser = AppRouteInformationParser();
 
     final defaultLocale = Platform.localeName;
     locale = defaultLocale.split('_')[0];
@@ -113,7 +106,11 @@ class _MyAppState extends State<MyApp> {
       routes: Routes.values,
       defaultRoute: Routes.loading,
       guards: <IOctopusGuard>[],
-      onError: (error, stackTrace) => print(error),
+      onError: (error, stackTrace) => log(
+        error.toString(),
+        error: error,
+        stackTrace: stackTrace,
+      ),
       /* observers: <NavigatorObserver>[
         HeroController(),
       ], */
@@ -159,7 +156,7 @@ class _MyAppState extends State<MyApp> {
               textScaler: TextScaler.noScaling,
             ),
             child: OctopusTools(
-              enable: false,
+              enable: true,
               octopus: router,
               child: child ?? const SizedBox.shrink(),
             ),

@@ -22,7 +22,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   final PageObserver pageObserver;
   final ModalObserver modalObserver;
 
-  List<AppRoutePath> _history = [];
+  final List<AppRoutePath> _history = [];
   AppRoutePath currentPath = const AppRoutePath.loading();
 
   void handleSchedulePageOpened(int groupId, String groupName) {
@@ -97,9 +97,6 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
             } else {
               previousPath = null;
             }
-
-            print(_history);
-            print(previousPath);
 
             if (previousPath is ScheduleAppRoutePath) {
               return [

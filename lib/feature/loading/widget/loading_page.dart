@@ -3,9 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
-import 'package:uneconly/common/model/short_group_info.dart';
-import 'package:uneconly/common/routing/app_route_path.dart';
-import 'package:uneconly/common/routing/app_router.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
 
