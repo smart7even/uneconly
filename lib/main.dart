@@ -159,7 +159,7 @@ class _MyAppState extends State<MyApp> {
               textScaler: TextScaler.noScaling,
             ),
             child: OctopusTools(
-              enable: kDebugMode,
+              enable: false,
               octopus: router,
               child: child ?? const SizedBox.shrink(),
             ),
