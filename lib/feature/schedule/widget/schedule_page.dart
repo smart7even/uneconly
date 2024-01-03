@@ -3,11 +3,13 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
+import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
@@ -221,14 +223,8 @@ class _SchedulePageState extends State<SchedulePage>
               AppLocalizations.of(context)!.selectAnotherGroup,
             ),
             onTap: () {
-              AppRouter.navigate(
-                context,
-                (configuration) => AppRoutePath.select(
-                  shortGroupInfo: ShortGroupInfo(
-                    groupId: widget.shortGroupInfo.groupId,
-                    groupName: widget.shortGroupInfo.groupName,
-                  ),
-                ),
+              Octopus.of(context).push(
+                Routes.select,
               );
             },
           ),
@@ -238,9 +234,10 @@ class _SchedulePageState extends State<SchedulePage>
               AppLocalizations.of(context)!.settings,
             ),
             onTap: () {
-              AppRouter.navigate(
+              Octopus.of(
                 context,
-                (configuration) => const AppRoutePath.settings(),
+              ).push(
+                Routes.settings,
               );
             },
           ),

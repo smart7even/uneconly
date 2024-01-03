@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
+import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
+import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/feature/select/bloc/group_bloc.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
@@ -66,14 +68,19 @@ class _SelectPageState extends State<SelectPage> {
     final settingsRepository =
         context.read<DependenciesScope>().settingsRepository;
 
-    AppRouter.navigate(
-      context,
-      (configuration) => AppRoutePath.schedule(
-        shortGroupInfo: ShortGroupInfo(
-          groupId: group.id,
-          groupName: group.name,
-        ),
-      ),
+    Octopus.of(context).setState(
+      (state) {
+        return state
+          ..removeWhere((node) => true)
+          ..add(
+            Routes.schedule.node(
+              arguments: {
+                'groupId': group.id.toString(),
+                'groupName': group.name,
+              },
+            ),
+          );
+      },
     );
 
     await settingsRepository.saveGroup(group);

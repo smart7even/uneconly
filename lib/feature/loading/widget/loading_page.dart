@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/app_route_path.dart';
 import 'package:uneconly/common/routing/app_router.dart';
+import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
 
 /// {@template loading_page}
@@ -58,10 +60,13 @@ class _LoadingPageState extends State<LoadingPage> {
     }
 
     if (group == null) {
-      AppRouter.navigate(
-        context,
-        (configuration) => const AppRoutePath.select(),
-      );
+      Octopus.of(context).setState((state) {
+        return state
+          ..removeByName(Routes.loading.name)
+          ..add(
+            Routes.select.node(),
+          );
+      });
     } else {
       HomeWidget.saveWidgetData<int>(
         'groupId',
@@ -72,15 +77,19 @@ class _LoadingPageState extends State<LoadingPage> {
           iOSName: 'UWidget',
         );
       });
-      AppRouter.navigate(
-        context,
-        (configuration) => AppRoutePath.schedule(
-          shortGroupInfo: ShortGroupInfo(
-            groupId: group.id,
-            groupName: group.name,
-          ),
-        ),
-      );
+
+      Octopus.of(context).setState((state) {
+        return state
+          ..removeByName(Routes.loading.name)
+          ..add(
+            Routes.schedule.node(
+              arguments: <String, String>{
+                'groupId': group.id.toString(),
+                'groupName': group.name,
+              },
+            ),
+          );
+      });
     }
   }
 

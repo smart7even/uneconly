@@ -2,16 +2,19 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:octopus/octopus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uneconly/common/app_scroll_configuration.dart';
 import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/routing/app_route_information_parser.dart';
 import 'package:uneconly/common/routing/app_router_delegate.dart';
+import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/colors_utils.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
@@ -47,6 +50,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late AppRouterDelegate _routerDelegate;
   late AppRouteInformationParser _routeInformationParser;
+  final Key builderKey = GlobalKey(); // Disable recreate widget tree
+  late final Octopus router;
 
   late String locale;
   late String theme;
@@ -102,6 +107,17 @@ class _MyAppState extends State<MyApp> {
         theme = newTheme;
       });
     });
+
+    // Create router.
+    router = Octopus(
+      routes: Routes.values,
+      defaultRoute: Routes.loading,
+      guards: <IOctopusGuard>[],
+      onError: (error, stackTrace) => print(error),
+      /* observers: <NavigatorObserver>[
+        HeroController(),
+      ], */
+    );
   }
 
   @override
@@ -135,8 +151,20 @@ class _MyAppState extends State<MyApp> {
           useMaterial3: false,
         ),
         scrollBehavior: AppScrollBehavior(),
-        routerDelegate: _routerDelegate,
-        routeInformationParser: _routeInformationParser,
+        routerConfig: router.config,
+        builder: (context, child) {
+          return MediaQuery(
+            key: builderKey,
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.noScaling,
+            ),
+            child: OctopusTools(
+              enable: kDebugMode,
+              octopus: router,
+              child: child ?? const SizedBox.shrink(),
+            ),
+          );
+        },
       ),
     );
   }

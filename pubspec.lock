@@ -549,6 +549,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  octopus:
+    dependency: "direct main"
+    description:
+      name: octopus
+      sha256: "6eee0d6084d60b4327c67e543a9804cb2601d40311b569f4979171b046ae4efb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1-pre.2"
   package_config:
     dependency: transitive
     description:
@@ -963,5 +971,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.2.0-194.0.dev <4.0.0"
-  flutter: ">=3.7.0"
+  dart: ">=3.2.0 <4.0.0"
+  flutter: ">=3.16.0"

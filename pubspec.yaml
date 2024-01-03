@@ -51,6 +51,7 @@ dependencies:
   collection: ^1.17.0
   shared_preferences: ^2.1.0
   home_widget: ^0.3.0
+  octopus: ^0.0.1-pre.2
 
 dev_dependencies:
   flutter_test:
