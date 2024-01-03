@@ -132,6 +132,7 @@ class _MyAppState extends State<MyApp> {
           primarySwatch: getColorFromString(
             theme,
           ),
+          useMaterial3: false,
         ),
         scrollBehavior: AppScrollBehavior(),
         routerDelegate: _routerDelegate,
