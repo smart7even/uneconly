@@ -312,25 +312,34 @@ class _SelectPageState extends State<SelectPage> {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: selectedGroups.length,
-                    itemBuilder: (context, index) {
-                      final group = selectedGroups[index];
-
-                      return ListTile(
-                        title: Text(
-                          group.name,
-                          semanticsLabel:
-                              '${AppLocalizations.of(context)!.group} ${group.name}',
-                        ),
-                        onTap: () => onPressed(
-                          context,
-                          group,
-                        ),
-                      );
-                    },
+                state.maybeMap(
+                  processing: (_) => const Expanded(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
                   ),
+                  orElse: () {
+                    return Expanded(
+                      child: ListView.builder(
+                        itemCount: selectedGroups.length,
+                        itemBuilder: (context, index) {
+                          final group = selectedGroups[index];
+
+                          return ListTile(
+                            title: Text(
+                              group.name,
+                              semanticsLabel:
+                                  '${AppLocalizations.of(context)!.group} ${group.name}',
+                            ),
+                            onTap: () => onPressed(
+                              context,
+                              group,
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
