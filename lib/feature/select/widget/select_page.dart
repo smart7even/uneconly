@@ -15,12 +15,22 @@ import 'package:uneconly/feature/select/model/group.dart';
 import 'package:uneconly/feature/select/widget/select_course_page.dart';
 import 'package:uneconly/feature/select/widget/select_faculty_page.dart';
 
+enum SelectPageMode {
+  view,
+  select,
+}
+
 /// {@template select_page}
 /// SelectPage widget
 /// {@endtemplate}
 class SelectPage extends StatefulWidget {
+  final SelectPageMode mode;
+
   /// {@macro select_page}
-  const SelectPage({super.key});
+  const SelectPage({
+    super.key,
+    required this.mode,
+  });
 
   @override
   State<SelectPage> createState() => _SelectPageState();
@@ -62,6 +72,26 @@ class _SelectPageState extends State<SelectPage> {
   /* #endregion */
 
   Future<void> onPressed(BuildContext context, Group group) async {
+    if (widget.mode == SelectPageMode.view) {
+      Octopus.of(context).setState(
+        (state) {
+          return state
+            ..removeByName(Routes.select.name)
+            ..add(
+              Routes.schedule.node(
+                arguments: {
+                  'groupId': group.id.toString(),
+                  'groupName': group.name,
+                  'isViewMode': true.toString(),
+                },
+              ),
+            );
+        },
+      );
+
+      return;
+    }
+
     final settingsRepository =
         context.read<DependenciesScope>().settingsRepository;
 

@@ -24,11 +24,13 @@ import 'package:uneconly/feature/select/data/group_repository.dart';
 /// {@endtemplate}
 class SchedulePage extends StatefulWidget {
   final ShortGroupInfo shortGroupInfo;
+  final bool isViewMode;
 
   /// {@macro schedule_page}
   const SchedulePage({
     super.key,
     required this.shortGroupInfo,
+    required this.isViewMode,
   });
 
   @override
@@ -244,22 +246,19 @@ class _SchedulePageState extends State<SchedulePage>
             },
           ),
           // ListTile to view schedule of another group
-          // ListTile(
-          //   title: Text(
-          //     AppLocalizations.of(context)!.viewScheduleOfAnotherGroup,
-          //   ),
-          //   onTap: () {
-          //     AppRouter.navigate(
-          //       context,
-          //       (configuration) => AppRoutePath.select(
-          //         shortGroupInfo: ShortGroupInfo(
-          //           groupId: widget.shortGroupInfo.groupId,
-          //           groupName: widget.shortGroupInfo.groupName,
-          //         ),
-          //       ),
-          //     );
-          //   },
-          // ),
+          ListTile(
+            title: Text(
+              AppLocalizations.of(context)!.viewScheduleOfAnotherGroup,
+            ),
+            onTap: () {
+              context.octopus.push(
+                Routes.select,
+                arguments: {
+                  'mode': 'view',
+                },
+              );
+            },
+          ),
         ],
       ),
     );
@@ -302,10 +301,12 @@ class _SchedulePageState extends State<SchedulePage>
 
     return Scaffold(
       key: _scaffoldKey,
-      drawer: _buildDrawer(
-        context,
-        state,
-      ),
+      drawer: !widget.isViewMode
+          ? _buildDrawer(
+              context,
+              state,
+            )
+          : null,
       appBar: AppBar(
         title: Text(title),
         // actions: [

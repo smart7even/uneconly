@@ -63,6 +63,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
                     groupId: path.shortGroupInfo.groupId,
                     groupName: path.shortGroupInfo.groupName,
                   ),
+                  isViewMode: false,
                 ),
               ),
             ];
@@ -79,11 +80,14 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
                       groupId: shortGroupInfo.groupId,
                       groupName: shortGroupInfo.groupName,
                     ),
+                    isViewMode: false,
                   ),
                 ),
               const MaterialPage(
                 key: ValueKey('SelectPage'),
-                child: SelectPage(),
+                child: SelectPage(
+                  mode: SelectPageMode.select,
+                ),
               ),
             ];
           },
@@ -107,6 +111,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
                       groupId: previousPath.shortGroupInfo.groupId,
                       groupName: previousPath.shortGroupInfo.groupName,
                     ),
+                    isViewMode: false,
                   ),
                 ),
                 const MaterialPage(

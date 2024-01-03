@@ -33,9 +33,18 @@ enum Routes with OctopusRoute {
             groupId: int.parse(node.arguments['groupId'] as String),
             groupName: node.arguments['groupName'] as String,
           ),
+          isViewMode: node.arguments['isViewMode'] != null
+              ? node.arguments['isViewMode'] as String == 'true'
+              : false,
         );
       case Routes.select:
-        return const SelectPage();
+        return SelectPage(
+          mode: node.arguments['mode'] != null
+              ? SelectPageMode.values
+                  .where((element) => element.name == node.arguments['mode'])
+                  .first
+              : SelectPageMode.select,
+        );
       case Routes.settings:
         return const SettingsPage();
     }
