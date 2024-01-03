@@ -7,6 +7,8 @@ import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart
 abstract class ISettingsRepository {
   Future<void> saveGroup(Group group);
   Future<Group?> getGroup();
+  Future<void> addGroupToFavorites(Group group);
+  Future<List<Group>> getFavoriteGroups();
   Future<void> saveLanguage(String language);
   Future<String?> getLanguage();
   Stream<String> getLanguageChangedStream();
@@ -74,5 +76,15 @@ class SettingsRepository implements ISettingsRepository {
   Future<void> saveTheme(String theme) async {
     await _localDataProvider.saveTheme(theme);
     _themeChangedController.add(theme);
+  }
+
+  @override
+  Future<void> addGroupToFavorites(Group group) async {
+    await _localDataProvider.saveGroup(group);
+  }
+
+  @override
+  Future<List<Group>> getFavoriteGroups() {
+    return _localDataProvider.getFavoriteGroups();
   }
 }

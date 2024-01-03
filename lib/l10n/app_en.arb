@@ -31,5 +31,6 @@
     "system": "System",
     "light": "Light",
     "dark": "Dark",
-    "newYearCongratulation": "Happy New Year!"
+    "newYearCongratulation": "Happy New Year!",
+    "viewScheduleOfAnotherGroup": "View schedule of another group"
 }

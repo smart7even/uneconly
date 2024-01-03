@@ -244,6 +244,23 @@ class _SchedulePageState extends State<SchedulePage>
               );
             },
           ),
+          // ListTile to view schedule of another group
+          // ListTile(
+          //   title: Text(
+          //     AppLocalizations.of(context)!.viewScheduleOfAnotherGroup,
+          //   ),
+          //   onTap: () {
+          //     AppRouter.navigate(
+          //       context,
+          //       (configuration) => AppRoutePath.select(
+          //         shortGroupInfo: ShortGroupInfo(
+          //           groupId: widget.shortGroupInfo.groupId,
+          //           groupName: widget.shortGroupInfo.groupName,
+          //         ),
+          //       ),
+          //     );
+          //   },
+          // ),
         ],
       ),
     );

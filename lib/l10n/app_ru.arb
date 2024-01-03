@@ -28,5 +28,6 @@
     "system": "Системная",
     "light": "Светлая",
     "dark": "Темная",
-    "newYearCongratulation": "С Новым Годом!"
+    "newYearCongratulation": "С Новым Годом!",
+    "viewScheduleOfAnotherGroup": "Посмотреть расписание другой группы"
 }
