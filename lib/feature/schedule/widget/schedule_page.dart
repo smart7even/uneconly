@@ -217,6 +217,21 @@ class _SchedulePageState extends State<SchedulePage>
     );
   }
 
+  Future<void> waitReturnToSchedule(
+    Octopus octopus,
+  ) async {
+    await waitRouteChange(
+      octopus,
+      shouldStopListen: () {
+        final lastNode = octopus.observer.value.children.last;
+
+        return lastNode.name == Routes.schedule.name &&
+            lastNode.arguments['groupId'] ==
+                widget.shortGroupInfo.groupId.toString();
+      },
+    );
+  }
+
   Widget _buildDrawer(
     BuildContext context,
     ScheduleState state,
@@ -288,7 +303,9 @@ class _SchedulePageState extends State<SchedulePage>
                 },
               );
 
-              await waitRouteChange(octopus);
+              await waitReturnToSchedule(
+                octopus,
+              );
 
               final value = await dependenciesScope.settingsRepository
                   .getFavoriteGroups();
@@ -342,7 +359,7 @@ class _SchedulePageState extends State<SchedulePage>
                       },
                     );
 
-                    await waitRouteChange(octopus);
+                    await waitReturnToSchedule(octopus);
 
                     final value = await dependenciesScope.settingsRepository
                         .getFavoriteGroups();
@@ -376,7 +393,7 @@ class _SchedulePageState extends State<SchedulePage>
                     },
                   );
 
-                  await waitRouteChange(octopus);
+                  await waitReturnToSchedule(octopus);
 
                   final value = await dependenciesScope.settingsRepository
                       .getFavoriteGroups();
