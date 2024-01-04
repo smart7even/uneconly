@@ -40,9 +40,7 @@ enum Routes with OctopusRoute {
       case Routes.select:
         return SelectPage(
           mode: node.arguments['mode'] != null
-              ? SelectPageMode.values
-                  .where((element) => element.name == node.arguments['mode'])
-                  .first
+              ? SelectPageMode.fromName(node.arguments['mode'] as String)
               : SelectPageMode.select,
         );
       case Routes.settings:

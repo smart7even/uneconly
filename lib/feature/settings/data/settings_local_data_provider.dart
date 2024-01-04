@@ -7,6 +7,7 @@ abstract class ISettingsLocalDataProvider {
   Future<void> saveGroup(Group group);
   Future<Group?> getGroup();
   Future<void> addGroupToFavorites(Group group);
+  Future<void> removeGroupFromFavorites(Group group);
   Future<List<Group>> getFavoriteGroups();
   Future<void> saveLanguage(String language);
   Future<String?> getLanguage();
@@ -80,10 +81,32 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
 
   @override
   Future<void> addGroupToFavorites(Group group) async {
+    final favoriteGroups = _prefs.getString(_favoriteGroupsKey);
+
+    if (favoriteGroups == null) {
+      await _prefs.setString(
+        _favoriteGroupsKey,
+        jsonEncode(
+          [
+            group.toJson(),
+          ],
+        ),
+      );
+
+      return;
+    }
+
+    final decoded = jsonDecode(favoriteGroups) as List<dynamic>;
+
+    final filtered = decoded.where((e) => e['id'] != group.id).toList();
+
     await _prefs.setString(
       _favoriteGroupsKey,
       jsonEncode(
-        group.toJson(),
+        [
+          ...filtered,
+          group.toJson(),
+        ],
       ),
     );
   }
@@ -99,5 +122,27 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
     final decoded = jsonDecode(favoriteGroups) as List<dynamic>;
 
     return decoded.map((e) => Group.fromJson(e)).toList();
+  }
+
+  @override
+  Future<void> removeGroupFromFavorites(Group group) async {
+    final favoriteGroups = _prefs.getString(_favoriteGroupsKey);
+
+    if (favoriteGroups == null) {
+      return;
+    }
+
+    final decoded = jsonDecode(favoriteGroups) as List<dynamic>;
+
+    final filtered = decoded.where((e) => e['id'] != group.id).toList();
+
+    await _prefs.setString(
+      _favoriteGroupsKey,
+      jsonEncode(
+        filtered,
+      ),
+    );
+
+    return;
   }
 }

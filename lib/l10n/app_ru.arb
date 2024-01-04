@@ -29,5 +29,10 @@
     "light": "Светлая",
     "dark": "Темная",
     "newYearCongratulation": "С Новым Годом!",
-    "viewScheduleOfAnotherGroup": "Посмотреть расписание другой группы"
+    "viewScheduleOfAnotherGroup": "Посмотреть расписание другой группы",
+    "addToFavorites": "Добавить в избранное",
+    "removeFromFavorites": "Удалить из избранного",
+    "favoriteGroups": "Избранные группы",
+    "addFirstFavoriteGroup": "Список пуст. Добавляйте группы в избранное, чтобы быстро получать к ним доступ",
+    "add": "Добавить"
 }

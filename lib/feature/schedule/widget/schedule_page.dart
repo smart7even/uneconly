@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/routes.dart';
+import 'package:uneconly/common/routing/routing_utils.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
@@ -18,6 +20,8 @@ import 'package:uneconly/feature/schedule/model/schedule_details.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
+import 'package:uneconly/feature/select/model/group.dart';
+import 'package:uneconly/feature/select/widget/select_page.dart';
 
 /// {@template schedule_page}
 /// SchedulePage widget
@@ -50,6 +54,9 @@ class _SchedulePageState extends State<SchedulePage>
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  final List<Group> favoriteGroups = [];
+  bool isFavorite = false;
+
   /* #region Lifecycle */
   @override
   void initState() {
@@ -65,6 +72,25 @@ class _SchedulePageState extends State<SchedulePage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final dependenciesScope = context.read<DependenciesScope>();
+
+    dependenciesScope.settingsRepository.getFavoriteGroups().then(
+      (value) {
+        setState(() {
+          favoriteGroups.clear();
+          favoriteGroups.addAll(value);
+
+          if (favoriteGroups.any(
+            (element) => element.id == widget.shortGroupInfo.groupId,
+          )) {
+            setState(() {
+              isFavorite = true;
+            });
+          }
+        });
+      },
+    );
   }
 
   @override
@@ -250,14 +276,121 @@ class _SchedulePageState extends State<SchedulePage>
             title: Text(
               AppLocalizations.of(context)!.viewScheduleOfAnotherGroup,
             ),
-            onTap: () {
-              context.octopus.push(
+            onTap: () async {
+              final dependenciesScope = context.read<DependenciesScope>();
+
+              final octopus = context.octopus;
+
+              await octopus.push(
                 Routes.select,
                 arguments: {
                   'mode': 'view',
                 },
               );
+
+              await waitRouteChange(octopus);
+
+              final value = await dependenciesScope.settingsRepository
+                  .getFavoriteGroups();
+
+              setState(() {
+                favoriteGroups.clear();
+                favoriteGroups.addAll(value);
+              });
             },
+          ),
+          // Title for lisview of favorite groups
+          ListTile(
+            title: Text(
+              AppLocalizations.of(context)!.favoriteGroups,
+              // heading style
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // If there are no favorite groups show button to add one
+          if (favoriteGroups.isEmpty)
+            ListTile(
+              title: Text(
+                AppLocalizations.of(context)!.addFirstFavoriteGroup,
+              ),
+            ),
+
+          // Listview to view favorite groups
+          if (favoriteGroups.isNotEmpty)
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: favoriteGroups.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(
+                    favoriteGroups[index].name,
+                  ),
+                  onTap: () async {
+                    final octopus = context.octopus;
+                    final dependenciesScope = context.read<DependenciesScope>();
+
+                    await octopus.push(
+                      Routes.schedule,
+                      arguments: {
+                        'groupId': favoriteGroups[index].id.toString(),
+                        'groupName': favoriteGroups[index].name,
+                        'isViewMode': 'true',
+                      },
+                    );
+
+                    await waitRouteChange(octopus);
+
+                    final value = await dependenciesScope.settingsRepository
+                        .getFavoriteGroups();
+
+                    setState(() {
+                      favoriteGroups.clear();
+                      favoriteGroups.addAll(value);
+                    });
+                  },
+                );
+              },
+            ),
+          // Elevated Button with minimum possible width to add favorite group
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              width: 132,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+              ),
+              child: ElevatedButton(
+                onPressed: () async {
+                  final dependenciesScope = context.read<DependenciesScope>();
+
+                  final octopus = context.octopus;
+
+                  await octopus.push(
+                    Routes.select,
+                    arguments: {
+                      'mode': SelectPageMode.favorite.name,
+                    },
+                  );
+
+                  await waitRouteChange(octopus);
+
+                  final value = await dependenciesScope.settingsRepository
+                      .getFavoriteGroups();
+
+                  setState(() {
+                    favoriteGroups.clear();
+                    favoriteGroups.addAll(value);
+                  });
+                },
+                child: Text(
+                  AppLocalizations.of(context)!.add,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -309,19 +442,58 @@ class _SchedulePageState extends State<SchedulePage>
           : null,
       appBar: AppBar(
         title: Text(title),
-        // actions: [
-        //   Padding(
-        //     padding: const EdgeInsets.only(
-        //       right: 10,
-        //     ),
-        //     child: IconButton(
-        //       onPressed: () {},
-        //       icon: const Icon(
-        //         Icons.edit,
-        //       ),
-        //     ),
-        //   ),
-        // ],
+        actions: [
+          if (widget.isViewMode)
+            Padding(
+              padding: const EdgeInsets.only(
+                right: 10,
+              ),
+              child: IconButton(
+                onPressed: () {
+                  setState(() {
+                    isFavorite = !isFavorite;
+                  });
+
+                  if (isFavorite) {
+                    context
+                        .read<DependenciesScope>()
+                        .settingsRepository
+                        .addGroupToFavorites(
+                          Group(
+                            id: state.shortGroupInfo?.groupId ??
+                                widget.shortGroupInfo.groupId,
+                            name: state.shortGroupInfo?.groupName ??
+                                widget.shortGroupInfo.groupName ??
+                                '',
+                            facultyId: 0,
+                            course: 0,
+                          ),
+                        );
+                  } else {
+                    context
+                        .read<DependenciesScope>()
+                        .settingsRepository
+                        .removeGroupFromFavorites(
+                          Group(
+                            id: state.shortGroupInfo?.groupId ??
+                                widget.shortGroupInfo.groupId,
+                            name: state.shortGroupInfo?.groupName ??
+                                widget.shortGroupInfo.groupName ??
+                                '',
+                            facultyId: 0,
+                            course: 0,
+                          ),
+                        );
+                  }
+                },
+                icon: isFavorite
+                    ? const Icon(Icons.star)
+                    : const Icon(
+                        Icons.star_outline,
+                      ),
+              ),
+            ),
+        ],
       ),
       body: PageView.builder(
         controller: controller,

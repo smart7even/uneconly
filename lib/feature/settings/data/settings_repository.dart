@@ -8,6 +8,7 @@ abstract class ISettingsRepository {
   Future<void> saveGroup(Group group);
   Future<Group?> getGroup();
   Future<void> addGroupToFavorites(Group group);
+  Future<void> removeGroupFromFavorites(Group group);
   Future<List<Group>> getFavoriteGroups();
   Future<void> saveLanguage(String language);
   Future<String?> getLanguage();
@@ -80,11 +81,16 @@ class SettingsRepository implements ISettingsRepository {
 
   @override
   Future<void> addGroupToFavorites(Group group) async {
-    await _localDataProvider.saveGroup(group);
+    await _localDataProvider.addGroupToFavorites(group);
   }
 
   @override
   Future<List<Group>> getFavoriteGroups() {
     return _localDataProvider.getFavoriteGroups();
+  }
+
+  @override
+  Future<void> removeGroupFromFavorites(Group group) {
+    return _localDataProvider.removeGroupFromFavorites(group);
   }
 }

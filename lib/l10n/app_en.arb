@@ -32,5 +32,10 @@
     "light": "Light",
     "dark": "Dark",
     "newYearCongratulation": "Happy New Year!",
-    "viewScheduleOfAnotherGroup": "View schedule of another group"
+    "viewScheduleOfAnotherGroup": "View schedule of another group",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "favoriteGroups": "Favorite groups",
+    "addFirstFavoriteGroup": "List is empty. Add groups to favorites to access it quickly",
+    "add": "Add"
 }

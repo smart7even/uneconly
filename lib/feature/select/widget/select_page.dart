@@ -18,6 +18,11 @@ import 'package:uneconly/feature/select/widget/select_faculty_page.dart';
 enum SelectPageMode {
   view,
   select,
+  favorite;
+
+  factory SelectPageMode.fromName(String name) {
+    return SelectPageMode.values.where((element) => element.name == name).first;
+  }
 }
 
 /// {@template select_page}
@@ -41,6 +46,7 @@ class _SelectPageState extends State<SelectPage> {
   late final TextEditingController _searchController;
   late final FocusNode _searchFocusNode;
   bool _isSearch = false;
+  final _favoriteGroups = <Group>[];
 
   /* #region Lifecycle */
   @override
@@ -62,6 +68,20 @@ class _SelectPageState extends State<SelectPage> {
     super.didChangeDependencies();
     // The configuration of InheritedWidgets has changed
     // Also called after initState but before build
+    context
+        .read<DependenciesScope>()
+        .settingsRepository
+        .getFavoriteGroups()
+        .then(
+      (value) {
+        setState(
+          () {
+            _favoriteGroups.clear();
+            _favoriteGroups.addAll(value);
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -90,6 +110,10 @@ class _SelectPageState extends State<SelectPage> {
       );
 
       return;
+    } else if (widget.mode == SelectPageMode.favorite) {
+      await onAddToFavoritesPressed(context, group);
+
+      return;
     }
 
     final settingsRepository =
@@ -111,6 +135,35 @@ class _SelectPageState extends State<SelectPage> {
     );
 
     await settingsRepository.saveGroup(group);
+  }
+
+  Future<void> onAddToFavoritesPressed(
+    BuildContext context,
+    Group group,
+  ) async {
+    final settingsRepository =
+        context.read<DependenciesScope>().settingsRepository;
+    final isFavorite = _favoriteGroups.any(
+      (favoriteGroup) => favoriteGroup.id == group.id,
+    );
+
+    if (isFavorite) {
+      await settingsRepository.removeGroupFromFavorites(group);
+
+      setState(() {
+        _favoriteGroups.removeWhere(
+          (favoriteGroup) => favoriteGroup.id == group.id,
+        );
+      });
+
+      return;
+    }
+
+    await settingsRepository.addGroupToFavorites(group);
+
+    setState(() {
+      _favoriteGroups.add(group);
+    });
   }
 
   Future<void> onFacultySelectPressed(
@@ -324,6 +377,9 @@ class _SelectPageState extends State<SelectPage> {
                         itemCount: selectedGroups.length,
                         itemBuilder: (context, index) {
                           final group = selectedGroups[index];
+                          final isFavorite = _favoriteGroups.any(
+                            (favoriteGroup) => favoriteGroup.id == group.id,
+                          );
 
                           return ListTile(
                             title: Text(
@@ -331,6 +387,22 @@ class _SelectPageState extends State<SelectPage> {
                               semanticsLabel:
                                   '${AppLocalizations.of(context)!.group} ${group.name}',
                             ),
+                            trailing: widget.mode == SelectPageMode.view ||
+                                    widget.mode == SelectPageMode.favorite
+                                ? IconButton(
+                                    onPressed: () async {
+                                      await onAddToFavoritesPressed(
+                                        context,
+                                        group,
+                                      );
+                                    },
+                                    icon: isFavorite
+                                        ? const Icon(Icons.star)
+                                        : const Icon(
+                                            Icons.star_outline,
+                                          ),
+                                  )
+                                : null,
                             onTap: () => onPressed(
                               context,
                               group,
