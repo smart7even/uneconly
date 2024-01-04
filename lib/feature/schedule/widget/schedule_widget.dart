@@ -11,6 +11,16 @@ import 'package:uneconly/feature/schedule/widget/lesson_tile.dart';
 /// {@endtemplate}
 class ScheduleWidget extends StatelessWidget {
   final Schedule? schedule;
+  final VoidCallback? onNextWeek;
+  final VoidCallback? onPreviousWeek;
+
+  /// {@macro schedule_widget}
+  const ScheduleWidget({
+    super.key,
+    required this.schedule,
+    this.onNextWeek,
+    this.onPreviousWeek,
+  });
 
   List<Widget> _buildSchedule(BuildContext context) {
     List<Widget> slivers = [];
@@ -109,12 +119,6 @@ class ScheduleWidget extends StatelessWidget {
     return slivers;
   }
 
-  /// {@macro schedule_widget}
-  const ScheduleWidget({
-    super.key,
-    required this.schedule,
-  });
-
   @override
   Widget build(BuildContext context) {
     final currentSchedule = schedule;
@@ -127,7 +131,47 @@ class ScheduleWidget extends StatelessWidget {
 
     if (currentSchedule.daySchedules.isEmpty) {
       return Center(
-        child: Text(AppLocalizations.of(context)!.noSchedule),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(AppLocalizations.of(context)!.noSchedule),
+            const SizedBox(
+              height: 8,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                AppLocalizations.of(context)!.noScheduleDescription,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    onPreviousWeek?.call();
+                  },
+                  child: const Icon(
+                    Icons.arrow_left,
+                  ),
+                ),
+                const SizedBox(
+                  width: 16,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    onNextWeek?.call();
+                  },
+                  child: const Icon(
+                    Icons.arrow_right,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       );
     }
 

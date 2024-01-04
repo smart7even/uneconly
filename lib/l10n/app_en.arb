@@ -7,7 +7,7 @@
     "schedule": "Schedule",
     "week": "week",
     "now": "now",
-    "noSchedule": "No schedule",
+    "noSchedule": "No schedule for this week",
     "loadingSchedule": "Loading schedule",
     "today": "Today",
     "tomorrow": "Tomorrow",
@@ -37,5 +37,6 @@
     "removeFromFavorites": "Remove from favorites",
     "favoriteGroups": "Favorite groups",
     "addFirstFavoriteGroup": "List is empty. Add groups to favorites to access it quickly",
-    "add": "Add"
+    "add": "Add",
+    "noScheduleDescription": "Swipe left to see the schedule for the next week or right to see the schedule for the previous week"
 }

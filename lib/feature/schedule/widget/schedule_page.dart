@@ -195,7 +195,6 @@ class _SchedulePageState extends State<SchedulePage>
     BuildContext context,
     int newIndex,
     int? week,
-    Map<int, ScheduleDetails> data,
   ) async {
     if (week == null) {
       return;
@@ -414,6 +413,44 @@ class _SchedulePageState extends State<SchedulePage>
     );
   }
 
+  void onNextWeek() {
+    final currentPage = controller.page;
+    final week = scheduleBLoC.state.currentWeek;
+
+    if (currentPage == null) {
+      return;
+    }
+
+    final newPage = currentPage + 1;
+
+    controller.animateToPage(
+      newPage.round(),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeIn,
+    );
+
+    onPageChanged(context, newPage.round(), week);
+  }
+
+  void onPreviousWeek() {
+    final currentPage = controller.page;
+    final week = scheduleBLoC.state.currentWeek;
+
+    if (currentPage == null) {
+      return;
+    }
+
+    final newPage = currentPage - 1;
+
+    controller.animateToPage(
+      newPage.round(),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeIn,
+    );
+
+    onPageChanged(context, newPage.round(), week);
+  }
+
   Widget _buildPageView(
     BuildContext context,
     ScheduleState state,
@@ -518,8 +555,7 @@ class _SchedulePageState extends State<SchedulePage>
       body: PageView.builder(
         controller: controller,
         scrollDirection: Axis.horizontal,
-        onPageChanged: (int newIndex) =>
-            onPageChanged(context, newIndex, week, data),
+        onPageChanged: (int newIndex) => onPageChanged(context, newIndex, week),
         itemBuilder: (context, index) {
           debugPrint('index: ${index - initialPageIndex}');
           int? currentWeek;
@@ -529,14 +565,26 @@ class _SchedulePageState extends State<SchedulePage>
           }
 
           if (currentWeek == null) {
-            return const ScheduleWidget(schedule: Schedule.empty());
+            return ScheduleWidget(
+              schedule: const Schedule.empty(),
+              onNextWeek: onNextWeek,
+              onPreviousWeek: onPreviousWeek,
+            );
           }
 
           if (currentWeek < 0 || currentWeek > 52) {
-            return const ScheduleWidget(schedule: Schedule.empty());
+            return ScheduleWidget(
+              schedule: const Schedule.empty(),
+              onNextWeek: onNextWeek,
+              onPreviousWeek: onPreviousWeek,
+            );
           }
 
-          return ScheduleWidget(schedule: data[currentWeek]?.schedule);
+          return ScheduleWidget(
+            schedule: data[currentWeek]?.schedule,
+            onNextWeek: onNextWeek,
+            onPreviousWeek: onPreviousWeek,
+          );
         },
       ),
     );
