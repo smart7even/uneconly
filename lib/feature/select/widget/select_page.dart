@@ -396,6 +396,11 @@ class _SelectPageState extends State<SelectPage> {
                                         group,
                                       );
                                     },
+                                    tooltip: isFavorite
+                                        ? AppLocalizations.of(context)!
+                                            .removeFromFavorites
+                                        : AppLocalizations.of(context)!
+                                            .addToFavorites,
                                     icon: isFavorite
                                         ? const Icon(Icons.star)
                                         : const Icon(

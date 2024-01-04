@@ -486,6 +486,9 @@ class _SchedulePageState extends State<SchedulePage>
                         );
                   }
                 },
+                tooltip: isFavorite
+                    ? AppLocalizations.of(context)!.removeFromFavorites
+                    : AppLocalizations.of(context)!.addToFavorites,
                 icon: isFavorite
                     ? const Icon(Icons.star)
                     : const Icon(
