@@ -24,5 +24,14 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.16.5'
-      - run: flutter pub get
-      - run: flutter test
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Run tests
+        run: flutter test
+      - name: Build APK
+        run: flutter build apk --release
+      - name: upload APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
