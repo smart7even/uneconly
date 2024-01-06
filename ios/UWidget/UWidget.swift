@@ -62,6 +62,7 @@ struct SimpleEntry: TimelineEntry {
 
 
 struct UWidgetEntryView : View {
+    @Environment(\.widgetFamily) var family: WidgetFamily
     var entry: Provider.Entry
 
     func formatTime(date: Date) -> String {
@@ -72,8 +73,18 @@ struct UWidgetEntryView : View {
             // If the date is today, do not show the date part
             formatter.dateFormat = "HH:mm"
         } else {
+            switch family {
+            case .systemSmall:             formatter.dateFormat = "dd.MM, HH:mm"
+            case .systemMedium:
+                formatter.dateFormat = "dd.MM.yyyy, HH:mm"
+            case .systemLarge:
+                formatter.dateStyle = .full
+            case .systemExtraLarge:
+                formatter.dateStyle = .full
+            default:
+                formatter.dateFormat = "dd.MM, HH:mm"
+            }
             // If the date is not today, include the date part
-            formatter.dateFormat = "dd.MM, HH:mm"
         }
         
         return formatter.string(from: date)
