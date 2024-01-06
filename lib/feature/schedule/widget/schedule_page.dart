@@ -413,7 +413,7 @@ class _SchedulePageState extends State<SchedulePage>
     );
   }
 
-  void onNextWeek() {
+  void onNextWeek(BuildContext context) {
     final currentPage = controller.page;
     final week = scheduleBLoC.state.currentWeek;
 
@@ -432,7 +432,7 @@ class _SchedulePageState extends State<SchedulePage>
     onPageChanged(context, newPage.round(), week);
   }
 
-  void onPreviousWeek() {
+  void onPreviousWeek(BuildContext context) {
     final currentPage = controller.page;
     final week = scheduleBLoC.state.currentWeek;
 
@@ -567,23 +567,23 @@ class _SchedulePageState extends State<SchedulePage>
           if (currentWeek == null) {
             return ScheduleWidget(
               schedule: const Schedule.empty(),
-              onNextWeek: onNextWeek,
-              onPreviousWeek: onPreviousWeek,
+              onNextWeek: () => onNextWeek(context),
+              onPreviousWeek: () => onPreviousWeek(context),
             );
           }
 
           if (currentWeek < 0 || currentWeek > 52) {
             return ScheduleWidget(
               schedule: const Schedule.empty(),
-              onNextWeek: onNextWeek,
-              onPreviousWeek: onPreviousWeek,
+              onNextWeek: () => onNextWeek(context),
+              onPreviousWeek: () => onPreviousWeek(context),
             );
           }
 
           return ScheduleWidget(
             schedule: data[currentWeek]?.schedule,
-            onNextWeek: onNextWeek,
-            onPreviousWeek: onPreviousWeek,
+            onNextWeek: () => onNextWeek(context),
+            onPreviousWeek: () => onPreviousWeek(context),
           );
         },
       ),
