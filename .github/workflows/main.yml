@@ -26,11 +26,15 @@ jobs:
           flutter-version: '3.16.5'
       - name: Install dependencies
         run: flutter pub get
+      - name: Generate code
+        run: make generate
+      - name: Generate localization
+        run: make intl
       - name: Run tests
         run: flutter test
       - name: Build APK
         run: flutter build apk --release
-      - name: upload APK
+      - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
           name: app-release.apk
