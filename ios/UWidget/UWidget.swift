@@ -67,7 +67,15 @@ struct UWidgetEntryView : View {
     func formatTime(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
-        formatter.dateStyle = .none
+        
+        if Calendar.current.isDateInToday(date) {
+            // If the date is today, do not show the date part
+            formatter.dateFormat = "HH:mm"
+        } else {
+            // If the date is not today, include the date part
+            formatter.dateFormat = "dd.MM, HH:mm"
+        }
+        
         return formatter.string(from: date)
     }
 
