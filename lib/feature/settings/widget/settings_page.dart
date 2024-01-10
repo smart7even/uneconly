@@ -2,9 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
+import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/utils/colors_utils.dart';
 
 /// Flutter code sample for [CupertinoPicker].
@@ -45,7 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
 
-    final dependenciesScope = RepositoryProvider.of<DependenciesScope>(context);
+    final dependenciesScope = Dependencies.of(context);
 
     dependenciesScope.settingsRepository.getLanguage().then((value) {
       if (value == 'ru') {
@@ -190,8 +189,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: () async {
-                        await context
-                            .read<DependenciesScope>()
+                        await Dependencies.of(context)
                             .settingsRepository
                             .saveTheme(
                               getStringFromColor(colors[index]),

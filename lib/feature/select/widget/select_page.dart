@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:octopus/octopus.dart';
-import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
+import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/feature/select/bloc/group_bloc.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
@@ -68,11 +68,7 @@ class _SelectPageState extends State<SelectPage> {
     super.didChangeDependencies();
     // The configuration of InheritedWidgets has changed
     // Also called after initState but before build
-    context
-        .read<DependenciesScope>()
-        .settingsRepository
-        .getFavoriteGroups()
-        .then(
+    Dependencies.of(context).settingsRepository.getFavoriteGroups().then(
       (value) {
         setState(
           () {
@@ -116,8 +112,7 @@ class _SelectPageState extends State<SelectPage> {
       return;
     }
 
-    final settingsRepository =
-        context.read<DependenciesScope>().settingsRepository;
+    final settingsRepository = Dependencies.of(context).settingsRepository;
 
     Octopus.of(context).setState(
       (state) {
@@ -141,8 +136,7 @@ class _SelectPageState extends State<SelectPage> {
     BuildContext context,
     Group group,
   ) async {
-    final settingsRepository =
-        context.read<DependenciesScope>().settingsRepository;
+    final settingsRepository = Dependencies.of(context).settingsRepository;
     final isFavorite = _favoriteGroups.any(
       (favoriteGroup) => favoriteGroup.id == group.id,
     );
@@ -220,7 +214,7 @@ class _SelectPageState extends State<SelectPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) {
-        final dependenciesScope = context.read<DependenciesScope>();
+        final dependenciesScope = Dependencies.of(context);
 
         final bloc = GroupBloc(
           groupRepository: GroupRepository(

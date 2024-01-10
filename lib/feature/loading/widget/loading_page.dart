@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:octopus/octopus.dart';
-import 'package:uneconly/common/dependencies/dependencies_scope.dart';
+import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
 
@@ -48,7 +47,7 @@ class _LoadingPageState extends State<LoadingPage> {
 
   Future<void> onOpen() async {
     ISettingsRepository settingsRepository =
-        context.read<DependenciesScope>().settingsRepository;
+        Dependencies.of(context).settingsRepository;
 
     final group = await settingsRepository.getGroup();
 

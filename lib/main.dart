@@ -2,43 +2,66 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:l/l.dart';
 import 'package:octopus/octopus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uneconly/common/app_scroll_configuration.dart';
-import 'package:uneconly/common/database/database.dart';
-import 'package:uneconly/common/dependencies/dependencies_scope.dart';
+import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/routes.dart';
+import 'package:uneconly/common/util/error_util.dart';
 import 'package:uneconly/common/utils/colors_utils.dart';
-import 'package:uneconly/constants.dart';
-import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
-import 'package:uneconly/feature/settings/data/settings_repository.dart';
+import 'package:uneconly/common/widget/app_error.dart';
+import 'package:uneconly/feature/initialization/data/initialization.dart';
+import 'package:uneconly/feature/initialization/widget/inherited_dependencies.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
-
-  final settingsRepository = SettingsRepository(
-    localDataProvider: SettingsLocalDataProvider(
-      prefs: prefs,
+  l.capture<void>(
+    () => runZonedGuarded<void>(
+      () async {
+        // Splash screen
+        final initializationProgress =
+            ValueNotifier<({int progress, String message})>(
+          (progress: 0, message: ''),
+        );
+        $initializeApp(
+          onProgress: (progress, message) => initializationProgress.value =
+              (progress: progress, message: message),
+          onSuccess: (dependencies) => runApp(
+            InheritedDependencies(
+              dependencies: dependencies,
+              child: const MyApp(),
+            ),
+          ),
+          onError: (error, stackTrace) {
+            runApp(AppError(error: error));
+            ErrorUtil.logError(error, stackTrace).ignore();
+          },
+        ).ignore();
+      },
+      l.e,
+    ),
+    const LogOptions(
+      handlePrint: true,
+      messageFormatting: _messageFormatting,
+      outputInRelease: false,
+      printColors: true,
     ),
   );
-
-  runApp(MyApp(
-    settingsRepository: settingsRepository,
-  ));
 }
 
-class MyApp extends StatefulWidget {
-  final ISettingsRepository settingsRepository;
+/// Formats the log message.
+Object _messageFormatting(Object message, LogLevel logLevel, DateTime now) =>
+    '${_timeFormat(now)} | $message';
 
+/// Formats the time.
+String _timeFormat(DateTime time) =>
+    '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+
+class MyApp extends StatefulWidget {
   const MyApp({
     super.key,
-    required this.settingsRepository,
   });
 
   @override
@@ -58,6 +81,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    final dependencies = Dependencies.of(context);
+
     HomeWidget.setAppGroupId('group.roadmapik.test');
 
     final defaultLocale = Platform.localeName;
@@ -66,7 +91,7 @@ class _MyAppState extends State<MyApp> {
     const defaultTheme = 'blue';
     theme = defaultTheme;
 
-    widget.settingsRepository.getLanguage().then(
+    dependencies.settingsRepository.getLanguage().then(
       (value) {
         if (value != null) {
           setState(() {
@@ -76,7 +101,7 @@ class _MyAppState extends State<MyApp> {
       },
     );
 
-    _languageChangedSubscription = widget.settingsRepository
+    _languageChangedSubscription = dependencies.settingsRepository
         .getLanguageChangedStream()
         .listen((newLanguage) {
       setState(() {
@@ -84,7 +109,7 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
-    widget.settingsRepository.getTheme().then(
+    dependencies.settingsRepository.getTheme().then(
       (value) {
         if (value != null) {
           setState(() {
@@ -94,8 +119,9 @@ class _MyAppState extends State<MyApp> {
       },
     );
 
-    _themeChangedSubscription =
-        widget.settingsRepository.getThemeChangedStream().listen((newTheme) {
+    _themeChangedSubscription = dependencies.settingsRepository
+        .getThemeChangedStream()
+        .listen((newTheme) {
       setState(() {
         theme = newTheme;
       });
@@ -126,43 +152,32 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (context) => DependenciesScope(
-        database: MyDatabase(),
-        dio: Dio(
-          BaseOptions(
-            baseUrl: serverAddress,
-          ),
+    return MaterialApp.router(
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.scheduleApp,
+      locale: const Locale('ru'), // Locale(locale),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      theme: ThemeData(
+        primarySwatch: getColorFromString(
+          theme,
         ),
-        settingsRepository: widget.settingsRepository,
+        useMaterial3: false,
       ),
-      child: MaterialApp.router(
-        onGenerateTitle: (context) => AppLocalizations.of(context)!.scheduleApp,
-        locale: const Locale('ru'), // Locale(locale),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        theme: ThemeData(
-          primarySwatch: getColorFromString(
-            theme,
+      scrollBehavior: AppScrollBehavior(),
+      routerConfig: router.config,
+      builder: (context, child) {
+        return MediaQuery(
+          key: builderKey,
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.noScaling,
           ),
-          useMaterial3: false,
-        ),
-        scrollBehavior: AppScrollBehavior(),
-        routerConfig: router.config,
-        builder: (context, child) {
-          return MediaQuery(
-            key: builderKey,
-            data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.noScaling,
-            ),
-            child: OctopusTools(
-              enable: false,
-              octopus: router,
-              child: child ?? const SizedBox.shrink(),
-            ),
-          );
-        },
-      ),
+          child: OctopusTools(
+            enable: false,
+            octopus: router,
+            child: child ?? const SizedBox.shrink(),
+          ),
+        );
+      },
     );
   }
 }

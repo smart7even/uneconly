@@ -4,9 +4,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:l/l.dart';
 import 'package:octopus/octopus.dart';
-import 'package:uneconly/common/dependencies/dependencies_scope.dart';
 import 'package:uneconly/common/localization/localization.dart';
+import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/routing/routing_utils.dart';
@@ -73,7 +74,7 @@ class _SchedulePageState extends State<SchedulePage>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final dependenciesScope = context.read<DependenciesScope>();
+    final dependenciesScope = Dependencies.of(context);
 
     dependenciesScope.settingsRepository.getFavoriteGroups().then(
       (value) {
@@ -125,7 +126,7 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   ScheduleBLoC _initBloc(BuildContext context) {
-    final dependenciesScope = context.read<DependenciesScope>();
+    final dependenciesScope = Dependencies.of(context);
 
     ScheduleNetworkDataProvider scheduleNetworkDataProvider =
         ScheduleNetworkDataProvider(
@@ -291,7 +292,7 @@ class _SchedulePageState extends State<SchedulePage>
               AppLocalizations.of(context)!.viewScheduleOfAnotherGroup,
             ),
             onTap: () async {
-              final dependenciesScope = context.read<DependenciesScope>();
+              final dependenciesScope = Dependencies.of(context);
 
               final octopus = context.octopus;
 
@@ -347,7 +348,7 @@ class _SchedulePageState extends State<SchedulePage>
                   ),
                   onTap: () async {
                     final octopus = context.octopus;
-                    final dependenciesScope = context.read<DependenciesScope>();
+                    final dependenciesScope = Dependencies.of(context);
 
                     await octopus.push(
                       Routes.schedule,
@@ -381,7 +382,7 @@ class _SchedulePageState extends State<SchedulePage>
               ),
               child: ElevatedButton(
                 onPressed: () async {
-                  final dependenciesScope = context.read<DependenciesScope>();
+                  final dependenciesScope = Dependencies.of(context);
 
                   final octopus = context.octopus;
 
@@ -509,8 +510,7 @@ class _SchedulePageState extends State<SchedulePage>
                   });
 
                   if (isFavorite) {
-                    context
-                        .read<DependenciesScope>()
+                    Dependencies.of(context)
                         .settingsRepository
                         .addGroupToFavorites(
                           Group(
@@ -524,8 +524,7 @@ class _SchedulePageState extends State<SchedulePage>
                           ),
                         );
                   } else {
-                    context
-                        .read<DependenciesScope>()
+                    Dependencies.of(context)
                         .settingsRepository
                         .removeGroupFromFavorites(
                           Group(
@@ -557,7 +556,6 @@ class _SchedulePageState extends State<SchedulePage>
         scrollDirection: Axis.horizontal,
         onPageChanged: (int newIndex) => onPageChanged(context, newIndex, week),
         itemBuilder: (context, index) {
-          debugPrint('index: ${index - initialPageIndex}');
           int? currentWeek;
 
           if (week != null) {
