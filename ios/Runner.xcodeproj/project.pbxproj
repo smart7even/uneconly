@@ -11,6 +11,8 @@
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		4AC4552286D0AE5C2D060267 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B630AA0B7629E0911B1F13C6 /* Pods_Runner.framework */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		7C85D8B02B51D8EB002E371C /* LessonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C85D8AF2B51D8EB002E371C /* LessonRepository.swift */; };
+		7C85D8B12B51D8EB002E371C /* LessonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C85D8AF2B51D8EB002E371C /* LessonRepository.swift */; };
 		7CBA2ACC2A9284E800F8DB4E /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CBA2ACB2A9284E800F8DB4E /* WidgetKit.framework */; };
 		7CBA2ACE2A9284E800F8DB4E /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CBA2ACD2A9284E800F8DB4E /* SwiftUI.framework */; };
 		7CBA2AD12A9284E800F8DB4E /* UWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBA2AD02A9284E800F8DB4E /* UWidgetBundle.swift */; };
@@ -67,6 +69,7 @@
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		7C85D8AF2B51D8EB002E371C /* LessonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonRepository.swift; sourceTree = "<group>"; };
 		7CBA2ACA2A9284E800F8DB4E /* UWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = UWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CBA2ACB2A9284E800F8DB4E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		7CBA2ACD2A9284E800F8DB4E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -141,6 +144,7 @@
 				7CBA2AD62A9284E900F8DB4E /* Info.plist */,
 				7CBA2AE12A929F8700F8DB4E /* Lesson.swift */,
 				7CBA2AE42A92A04300F8DB4E /* LessonDataProvider.swift */,
+				7C85D8AF2B51D8EB002E371C /* LessonRepository.swift */,
 			);
 			path = UWidget;
 			sourceTree = "<group>";
@@ -377,6 +381,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7CBA2AE62A92A04300F8DB4E /* LessonDataProvider.swift in Sources */,
+				7C85D8B12B51D8EB002E371C /* LessonRepository.swift in Sources */,
 				7CBA2AD12A9284E800F8DB4E /* UWidgetBundle.swift in Sources */,
 				7CBA2AE32A92A00700F8DB4E /* Lesson.swift in Sources */,
 				7CBA2AD32A9284E800F8DB4E /* UWidget.swift in Sources */,
@@ -388,6 +393,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7CBA2AE52A92A04300F8DB4E /* LessonDataProvider.swift in Sources */,
+				7C85D8B02B51D8EB002E371C /* LessonRepository.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				7CBA2AE22A929F8700F8DB4E /* Lesson.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,

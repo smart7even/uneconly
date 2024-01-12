@@ -44,7 +44,13 @@ struct Provider: TimelineProvider {
         
         print("groupId \(groupId)")
         
-        let dataProvider: DataProvider = ServerDataProvider(baseURL: "https://roadmapik.com:5000")
+        let dataProvider: ILessonRepository = LessonRepository(
+                remoteDataProvider: ServerDataProvider(
+                    baseURL: "https://roadmapik.com:5000"
+                ),
+                localDataProvider: LocalLessonDataProvider()
+            )
+        
         dataProvider.fetchData(groupId: groupId) { lesson in
                     let entry = SimpleEntry(date: Date(), lesson: lesson, isResponseFromServer: true)
                     let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 30, to: Date())!

@@ -34,6 +34,7 @@ Future<Dependencies> $initializeDependencies({
       );
     }
   }
+
   return dependencies;
 }
 

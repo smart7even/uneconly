@@ -16,7 +16,7 @@ struct LessonResponse: Codable {
 }
 
 protocol DataProvider {
-    func fetchData(groupId: Int, completion: @escaping (Lesson?) -> Void)
+    func fetchData(groupId: Int, completion: @escaping ([Lesson]?) -> Void)
     // Add any other methods or properties that the data provider should have.
 }
 
@@ -27,7 +27,7 @@ class ServerDataProvider: DataProvider {
         self.baseURL = baseURL
     }
 
-    func fetchData(groupId: Int, completion: @escaping (Lesson?) -> Void) {
+    func fetchData(groupId: Int, completion: @escaping ([Lesson]?) -> Void) {
         // Create a URL object
         guard let url = URL(string: "\(baseURL)/group/\(groupId)/lessons/next") else {
             print("Invalid URL")
@@ -71,7 +71,7 @@ class ServerDataProvider: DataProvider {
                     })
                     let lessonResponse = try decoder.decode(LessonResponse.self, from: data)
                     
-                    completion(lessonResponse.lessons.first)
+                    completion(lessonResponse.lessons)
                 } catch {
                     print("Decoding error: \(error)")
                     completion(nil)
@@ -88,3 +88,55 @@ class ServerDataProvider: DataProvider {
 
     // Implement any other methods from the DataProvider protocol.
 }
+
+extension FileManager {
+    static func documentsDirectory() -> URL {
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+}
+
+
+struct LessonsRecord: Codable {
+    let lessons: [Lesson]
+    let savedDate: Date
+    let groupId: Int
+}
+
+protocol ILocalLessonDataProvider {
+    func fetchData(groupId: Int) -> LessonsRecord?
+    func saveData(lessonsRecord: LessonsRecord)
+}
+
+class LocalLessonDataProvider: ILocalLessonDataProvider {
+    func fetchData(groupId: Int) -> LessonsRecord? {
+        let url = getUrl(groupId: groupId)
+        
+        do {
+            let data = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode(LessonsRecord.self, from: data)
+        } catch {
+            print("Error loading lessons from LocalLessonDataProvider: \(error)")
+            return nil
+        }
+    }
+    
+    func saveData(lessonsRecord: LessonsRecord) {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        
+        do {
+            let data = try encoder.encode(lessonsRecord)
+            let url = getUrl(groupId: lessonsRecord.groupId)
+            try data.write(to: url)
+        } catch {
+            print("Error saving lessons to LocalLessonDataProvider: \(error)")
+        }
+    }
+    
+    func getUrl(groupId: Int) -> URL {
+        return FileManager.documentsDirectory().appendingPathComponent("lessons_\(groupId)")
+    }
+}
+

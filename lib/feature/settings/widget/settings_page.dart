@@ -173,6 +173,20 @@ class _SettingsPageState extends State<SettingsPage> {
               //   ],
               // ),
 
+              // Open ListSectionInsetExample widget
+              // CupertinoButton(
+              //   onPressed: () {
+              //     Navigator.of(context).push(
+              //       CupertinoPageRoute<void>(
+              //         builder: (BuildContext context) {
+              //           return const ListSectionInsetExample();
+              //         },
+              //       ),
+              //     );
+              //   },
+              //   child: const Text('Open ListSectionInsetExample'),
+              // ),
+
               Text('${AppLocalizations.of(context)!.theme}: '),
               const SizedBox(height: 10),
               // horizontal list of themes
@@ -234,6 +248,125 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class CupertinoListSectionInsetApp extends StatelessWidget {
+  const CupertinoListSectionInsetApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const CupertinoApp(
+      home: ListSectionInsetExample(),
+    );
+  }
+}
+
+class ListSectionInsetExample extends StatefulWidget {
+  const ListSectionInsetExample({super.key});
+
+  @override
+  State<ListSectionInsetExample> createState() =>
+      _ListSectionInsetExampleState();
+}
+
+class _ListSectionInsetExampleState extends State<ListSectionInsetExample> {
+  bool _isNotificationsEnabled = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('ListSectionInsetExample'),
+      ),
+      body: CupertinoListSection.insetGrouped(
+        header: const Text('My Settings'),
+        children: <CupertinoListTile>[
+          CupertinoListTile.notched(
+            title: const Text('Open pull request'),
+            leading: Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: CupertinoColors.activeGreen,
+            ),
+            trailing: const CupertinoListTileChevron(),
+            onTap: () => Navigator.of(context).push(
+              CupertinoPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const _SecondPage(text: 'Open pull request');
+                },
+              ),
+            ),
+          ),
+          CupertinoListTile.notched(
+            title: const Text('Push to master'),
+            leading: Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: CupertinoColors.systemRed,
+            ),
+            additionalInfo: const Text('Not available'),
+          ),
+          CupertinoListTile.notched(
+            title: const Text('View last commit'),
+            leading: Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: CupertinoColors.activeOrange,
+            ),
+            additionalInfo: const Text('12 days ago'),
+            trailing: const CupertinoListTileChevron(),
+            onTap: () => Navigator.of(context).push(
+              CupertinoPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const _SecondPage(text: 'Last commit');
+                },
+              ),
+            ),
+          ),
+          CupertinoListTile.notched(
+            title: const Text('Notifications'),
+            leading: Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: CupertinoColors.activeBlue,
+            ),
+            trailing: CupertinoSwitch(
+              value: _isNotificationsEnabled,
+              onChanged: (value) {
+                setState(
+                  () {
+                    _isNotificationsEnabled = value;
+                  },
+                );
+              },
+            ),
+            onTap: () => Navigator.of(context).push(
+              CupertinoPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const _SecondPage(text: 'Last commit');
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SecondPage extends StatelessWidget {
+  const _SecondPage({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(text),
       ),
     );
   }
