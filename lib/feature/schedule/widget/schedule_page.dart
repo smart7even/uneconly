@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:l/l.dart';
 import 'package:octopus/octopus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
@@ -67,6 +70,17 @@ class _SchedulePageState extends State<SchedulePage>
     scheduleBLoC = _initBloc(context);
 
     WidgetsBinding.instance.addObserver(this);
+
+    _requestPermissions();
+  }
+
+  Future<void> _requestPermissions() async {
+    // Request permissions for calendar
+
+    var calendarWriteOnlyStatus = await Permission.calendarWriteOnly.request();
+    l.v6(calendarWriteOnlyStatus);
+    var calendarStatus = await Permission.calendarFullAccess.request();
+    l.v6(calendarStatus);
   }
 
   @override

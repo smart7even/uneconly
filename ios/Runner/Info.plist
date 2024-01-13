@@ -51,5 +51,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Uneconly needs access to editing calendar.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Uneconly needs access to viewing and editing calendar.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Uneconly needs access to viewing and editing reminders.</string>
 </dict>
 </plist>
