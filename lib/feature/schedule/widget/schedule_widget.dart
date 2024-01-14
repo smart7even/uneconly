@@ -3,7 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
+import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
+import 'package:uneconly/feature/schedule/model/schedule_rule.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_tile.dart';
 
 /// {@template schedule_widget}
@@ -13,6 +15,10 @@ class ScheduleWidget extends StatelessWidget {
   final Schedule? schedule;
   final VoidCallback? onNextWeek;
   final VoidCallback? onPreviousWeek;
+  final bool isEditMode;
+  final Lesson? selectedLesson;
+  final ValueChanged<Lesson>? onLessonSelected;
+  final List<ScheduleRule> rules;
 
   /// {@macro schedule_widget}
   const ScheduleWidget({
@@ -20,6 +26,10 @@ class ScheduleWidget extends StatelessWidget {
     required this.schedule,
     this.onNextWeek,
     this.onPreviousWeek,
+    this.isEditMode = false,
+    this.selectedLesson,
+    this.onLessonSelected,
+    required this.rules,
   });
 
   List<Widget> _buildSchedule(BuildContext context) {
@@ -86,8 +96,50 @@ class ScheduleWidget extends StatelessWidget {
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
               final lesson = daySchedule.lessons[index];
+              // get next lesson
+              final nextLesson = index + 1 < daySchedule.lessons.length
+                  ? daySchedule.lessons[index + 1]
+                  : null;
 
-              return LessonTile(lesson: lesson);
+              // get previous lesson
+              final previousLesson =
+                  index - 1 >= 0 ? daySchedule.lessons[index - 1] : null;
+
+              // check if lesson has the same start time and end time as next lesson
+              final isSameTimeAsNextLesson = nextLesson != null &&
+                  lesson.start.isAtSameMomentAs(nextLesson.start) &&
+                  lesson.end.isAtSameMomentAs(nextLesson.end);
+
+              // check if lesson has the same start time and end time as previous lesson
+              final isSameTimeAsPreviousLesson = previousLesson != null &&
+                  lesson.start.isAtSameMomentAs(previousLesson.start) &&
+                  lesson.end.isAtSameMomentAs(previousLesson.end);
+
+              final isSameTimeAsNextOrPreviousLesson =
+                  isSameTimeAsNextLesson || isSameTimeAsPreviousLesson;
+
+              final isLessonEditMode =
+                  isEditMode && isSameTimeAsNextOrPreviousLesson;
+
+              final lessonRules = rules
+                  .where((rule) =>
+                      rule.lesson == lesson.name &&
+                      rule.lessonType == lesson.lessonType &&
+                      rule.professor != lesson.professor)
+                  .toList();
+
+              if (lessonRules.isNotEmpty && !isLessonEditMode) {
+                return const SizedBox.shrink();
+              }
+
+              return LessonTile(
+                lesson: lesson,
+                isEditMode: isLessonEditMode,
+                isSelected: selectedLesson == lesson,
+                onSelected: () {
+                  onLessonSelected?.call(lesson);
+                },
+              );
             },
             childCount: daySchedule.lessons.length,
           ),

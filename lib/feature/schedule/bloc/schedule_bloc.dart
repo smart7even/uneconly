@@ -6,8 +6,10 @@ import 'package:bloc_concurrency/bloc_concurrency.dart' as bloc_concurrency;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
+import 'package:uneconly/feature/schedule/data/schedule_rules_repository.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
+import 'package:uneconly/feature/schedule/model/schedule_rule.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
 
 part 'schedule_bloc.freezed.dart';
@@ -17,6 +19,8 @@ part 'schedule_bloc.freezed.dart';
 @freezed
 class ScheduleEvent with _$ScheduleEvent {
   const ScheduleEvent._();
+
+  const factory ScheduleEvent.init() = InitScheduleEvent;
 
   /// Create
   const factory ScheduleEvent.create({required Schedule itemData}) =
@@ -28,6 +32,11 @@ class ScheduleEvent with _$ScheduleEvent {
     required int week,
     ShortGroupInfo? shortGroupInfo,
   }) = FetchScheduleEvent;
+
+  /// Fetch
+  const factory ScheduleEvent.updateRules({
+    required List<ScheduleRule> rules,
+  }) = UpdateRulesScheduleEvent;
 
   const factory ScheduleEvent.changeGroup({
     required int groupId,
@@ -56,6 +65,7 @@ class ScheduleState with _$ScheduleState {
     required final Map<int, ScheduleDetails> data,
     required final ShortGroupInfo? shortGroupInfo,
     final int? selectedWeek,
+    required final List<ScheduleRule> rules,
     @Default('Idle') final String message,
   }) = IdleScheduleState;
 
@@ -65,6 +75,7 @@ class ScheduleState with _$ScheduleState {
     required final Map<int, ScheduleDetails> data,
     required final ShortGroupInfo? shortGroupInfo,
     final int? selectedWeek,
+    required final List<ScheduleRule> rules,
     @Default('Processing') final String message,
   }) = ProcessingScheduleState;
 
@@ -74,6 +85,7 @@ class ScheduleState with _$ScheduleState {
     required final Map<int, ScheduleDetails> data,
     required final ShortGroupInfo? shortGroupInfo,
     final int? selectedWeek,
+    required final List<ScheduleRule> rules,
     @Default('Successful') final String message,
   }) = SuccessfulScheduleState;
 
@@ -83,6 +95,7 @@ class ScheduleState with _$ScheduleState {
     required final Map<int, ScheduleDetails> data,
     required final ShortGroupInfo? shortGroupInfo,
     final int? selectedWeek,
+    required final List<ScheduleRule> rules,
     @Default('An error has occurred') final String message,
   }) = ErrorScheduleState;
 
@@ -106,9 +119,11 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
   ScheduleBLoC({
     required final IScheduleRepository repository,
     required final IGroupRepository groupRepository,
+    required final IScheduleRulesRepository rulesRepository,
     final ScheduleState? initialState,
   })  : _repository = repository,
         _groupRepository = groupRepository,
+        _rulesRepository = rulesRepository,
         super(
           initialState ??
               const ScheduleState.idle(
@@ -117,6 +132,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
                 data: {},
                 shortGroupInfo: null,
                 message: 'Initial idle state',
+                rules: [],
               ),
         ) {
     on<ScheduleEvent>(
@@ -133,6 +149,9 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         },
         changeGroup: (ChangeGroupScheduleEvent event) =>
             _changeGroup(event, emit),
+        updateRules: (UpdateRulesScheduleEvent event) =>
+            _updateRules(event, emit),
+        init: (InitScheduleEvent value) => _init(value, emit),
       ),
       transformer: bloc_concurrency.sequential(),
     );
@@ -140,6 +159,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
 
   final IScheduleRepository _repository;
   final IGroupRepository _groupRepository;
+  final IScheduleRulesRepository _rulesRepository;
 
   /// Fetch event handler
   Future<void> _fetch(
@@ -152,6 +172,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         currentWeek: state.currentWeek ?? event.week,
         selectedWeek: event.week,
         shortGroupInfo: state.shortGroupInfo,
+        rules: state.rules,
       ));
 
       if (event.shortGroupInfo != null && state.shortGroupInfo == null) {
@@ -160,8 +181,13 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           currentWeek: state.currentWeek ?? event.week,
           selectedWeek: event.week,
           shortGroupInfo: event.shortGroupInfo,
+          rules: state.rules,
         ));
       }
+
+      final scheduleRules = await _rulesRepository.getLocalScheduleRules(
+        event.groupId,
+      );
 
       final localSchedule = await _repository.getLocalSchedule(
         groupId: event.groupId,
@@ -184,6 +210,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
             currentWeek: state.currentWeek ?? localSchedule.week,
             selectedWeek: event.week,
             shortGroupInfo: state.shortGroupInfo,
+            rules: scheduleRules,
           ),
         );
       }
@@ -199,6 +226,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
             groupId: group.id,
             groupName: group.name,
           ),
+          rules: scheduleRules,
         ));
       }
 
@@ -221,6 +249,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         currentWeek: state.currentWeek ?? schedule.week,
         selectedWeek: event.week,
         shortGroupInfo: state.shortGroupInfo,
+        rules: scheduleRules,
       ));
     } on Object catch (err, stackTrace) {
       l.e('An error occurred in the ScheduleBLoC: $err', stackTrace);
@@ -229,6 +258,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         currentWeek: state.currentWeek,
         selectedWeek: state.selectedWeek,
         shortGroupInfo: state.shortGroupInfo,
+        rules: state.rules,
       ));
       rethrow;
     } finally {
@@ -238,6 +268,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           currentWeek: state.currentWeek,
           selectedWeek: state.selectedWeek,
           shortGroupInfo: state.shortGroupInfo,
+          rules: state.rules,
         ),
       );
     }
@@ -263,6 +294,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         currentWeek: state.currentWeek ?? event.week,
         selectedWeek: event.week,
         shortGroupInfo: state.shortGroupInfo,
+        rules: state.rules,
       ));
 
       if (event.shortGroupInfo != null) {
@@ -271,6 +303,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           currentWeek: state.currentWeek ?? event.week,
           selectedWeek: event.week,
           shortGroupInfo: event.shortGroupInfo,
+          rules: state.rules,
         ));
       }
 
@@ -294,6 +327,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           currentWeek: state.currentWeek ?? localSchedule.week,
           selectedWeek: event.week,
           shortGroupInfo: state.shortGroupInfo,
+          rules: state.rules,
         ));
       }
 
@@ -310,6 +344,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
               groupId: group.id,
               groupName: group.name,
             ),
+            rules: state.rules,
           ),
         );
       }
@@ -334,6 +369,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           currentWeek: state.currentWeek ?? schedule.week,
           selectedWeek: event.week,
           shortGroupInfo: state.shortGroupInfo,
+          rules: state.rules,
         ),
       );
     } on Object catch (err, stackTrace) {
@@ -344,6 +380,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           currentWeek: state.currentWeek,
           selectedWeek: state.selectedWeek,
           shortGroupInfo: state.shortGroupInfo,
+          rules: state.rules,
         ),
       );
       rethrow;
@@ -354,8 +391,62 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           currentWeek: state.currentWeek,
           selectedWeek: state.selectedWeek,
           shortGroupInfo: state.shortGroupInfo,
+          rules: state.rules,
         ),
       );
     }
   }
+
+  Future<void> _updateRules(
+    UpdateRulesScheduleEvent event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    try {
+      emit(ScheduleState.processing(
+        data: state.data,
+        currentWeek: state.currentWeek,
+        selectedWeek: state.selectedWeek,
+        shortGroupInfo: state.shortGroupInfo,
+        rules: state.rules,
+      ));
+
+      await _rulesRepository.saveLocalScheduleRules(
+        state.shortGroupInfo!.groupId,
+        event.rules,
+      );
+
+      emit(ScheduleState.successful(
+        data: state.data,
+        currentWeek: state.currentWeek,
+        selectedWeek: state.selectedWeek,
+        shortGroupInfo: state.shortGroupInfo,
+        rules: event.rules,
+      ));
+    } on Object catch (err, stackTrace) {
+      l.e('An error occurred in the ScheduleBLoC: $err', stackTrace);
+      emit(ScheduleState.error(
+        data: state.data,
+        currentWeek: state.currentWeek,
+        selectedWeek: state.selectedWeek,
+        shortGroupInfo: state.shortGroupInfo,
+        rules: state.rules,
+      ));
+      rethrow;
+    } finally {
+      emit(
+        ScheduleState.idle(
+          data: state.data,
+          currentWeek: state.currentWeek,
+          selectedWeek: state.selectedWeek,
+          shortGroupInfo: state.shortGroupInfo,
+          rules: state.rules,
+        ),
+      );
+    }
+  }
+
+  Future<void> _init(
+    InitScheduleEvent value,
+    Emitter<ScheduleState> emit,
+  ) async {}
 }

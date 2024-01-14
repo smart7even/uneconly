@@ -38,5 +38,11 @@
     "favoriteGroups": "Favorite groups",
     "addFirstFavoriteGroup": "List is empty. Add groups to favorites to access it quickly",
     "add": "Add",
-    "noScheduleDescription": "Swipe left to see the schedule for the next week or right to see the schedule for the previous week"
+    "noScheduleDescription": "Swipe left to see the schedule for the next week or right to see the schedule for the previous week",
+    "edit": "Edit",
+    "select": "Select",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "select_lesson_confirm_description": "Are you sure you want to select this lesson? Lessons with other professors will be hidden",
+    "hide_all_other_lessons_at_this_time": "Hide all other lessons at this time"
 }

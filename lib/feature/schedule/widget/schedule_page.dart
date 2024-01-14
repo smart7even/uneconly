@@ -15,8 +15,12 @@ import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
+import 'package:uneconly/feature/schedule/data/schedule_rules_local_data_provider.dart';
+import 'package:uneconly/feature/schedule/data/schedule_rules_repository.dart';
+import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
+import 'package:uneconly/feature/schedule/widget/schedule_edit_widget.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
@@ -56,6 +60,9 @@ class _SchedulePageState extends State<SchedulePage>
 
   final List<Group> favoriteGroups = [];
   bool isFavorite = false;
+  bool isEditMode = false;
+  Lesson? selectedLesson;
+  PersistentBottomSheetController? bottomSheetController;
 
   /* #region Lifecycle */
   @override
@@ -150,9 +157,23 @@ class _SchedulePageState extends State<SchedulePage>
       networkDataProvider: groupNetworkDataProvider,
     );
 
+    IScheduleRulesLocalDataProvider scheduleRulesLocalDataProvider =
+        ScheduleRulesLocalDataProvider(
+      dependenciesScope.database,
+    );
+
+    IScheduleRulesRepository rulesRepository = ScheduleRulesRepository(
+      localDataProvider: scheduleRulesLocalDataProvider,
+    );
+
     var bloc = ScheduleBLoC(
       repository: repository,
       groupRepository: groupRepository,
+      rulesRepository: rulesRepository,
+    );
+
+    bloc.add(
+      const ScheduleEvent.init(),
     );
 
     bloc.add(
@@ -497,6 +518,43 @@ class _SchedulePageState extends State<SchedulePage>
       appBar: AppBar(
         title: Text(title),
         actions: [
+          if (!widget.isViewMode)
+            Builder(builder: (context) {
+              return IconButton(
+                onPressed: () async {
+                  setState(() {
+                    isEditMode = !isEditMode;
+                  });
+
+                  if (!isEditMode) {
+                    bottomSheetController?.close();
+                    // hide bottom sheet
+
+                    return;
+                  }
+
+                  // Show ModalBottomSheet with buttons
+                  bottomSheetController = showBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return ScheduleEditWidget(
+                        getSelectedLesson: () {
+                          return selectedLesson;
+                        },
+                        onClose: () {
+                          setState(() {
+                            isEditMode = false;
+                          });
+                        },
+                      );
+                    },
+                  );
+                },
+                // TODO: Add tooltip
+                // tooltip: AppLocalizations.of(context)!,
+                icon: const Icon(Icons.edit),
+              );
+            }),
           if (widget.isViewMode)
             Padding(
               padding: const EdgeInsets.only(
@@ -566,6 +624,7 @@ class _SchedulePageState extends State<SchedulePage>
               schedule: const Schedule.empty(),
               onNextWeek: () => onNextWeek(context),
               onPreviousWeek: () => onPreviousWeek(context),
+              rules: [],
             );
           }
 
@@ -574,6 +633,7 @@ class _SchedulePageState extends State<SchedulePage>
               schedule: const Schedule.empty(),
               onNextWeek: () => onNextWeek(context),
               onPreviousWeek: () => onPreviousWeek(context),
+              rules: [],
             );
           }
 
@@ -581,6 +641,22 @@ class _SchedulePageState extends State<SchedulePage>
             schedule: data[currentWeek]?.schedule,
             onNextWeek: () => onNextWeek(context),
             onPreviousWeek: () => onPreviousWeek(context),
+            isEditMode: isEditMode,
+            selectedLesson: selectedLesson,
+            rules: state.rules,
+            onLessonSelected: (value) {
+              if (selectedLesson == value) {
+                setState(() {
+                  selectedLesson = null;
+                });
+
+                return;
+              }
+
+              setState(() {
+                selectedLesson = value;
+              });
+            },
           );
         },
       ),

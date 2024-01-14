@@ -5,10 +5,11 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:uneconly/common/database/tables/lessons.dart';
+import 'package:uneconly/common/database/tables/schedule_rule.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Lessons])
+@DriftDatabase(tables: [Lessons, ScheduleRules])
 class MyDatabase extends _$MyDatabase {
   // we tell the database where to store the data with this constructor
   MyDatabase() : super(_openConnection());
@@ -16,7 +17,7 @@ class MyDatabase extends _$MyDatabase {
   // you should bump this number whenever you change or add a table definition.
   // Migrations are covered later in the documentation.
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -26,15 +27,21 @@ class MyDatabase extends _$MyDatabase {
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from < 2) {
-          // we added the dueDate property in the change from version 1 to
+          // we added the groupId property in the change from version 1 to
           // version 2
           await m.addColumn(lessons, lessons.groupId);
         }
 
         if (from < 3) {
-          // we added the dueDate property in the change from version 2 to
+          // we added the lessonType property in the change from version 2 to
           // version 3
           await m.addColumn(lessons, lessons.lessonType);
+        }
+
+        if (from < 4) {
+          // we added the ScheduleRules table in the change from version 3 to
+          // version 4
+          await m.createTable(scheduleRules);
         }
       },
     );
