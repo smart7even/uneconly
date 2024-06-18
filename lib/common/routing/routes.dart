@@ -21,7 +21,7 @@ enum Routes with OctopusRoute {
   final String? title;
 
   @override
-  Widget builder(BuildContext context, OctopusNode node) {
+  Widget builder(BuildContext context, OctopusState state, OctopusNode node) {
     switch (this) {
       case Routes.loading:
         return const LoadingPage(
