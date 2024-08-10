@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/utils/colors_utils.dart';
+import 'package:uneconly/feature/settings/widget/settings_tile.dart';
 
 /// Flutter code sample for [CupertinoPicker].
 
@@ -186,9 +187,37 @@ class _SettingsPageState extends State<SettingsPage> {
               //   },
               //   child: const Text('Open ListSectionInsetExample'),
               // ),
-
-              Text('${AppLocalizations.of(context)!.theme}: '),
-              const SizedBox(height: 10),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SettingsTile(
+                    title: AppLocalizations.of(context)!.licenses,
+                    description: AppLocalizations.of(context)!.showLicenses,
+                    onPressed: () {
+                      showLicensePage(
+                        context: context,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 15),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                  ),
+                  child: Text(
+                    '${AppLocalizations.of(context)!.theme}: ',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
               // horizontal list of themes
               Container(
                 height: 40,
