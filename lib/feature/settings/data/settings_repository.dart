@@ -16,6 +16,8 @@ abstract class ISettingsRepository {
   Future<void> saveTheme(String theme);
   Future<String?> getTheme();
   Stream<String> getThemeChangedStream();
+  Future<void> clearAppCache();
+  Future<bool> isAppCacheEmpty();
 }
 
 class SettingsRepository implements ISettingsRepository {
@@ -92,5 +94,15 @@ class SettingsRepository implements ISettingsRepository {
   @override
   Future<void> removeGroupFromFavorites(Group group) {
     return _localDataProvider.removeGroupFromFavorites(group);
+  }
+
+  @override
+  Future<void> clearAppCache() {
+    return _localDataProvider.clearAppCache();
+  }
+
+  @override
+  Future<bool> isAppCacheEmpty() {
+    return _localDataProvider.isAppCacheEmpty();
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:drift/drift.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/feature/select/model/group.dart';
 
 abstract class ISettingsLocalDataProvider {
@@ -13,10 +15,13 @@ abstract class ISettingsLocalDataProvider {
   Future<String?> getLanguage();
   Future<void> saveTheme(String theme);
   Future<String?> getTheme();
+  Future<void> clearAppCache();
+  Future<bool> isAppCacheEmpty();
 }
 
 class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
   final SharedPreferences _prefs;
+  final MyDatabase _database;
 
   static const String _groupIdKey = 'groupId';
   static const String _groupNameKey = 'groupName';
@@ -26,8 +31,11 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
   static const String _themeKey = 'theme';
   static const String _favoriteGroupsKey = 'favoriteGroups';
 
-  SettingsLocalDataProvider({required SharedPreferences prefs})
-      : _prefs = prefs;
+  SettingsLocalDataProvider({
+    required SharedPreferences prefs,
+    required MyDatabase database,
+  })  : _prefs = prefs,
+        _database = database;
 
   @override
   Future<Group?> getGroup() async {
@@ -144,5 +152,18 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
     );
 
     return;
+  }
+
+  @override
+  Future<void> clearAppCache() async {
+    await _database.lessons.deleteAll();
+  }
+
+  @override
+  Future<bool> isAppCacheEmpty() async {
+    final lessonsCount = await _database.lessons.count().getSingle();
+    final isLessonsEmpty = lessonsCount == 0;
+
+    return isLessonsEmpty;
   }
 }

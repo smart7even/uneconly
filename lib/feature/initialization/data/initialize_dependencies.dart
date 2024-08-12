@@ -47,14 +47,15 @@ final Map<String, _InitializationStep> _initializationSteps =
   'Log app open': (_) {},
   'Initialize shared preferences': (dependencies) async =>
       dependencies.sharedPreferences = await SharedPreferences.getInstance(),
+  'Initialize database': (dependencies) async =>
+      dependencies.database = MyDatabase(),
   'Initialize settings repository': (dependencies) async =>
       dependencies.settingsRepository = SettingsRepository(
         localDataProvider: SettingsLocalDataProvider(
           prefs: dependencies.sharedPreferences,
+          database: dependencies.database,
         ),
       ),
-  'Initialize database': (dependencies) async =>
-      dependencies.database = MyDatabase(),
   'Initialize dio': (dependencies) async => dependencies.dio = Dio(
         BaseOptions(
           baseUrl: serverAddress,

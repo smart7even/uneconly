@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:l/l.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/utils/colors_utils.dart';
@@ -203,6 +204,60 @@ class _SettingsPageState extends State<SettingsPage> {
                       showLicensePage(
                         context: context,
                       );
+                    },
+                  ),
+                  const SizedBox(height: 15),
+                  SettingsTile(
+                    title: AppLocalizations.of(context)!.cache,
+                    description: AppLocalizations.of(context)!.clearCache,
+                    onPressed: () async {
+                      final settingsRepository =
+                          Dependencies.of(context).settingsRepository;
+
+                      try {
+                        final isCacheEmpty =
+                            await settingsRepository.isAppCacheEmpty();
+
+                        if (isCacheEmpty) {
+                          l.vvvv('Nothing to clear');
+
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(context)!.cacheIsEmpty,
+                                ),
+                              ),
+                            );
+                          }
+
+                          return;
+                        }
+
+                        l.vvvv('Cache is not empty and may be cleared');
+                        await settingsRepository.clearAppCache();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                AppLocalizations.of(context)!.cacheIsCleared,
+                              ),
+                            ),
+                          );
+                        }
+                      } on Exception catch (e) {
+                        l.vvvv(e);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                AppLocalizations.of(context)!
+                                    .errorWhileCleaningCache,
+                              ),
+                            ),
+                          );
+                        }
+                      }
                     },
                   ),
                 ],
