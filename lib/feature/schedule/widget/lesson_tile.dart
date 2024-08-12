@@ -17,6 +17,14 @@ class LessonTile extends StatefulWidget {
 class _LessonTileState extends State<LessonTile> {
   bool _isExpanded = false;
 
+  String _appendWithSpace(String source, String item) {
+    if (source.isEmpty) {
+      return item;
+    }
+
+    return '$source $item';
+  }
+
   @override
   Widget build(BuildContext context) {
     String subtitle = '';
@@ -29,7 +37,7 @@ class _LessonTileState extends State<LessonTile> {
 
     String location = widget.lesson.location.replaceAll('\n', ' ').trim();
 
-    subtitle = '$subtitle $location';
+    subtitle = _appendWithSpace(subtitle, location);
 
     return ListTile(
       title: Text(
