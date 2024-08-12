@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 class SettingsTile extends StatelessWidget {
   final String title;
   final String description;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   /// {@macro settings_tile}
   const SettingsTile({
     super.key,
     required this.title,
     required this.description,
-    required this.onPressed,
+    this.onPressed,
   });
 
   @override

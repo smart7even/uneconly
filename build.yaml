@@ -1,6 +1,13 @@
 targets:
   $default:
+    sources:
+        - $package$
+        - lib/**
+        - pubspec.yaml
     builders:
       drift_dev:
         options:
           store_date_time_values_as_text: true
+      pubspec_generator:
+        options:
+          output: lib/common/utils/pubspec.yaml.g.dart

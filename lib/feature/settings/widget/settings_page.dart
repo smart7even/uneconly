@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/utils/colors_utils.dart';
+import 'package:uneconly/common/utils/pubspec.yaml.g.dart';
 import 'package:uneconly/feature/settings/widget/settings_tile.dart';
 
 /// Flutter code sample for [CupertinoPicker].
@@ -190,6 +191,11 @@ class _SettingsPageState extends State<SettingsPage> {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  SettingsTile(
+                    title: AppLocalizations.of(context)!.appVersion,
+                    description: version,
+                  ),
+                  const SizedBox(height: 15),
                   SettingsTile(
                     title: AppLocalizations.of(context)!.licenses,
                     description: AppLocalizations.of(context)!.showLicenses,
