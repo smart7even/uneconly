@@ -1,0 +1,8 @@
+app_identifier("com.roadmapik.uneconly") # The bundle identifier of your app
+apple_id("smart7even@yandex.ru") # Your Apple Developer Portal username
+
+itc_team_id("126350654") # App Store Connect Team ID
+team_id("XQZ47WXYMB") # Developer Portal Team ID
+
+# For more information about the Appfile, see:
+#     https://docs.fastlane.tools/advanced/#appfile
