@@ -67,11 +67,6 @@ class _SchedulePageState extends State<SchedulePage>
     scheduleBLoC = _initBloc(context);
 
     WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
 
     final dependenciesScope = Dependencies.of(context);
 
