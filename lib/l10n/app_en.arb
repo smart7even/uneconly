@@ -46,5 +46,6 @@
     "clearCache": "Clear cache",
     "cacheIsCleared": "Cache is successfully cleared!",
     "errorWhileCleaningCache": "Unexpected error happened during cache clean. Try again later",
-    "cacheIsEmpty": "Cache is empty. Nothing to clean!"
+    "cacheIsEmpty": "Cache is empty. Nothing to clean!",
+    "share": "Share"
 }

@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:l/l.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart' as bloc_concurrency;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
+import 'package:uneconly/feature/schedule/domain/schedule_transformer.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
@@ -42,6 +44,10 @@ class ScheduleEvent with _$ScheduleEvent {
   /// Delete
   const factory ScheduleEvent.delete({required Schedule item}) =
       DeleteScheduleEvent;
+
+  /// Share
+  const factory ScheduleEvent.share(ValueChanged<String> onShare) =
+      ShareScheduleEvent;
 }
 
 /* Schedule States */
@@ -98,6 +104,22 @@ class ScheduleState with _$ScheduleState {
   /// Is in progress state
   bool get isProcessing =>
       maybeMap<bool>(orElse: () => true, idle: (_) => false);
+
+  ScheduleDetails? getSelectedScheduleDetails() {
+    if (selectedWeek == null) {
+      return null;
+    }
+
+    return data[selectedWeek];
+  }
+
+  ScheduleDetails? getCurrentScheduleDetails() {
+    if (currentWeek == null) {
+      return null;
+    }
+
+    return data[currentWeek];
+  }
 }
 
 /// Buisiness Logic Component ScheduleBLoC
@@ -122,17 +144,17 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
     on<ScheduleEvent>(
       (event, emit) => event.map<Future<void>>(
         fetch: (event) => _fetch(event, emit),
-        create: (value) {
+        create: (event) {
           throw UnimplementedError();
         },
-        update: (value) {
+        update: (event) {
           throw UnimplementedError();
         },
-        delete: (value) {
+        delete: (event) {
           throw UnimplementedError();
         },
-        changeGroup: (ChangeGroupScheduleEvent event) =>
-            _changeGroup(event, emit),
+        changeGroup: (event) => _changeGroup(event, emit),
+        share: (event) => _share(event, emit),
       ),
       transformer: bloc_concurrency.sequential(),
     );
@@ -357,5 +379,24 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         ),
       );
     }
+  }
+
+  Future<void> _share(
+    ShareScheduleEvent event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    final selectedScheduleDetails = state.getSelectedScheduleDetails();
+    final groupInfo = state.shortGroupInfo;
+
+    if (selectedScheduleDetails == null || groupInfo == null) {
+      return;
+    }
+
+    final content = ScheduleTransformer().transformScheduleToString(
+      selectedScheduleDetails.schedule,
+      groupInfo,
+    );
+
+    event.onShare(content);
   }
 }

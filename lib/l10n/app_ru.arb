@@ -43,5 +43,6 @@
     "clearCache": "Очистить кэш",
     "cacheIsCleared": "Кэш успешно очищен!",
     "errorWhileCleaningCache": "Возникла неожиданная ошибка при очистке кэша. Попробуйте снова",
-    "cacheIsEmpty": "Кэш уже пуст!"
+    "cacheIsEmpty": "Кэш уже пуст!",
+    "share": "Поделиться"
 }

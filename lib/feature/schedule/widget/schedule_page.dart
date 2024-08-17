@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:octopus/octopus.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
@@ -17,6 +18,7 @@ import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.da
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
+import 'package:uneconly/feature/schedule/widget/schedule_actions_popup.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
@@ -446,6 +448,67 @@ class _SchedulePageState extends State<SchedulePage>
     onPageChanged(context, newPage.round(), week);
   }
 
+  void onFavoritePressed(
+    BuildContext context,
+    ScheduleState state,
+  ) {
+    setState(() {
+      isFavorite = !isFavorite;
+    });
+
+    if (isFavorite) {
+      Dependencies.of(context).settingsRepository.addGroupToFavorites(
+            Group(
+              id: state.shortGroupInfo?.groupId ??
+                  widget.shortGroupInfo.groupId,
+              name: state.shortGroupInfo?.groupName ??
+                  widget.shortGroupInfo.groupName ??
+                  '',
+              facultyId: 0,
+              course: 0,
+            ),
+          );
+    } else {
+      Dependencies.of(context).settingsRepository.removeGroupFromFavorites(
+            Group(
+              id: state.shortGroupInfo?.groupId ??
+                  widget.shortGroupInfo.groupId,
+              name: state.shortGroupInfo?.groupName ??
+                  widget.shortGroupInfo.groupName ??
+                  '',
+              facultyId: 0,
+              course: 0,
+            ),
+          );
+    }
+  }
+
+  void onSharePressed(BuildContext context, ScheduleState state) {
+    final bloc = context.read<ScheduleBLoC>();
+
+    bloc.add(
+      ScheduleEvent.share(
+        (content) async {
+          await Share.share(content);
+
+          // await showDialog(
+          //   context: context,
+          //   builder: (context) {
+          //     return Material(
+          //       child: GestureDetector(
+          //         onTap: () {
+          //           Navigator.of(context).pop();
+          //         },
+          //         child: SingleChildScrollView(child: Text(content)),
+          //       ),
+          //     );
+          //   },
+          // );
+        },
+      ),
+    );
+  }
+
   Widget _buildPageView(
     BuildContext context,
     ScheduleState state,
@@ -491,58 +554,29 @@ class _SchedulePageState extends State<SchedulePage>
           : null,
       appBar: AppBar(
         title: Text(title),
+        centerTitle: true,
         actions: [
-          if (widget.isViewMode)
-            Padding(
-              padding: const EdgeInsets.only(
-                right: 10,
+          ScheduleActionsPopup(
+            actions: [
+              if (widget.isViewMode)
+                ScheduleActionConfig(
+                  Text(
+                    isFavorite
+                        ? AppLocalizations.of(context)!.removeFromFavorites
+                        : AppLocalizations.of(context)!.addToFavorites,
+                  ),
+                  action: ScheduleAction.favorite,
+                  onPressed: () => onFavoritePressed(context, state),
+                ),
+              ScheduleActionConfig(
+                Text(
+                  AppLocalizations.of(context)!.share,
+                ),
+                action: ScheduleAction.share,
+                onPressed: () => onSharePressed(context, state),
               ),
-              child: IconButton(
-                onPressed: () {
-                  setState(() {
-                    isFavorite = !isFavorite;
-                  });
-
-                  if (isFavorite) {
-                    Dependencies.of(context)
-                        .settingsRepository
-                        .addGroupToFavorites(
-                          Group(
-                            id: state.shortGroupInfo?.groupId ??
-                                widget.shortGroupInfo.groupId,
-                            name: state.shortGroupInfo?.groupName ??
-                                widget.shortGroupInfo.groupName ??
-                                '',
-                            facultyId: 0,
-                            course: 0,
-                          ),
-                        );
-                  } else {
-                    Dependencies.of(context)
-                        .settingsRepository
-                        .removeGroupFromFavorites(
-                          Group(
-                            id: state.shortGroupInfo?.groupId ??
-                                widget.shortGroupInfo.groupId,
-                            name: state.shortGroupInfo?.groupName ??
-                                widget.shortGroupInfo.groupName ??
-                                '',
-                            facultyId: 0,
-                            course: 0,
-                          ),
-                        );
-                  }
-                },
-                tooltip: isFavorite
-                    ? AppLocalizations.of(context)!.removeFromFavorites
-                    : AppLocalizations.of(context)!.addToFavorites,
-                icon: isFavorite
-                    ? const Icon(Icons.star)
-                    : const Icon(
-                        Icons.star_outline,
-                      ),
-              ),
-            ),
+            ],
+          ),
         ],
       ),
       body: PageView.builder(
@@ -620,4 +654,4 @@ class _SchedulePageState extends State<SchedulePage>
       ),
     );
   }
-} // _SchedulePageState
+}
