@@ -54,6 +54,7 @@ dependencies:
   octopus: ^0.0.9
   share_plus: ^10.0.2
   appmetrica_plugin: ^2.1.1
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:

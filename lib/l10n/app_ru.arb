@@ -44,5 +44,8 @@
     "cacheIsCleared": "Кэш успешно очищен!",
     "errorWhileCleaningCache": "Возникла неожиданная ошибка при очистке кэша. Попробуйте снова",
     "cacheIsEmpty": "Кэш уже пуст!",
-    "share": "Поделиться"
+    "share": "Поделиться",
+    "lastWeekOfCurrentStudyYear": "Это последняя неделя текущего учебного года. Скоро должно появиться расписание для следующего учебного года",
+    "checkOutOfficialWebsiteForPreciseInformation": "Проверяйте точную информацию на официальном веб-сайте",
+    "openOfficialWebsite": "Открыть официальный вебсайт"
 }

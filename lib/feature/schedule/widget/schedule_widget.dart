@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_tile.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// {@template schedule_widget}
 /// ScheduleWidget widget
@@ -146,6 +148,77 @@ class ScheduleWidget extends StatelessWidget {
           currentTime,
         ),
       );
+
+      final isLastStudyWeekOfCurrentYear = currentSchedule.week == 52;
+
+      if (isLastStudyWeekOfCurrentYear) {
+        return Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 8,
+                  right: 8,
+                  top: 0,
+                  bottom: 20,
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      '🍀',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 100,
+                      ),
+                    ),
+                    Text('$weekStart - $weekEnd'),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Text(
+                      AppLocalizations.of(context)!.lastWeekOfCurrentStudyYear,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Text(
+                      AppLocalizations.of(context)!
+                          .checkOutOfficialWebsiteForPreciseInformation,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await launchUrl(
+                          Uri.parse(
+                            'https://rasp.unecon.ru/raspisanie_grp.php?g=${currentSchedule.groupId}',
+                          ),
+                        );
+                      },
+                      child: Text(
+                        AppLocalizations.of(context)!.openOfficialWebsite,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
 
       return Center(
         child: Column(

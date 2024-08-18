@@ -78,4 +78,28 @@ void main() {
       );
     },
   );
+
+  test(
+    'getStartOfStudyYearDate returns start of study year for 2024/2025 study year when it is start of first study week',
+    () {
+      final nowTime = DateTime(2024, 8, 26, 0, 0, 1);
+
+      expect(
+        getStartOfStudyYearDate(nowTime),
+        equals(DateTime(2024, 8, 26)),
+      );
+    },
+  );
+
+  test(
+    'getStartOfStudyYearDate returns start of study year for 2024/2025 study year when month is September',
+    () {
+      final nowTime = DateTime(2024, 9, 1, 0, 0, 1);
+
+      expect(
+        getStartOfStudyYearDate(nowTime),
+        equals(DateTime(2024, 8, 26)),
+      );
+    },
+  );
 }

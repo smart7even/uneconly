@@ -599,11 +599,7 @@ class _SchedulePageState extends State<SchedulePage>
           }
 
           if (currentWeek < 0 || currentWeek > 52) {
-            return ScheduleWidget(
-              schedule: const Schedule.empty(),
-              onNextWeek: () => onNextWeek(context),
-              onPreviousWeek: () => onPreviousWeek(context),
-            );
+            return null;
           }
 
           return ScheduleWidget(

@@ -52,14 +52,17 @@ DateTime getEndOfStudyWeek(int week, DateTime nowTime) {
 }
 
 DateTime getStartOfStudyYearDate(DateTime nowTime) {
-  if (nowTime.month >= kSeptemberMonthNumber) {
-    return getWeekStart(
-      DateTime(
-        nowTime.year,
-        kSeptemberMonthNumber,
-        1,
-      ),
-    );
+  final currentStudyYearStartDate = getWeekStart(
+    DateTime(
+      nowTime.year,
+      kSeptemberMonthNumber,
+      1,
+    ),
+  );
+
+  if (nowTime.isAtSameMomentAs(currentStudyYearStartDate) ||
+      nowTime.isAfter(currentStudyYearStartDate)) {
+    return currentStudyYearStartDate;
   } else {
     return getWeekStart(
       DateTime(
