@@ -8,6 +8,8 @@ import 'package:home_widget/home_widget.dart';
 import 'package:l/l.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/app_scroll_configuration.dart';
+import 'package:uneconly/common/logging/logging_repository.dart';
+import 'package:uneconly/common/logging/logging_repository_factory.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/util/error_util.dart';
@@ -17,6 +19,8 @@ import 'package:uneconly/feature/initialization/data/initialization.dart';
 import 'package:uneconly/feature/initialization/widget/inherited_dependencies.dart';
 
 void main() async {
+  ILoggingRepository? loggingRepository;
+
   l.capture<void>(
     () => runZonedGuarded<void>(
       () async {
@@ -26,6 +30,8 @@ void main() async {
           (progress: 0, message: ''),
         );
         $initializeApp(
+          onLoggingRepositoryInitialized: (initializedLoggingRepository) =>
+              loggingRepository = initializedLoggingRepository,
           onProgress: (progress, message) => initializationProgress.value =
               (progress: progress, message: message),
           onSuccess: (dependencies) => runApp(
@@ -40,7 +46,10 @@ void main() async {
           },
         ).ignore();
       },
-      l.e,
+      (object, stackTrace) {
+        l.e(object, stackTrace);
+        loggingRepository?.logError(object, stackTrace);
+      },
     ),
     const LogOptions(
       handlePrint: true,

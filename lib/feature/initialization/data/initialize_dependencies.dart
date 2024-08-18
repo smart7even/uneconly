@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:l/l.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uneconly/common/database/database.dart';
+import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/initialization/data/platform/platform_initialization.dart';
@@ -13,11 +14,15 @@ import 'package:uneconly/feature/settings/data/settings_repository.dart';
 /// Initializes the app and returns a [Dependencies] object
 Future<Dependencies> $initializeDependencies({
   void Function(int progress, String message)? onProgress,
+  required ILoggingRepository loggingRepository,
 }) async {
   final dependencies = Dependencies();
-  final totalSteps = _initializationSteps.length;
+  final initializationSteps = _getInitializationSteps(
+    loggingRepository: loggingRepository,
+  );
+  final totalSteps = initializationSteps.length;
   var currentStep = 0;
-  for (final step in _initializationSteps.entries) {
+  for (final step in initializationSteps.entries) {
     try {
       currentStep++;
       final percent = (currentStep * 100 ~/ totalSteps).clamp(0, 100);
@@ -41,25 +46,36 @@ Future<Dependencies> $initializeDependencies({
 typedef _InitializationStep = FutureOr<void> Function(
   Dependencies dependencies,
 );
-final Map<String, _InitializationStep> _initializationSteps =
-    <String, _InitializationStep>{
-  'Platform pre-initialization': (_) => $platformInitialization(),
-  'Log app open': (_) {},
-  'Initialize shared preferences': (dependencies) async =>
-      dependencies.sharedPreferences = await SharedPreferences.getInstance(),
-  'Initialize database': (dependencies) async =>
-      dependencies.database = MyDatabase(),
-  'Initialize settings repository': (dependencies) async =>
-      dependencies.settingsRepository = SettingsRepository(
-        localDataProvider: SettingsLocalDataProvider(
-          prefs: dependencies.sharedPreferences,
-          database: dependencies.database,
+
+Map<String, _InitializationStep> _getInitializationSteps({
+  required ILoggingRepository loggingRepository,
+}) {
+  final Map<String, _InitializationStep> initializationSteps =
+      <String, _InitializationStep>{
+    'Platform pre-initialization': (_) => $platformInitialization(),
+    'Provide logging pepository': (dependencies) =>
+        dependencies.loggingRepository = loggingRepository,
+    'Log app open': (dependencies) {
+      dependencies.loggingRepository.logEvent('appOpen');
+    },
+    'Initialize shared preferences': (dependencies) async =>
+        dependencies.sharedPreferences = await SharedPreferences.getInstance(),
+    'Initialize database': (dependencies) async =>
+        dependencies.database = MyDatabase(),
+    'Initialize settings repository': (dependencies) async =>
+        dependencies.settingsRepository = SettingsRepository(
+          localDataProvider: SettingsLocalDataProvider(
+            prefs: dependencies.sharedPreferences,
+            database: dependencies.database,
+          ),
         ),
-      ),
-  'Initialize dio': (dependencies) async => dependencies.dio = Dio(
-        BaseOptions(
-          baseUrl: serverAddress,
+    'Initialize dio': (dependencies) async => dependencies.dio = Dio(
+          BaseOptions(
+            baseUrl: serverAddress,
+          ),
         ),
-      ),
-  'Log app initialized': (_) {},
-};
+    'Log app initialized': (_) {},
+  };
+
+  return initializationSteps;
+}
