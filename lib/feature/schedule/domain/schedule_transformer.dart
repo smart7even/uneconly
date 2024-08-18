@@ -31,7 +31,7 @@ class ScheduleTransformer {
     for (final daySchedule in schedule.daySchedules) {
       result += DateFormat('dd.MM.yyyy').format(daySchedule.day);
       result += space;
-      result += DateFormat('EEE', 'ru').format(daySchedule.day);
+      result += DateFormat('EEE').format(daySchedule.day);
       result += newLine;
 
       if (daySchedule.lessons.isEmpty) {

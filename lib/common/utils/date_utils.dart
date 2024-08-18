@@ -43,6 +43,14 @@ DateTime getStartOfStudyWeek(int week, DateTime nowTime) {
   return startWeekDate;
 }
 
+DateTime getEndOfStudyWeek(int week, DateTime nowTime) {
+  return getStartOfStudyWeek(week, nowTime).add(
+    const Duration(
+      days: 6,
+    ),
+  );
+}
+
 DateTime getStartOfStudyYearDate(DateTime nowTime) {
   if (nowTime.month >= kSeptemberMonthNumber) {
     return getWeekStart(

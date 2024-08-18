@@ -130,12 +130,30 @@ class ScheduleWidget extends StatelessWidget {
     }
 
     if (currentSchedule.daySchedules.isEmpty) {
+      final dateFormat = DateFormat(
+        'dd MMMM yyyy',
+      );
+      final currentTime = DateTime.now();
+      final weekStart = dateFormat.format(
+        getStartOfStudyWeek(
+          currentSchedule.week,
+          currentTime,
+        ),
+      );
+      final weekEnd = dateFormat.format(
+        getEndOfStudyWeek(
+          currentSchedule.week,
+          currentTime,
+        ),
+      );
+
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(AppLocalizations.of(context)!.noSchedule),
+            Text('$weekStart - $weekEnd'),
             const SizedBox(
               height: 8,
             ),

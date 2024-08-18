@@ -43,6 +43,12 @@ void main() {
     expect(getStartOfStudyWeek(36, nowTime), equals(DateTime(2023, 5, 1)));
   });
 
+  test('getEndOfStudyWeek returns end of study week', () {
+    final nowTime = DateTime(2024, 8, 18, 16, 10, 11);
+
+    expect(getEndOfStudyWeek(51, nowTime), equals(DateTime(2024, 8, 18)));
+  });
+
   test('getWeekStart returns start of week', () {
     final nowTime = DateTime(2023, 5, 6, 21, 49, 11);
 
