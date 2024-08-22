@@ -119,12 +119,7 @@ class _SelectPageState extends State<SelectPage> {
         return state
           ..removeWhere((node) => true)
           ..add(
-            Routes.schedule.node(
-              arguments: {
-                'groupId': group.id.toString(),
-                'groupName': group.name,
-              },
-            ),
+            Routes.loading.node(),
           );
       },
     );

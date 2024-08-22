@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:home_widget/home_widget.dart';
 import 'package:octopus/octopus.dart';
-import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/routes.dart';
-import 'package:uneconly/feature/settings/data/settings_repository.dart';
 
 /// {@template loading_page}
 /// LoadingPage widget
@@ -46,53 +43,20 @@ class _LoadingPageState extends State<LoadingPage> {
   }
 
   Future<void> onOpen() async {
-    ISettingsRepository settingsRepository =
-        Dependencies.of(context).settingsRepository;
-
-    final group = await settingsRepository.getGroup();
-
-    if (!mounted) {
-      return;
-    }
-
-    if (group == null) {
-      Octopus.of(context).setState((state) {
-        return state
-          ..removeByName(Routes.loading.name)
-          ..add(
-            Routes.select.node(),
-          );
-      });
-    } else {
-      HomeWidget.saveWidgetData<int>(
-        'groupId',
-        group.id,
-      ).then((value) {
-        HomeWidget.updateWidget(
-          name: 'UWidget',
-          iOSName: 'UWidget',
+    Octopus.of(context).setState((state) {
+      return state
+        ..removeWhere((state) => true)
+        ..add(
+          Routes.home.node(),
         );
-      });
-
-      Octopus.of(context).setState((state) {
-        return state
-          ..removeByName(Routes.loading.name)
-          ..add(
-            Routes.schedule.node(
-              arguments: <String, String>{
-                'groupId': group.id.toString(),
-                'groupName': group.name,
-              },
-            ),
-          );
-      });
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
+    return Scaffold(
+      appBar: AppBar(),
+      body: const Center(
         child: CircularProgressIndicator(),
       ),
     );

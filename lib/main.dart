@@ -12,6 +12,7 @@ import 'package:uneconly/common/app_scroll_configuration.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/routes.dart';
+import 'package:uneconly/common/routing/schedule_guard.dart';
 import 'package:uneconly/common/util/error_util.dart';
 import 'package:uneconly/common/utils/colors_utils.dart';
 import 'package:uneconly/common/widget/app_error.dart';
@@ -142,8 +143,10 @@ class _MyAppState extends State<MyApp> {
     // Create router.
     router = Octopus(
       routes: Routes.values,
-      defaultRoute: Routes.loading,
-      guards: <IOctopusGuard>[],
+      defaultRoute: Routes.home,
+      guards: <IOctopusGuard>[
+        ScheduleGuard(),
+      ],
       onError: (error, stackTrace) => log(
         error.toString(),
         error: error,
@@ -184,7 +187,7 @@ class _MyAppState extends State<MyApp> {
             textScaler: TextScaler.noScaling,
           ),
           child: OctopusTools(
-            enable: false,
+            enable: true,
             octopus: router,
             child: child ?? const SizedBox.shrink(),
           ),

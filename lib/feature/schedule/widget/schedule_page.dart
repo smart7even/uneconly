@@ -66,6 +66,8 @@ class _SchedulePageState extends State<SchedulePage>
     initializeDateFormatting('en');
     // Initial state initialization
 
+    print(Octopus.of(context).state.uri.toString());
+
     scheduleBLoC = _initBloc(context);
 
     WidgetsBinding.instance.addObserver(this);
@@ -213,7 +215,7 @@ class _SchedulePageState extends State<SchedulePage>
     );
   }
 
-  Future<void> waitReturnToSchedule(
+  Future<void> waitReturnToHomeSchedule(
     Octopus octopus,
   ) async {
     await waitRouteChange(
@@ -221,9 +223,7 @@ class _SchedulePageState extends State<SchedulePage>
       shouldStopListen: () {
         final lastNode = octopus.observer.value.children.last;
 
-        return lastNode.name == Routes.schedule.name &&
-            lastNode.arguments['groupId'] ==
-                widget.shortGroupInfo.groupId.toString();
+        return lastNode.name == Routes.home.name;
       },
     );
   }
@@ -299,7 +299,7 @@ class _SchedulePageState extends State<SchedulePage>
                 },
               );
 
-              await waitReturnToSchedule(
+              await waitReturnToHomeSchedule(
                 octopus,
               );
 
@@ -355,7 +355,7 @@ class _SchedulePageState extends State<SchedulePage>
                       },
                     );
 
-                    await waitReturnToSchedule(octopus);
+                    await waitReturnToHomeSchedule(octopus);
 
                     final value = await dependenciesScope.settingsRepository
                         .getFavoriteGroups();
@@ -389,7 +389,7 @@ class _SchedulePageState extends State<SchedulePage>
                     },
                   );
 
-                  await waitReturnToSchedule(octopus);
+                  await waitReturnToHomeSchedule(octopus);
 
                   final value = await dependenciesScope.settingsRepository
                       .getFavoriteGroups();
@@ -490,6 +490,34 @@ class _SchedulePageState extends State<SchedulePage>
       ScheduleEvent.share(
         (content) async {
           await Share.share(content);
+
+          // final groupInfo = state.shortGroupInfo;
+
+          // if (groupInfo == null) {
+          //   return;
+          // }
+
+          // final groupName = groupInfo.groupName;
+
+          // if (groupName == null) {
+          //   return;
+          // }
+
+          // final navigationState = OctopusState.fromNodes([
+          //   Routes.home.node(),
+          //   Routes.schedule.node(
+          //     arguments: <String, String>{
+          //       'groupId': groupInfo.groupId.toString(),
+          //       'groupName': groupName,
+          //     },
+          //   ),
+          // ]);
+
+          // print(navigationState.location);
+
+          // await Share.shareUri(Uri.parse(
+          //   'https://roadmapik.com${navigationState.location}',
+          // ));
 
           // await showDialog(
           //   context: context,

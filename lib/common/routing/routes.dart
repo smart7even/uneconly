@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/feature/loading/widget/loading_page.dart';
+import 'package:uneconly/feature/schedule/widget/home_page.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
 import 'package:uneconly/feature/select/widget/select_page.dart';
 import 'package:uneconly/feature/settings/widget/settings_page.dart';
@@ -10,7 +11,8 @@ enum Routes with OctopusRoute {
   loading('loading', title: 'Loading'),
   schedule('schedule', title: 'Schedule'),
   select('select', title: 'Select'),
-  settings('settings', title: 'Settings');
+  settings('settings', title: 'Settings'),
+  home('home', title: 'Home');
 
   const Routes(this.name, {this.title});
 
@@ -35,7 +37,7 @@ enum Routes with OctopusRoute {
           ),
           isViewMode: node.arguments['isViewMode'] != null
               ? node.arguments['isViewMode'] as String == 'true'
-              : false,
+              : true,
         );
       case Routes.select:
         return SelectPage(
@@ -45,6 +47,8 @@ enum Routes with OctopusRoute {
         );
       case Routes.settings:
         return const SettingsPage();
+      case Routes.home:
+        return const HomePage();
     }
   }
 }
