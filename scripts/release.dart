@@ -1,25 +1,49 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'version.dart';
 
 void main(List<String> args) async {
   await updatePubspecVersion();
+  await buildIosApp();
+  await pushIosAppToTestFlight();
+}
 
-  // final result = await Process.start(
-  //   'flutter',
-  //   ['build', 'ipa'],
-  //   runInShell: true,
-  // );
+Future<void> buildIosApp() async {
+  final result = await Process.start(
+    'flutter',
+    ['build', 'ipa'],
+    runInShell: true,
+  );
 
-  // result.stdout.transform(const Utf8Decoder()).listen((data) {
-  //   print(data);
-  // });
+  result.stdout.transform(const Utf8Decoder()).listen((data) {
+    print(data);
+  });
 
-  // result.stderr.transform(const Utf8Decoder()).listen((data) {
-  //   print(data);
-  // });
+  result.stderr.transform(const Utf8Decoder()).listen((data) {
+    print(data);
+  });
 
-  // print(await result.exitCode);
+  print(await result.exitCode);
+}
+
+Future<void> pushIosAppToTestFlight() async {
+  final result = await Process.start(
+    'fastlane',
+    ['beta'],
+    workingDirectory: '${Directory.current.path}${Platform.pathSeparator}ios',
+    runInShell: true,
+  );
+
+  result.stdout.transform(const Utf8Decoder()).listen((data) {
+    print(data);
+  });
+
+  result.stderr.transform(const Utf8Decoder()).listen((data) {
+    print(data);
+  });
+
+  print(await result.exitCode);
 }
 
 Future<Version?> updatePubspecVersion() async {
@@ -33,7 +57,7 @@ Future<Version?> updatePubspecVersion() async {
     return null;
   }
 
-  final newVersion = version.getNewMinorReleaseVersion().toVersionString();
+  final newVersion = version.getNewPatchReleaseVersion().toVersionString();
 
   final updatedPubspec = getPubspecWithReplacedVersion(
     pubspecContent,
