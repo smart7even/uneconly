@@ -114,17 +114,19 @@ class _SelectPageState extends State<SelectPage> {
 
     final settingsRepository = Dependencies.of(context).settingsRepository;
 
-    Octopus.of(context).setState(
-      (state) {
-        return state
-          ..removeWhere((node) => true)
-          ..add(
-            Routes.loading.node(),
-          );
-      },
-    );
-
     await settingsRepository.saveGroup(group);
+
+    if (context.mounted) {
+      Octopus.of(context).setState(
+        (state) {
+          return state
+            ..removeWhere((node) => true)
+            ..add(
+              Routes.loading.node(),
+            );
+        },
+      );
+    }
   }
 
   Future<void> onAddToFavoritesPressed(
