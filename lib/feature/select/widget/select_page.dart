@@ -191,7 +191,7 @@ class _SelectPageState extends State<SelectPage> {
       barrierColor: Colors.transparent,
       builder: (context) {
         return const SelectCoursePage(
-          courses: [1, 2, 3, 4],
+          courses: [1, 2, 3, 4, 5],
         );
       },
     );
