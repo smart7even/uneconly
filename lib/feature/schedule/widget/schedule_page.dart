@@ -626,7 +626,11 @@ class _SchedulePageState extends State<SchedulePage>
             );
           }
 
-          if (currentWeek < 1 || currentWeek > 52) {
+          if (currentWeek < 1) {
+            return const SizedBox();
+          }
+
+          if (currentWeek > 52) {
             return null;
           }
 
