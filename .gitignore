@@ -47,3 +47,5 @@ app.*.map.json
 
 # Test coverage report
 coverage
+
+env.json

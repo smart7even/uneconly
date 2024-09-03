@@ -77,6 +77,19 @@ class ScheduleDrawer extends StatelessWidget {
                   );
                 },
               ),
+              // ListTile for news
+              ListTile(
+                title: Text(
+                  AppLocalizations.of(context)!.news,
+                ),
+                onTap: () {
+                  Octopus.of(
+                    context,
+                  ).push(
+                    Routes.tutorials,
+                  );
+                },
+              ),
               // ListTile to view schedule of another group
               ListTile(
                 title: Text(

@@ -64,6 +64,20 @@ PODS:
     - AppMetricaCore (= 5.7.0)
     - AppMetricaCoreUtils (= 5.7.0)
     - AppMetricaLog (= 5.7.0)
+  - div_expressions_resolver (0.4.3):
+    - DivKit (< 31.0, >= 29.0)
+    - Flutter
+  - DivKit (30.15.0):
+    - DivKit_LayoutKit (= 30.15.0)
+    - DivKit_Serialization (= 30.15.0)
+    - VGSL (~> 6.0)
+  - DivKit_LayoutKit (30.15.0):
+    - DivKit_LayoutKitInterface (= 30.15.0)
+    - VGSL (~> 6.0)
+  - DivKit_LayoutKitInterface (30.15.0):
+    - VGSL (~> 6.0)
+  - DivKit_Serialization (30.15.0):
+    - VGSL (~> 6.0)
   - Flutter (1.0.0)
   - home_widget (0.0.1):
     - Flutter
@@ -76,6 +90,9 @@ PODS:
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - sqflite (0.0.3):
     - Flutter
     - FlutterMacOS
   - sqlite3 (3.46.1):
@@ -98,14 +115,26 @@ PODS:
     - sqlite3/rtree
   - url_launcher_ios (0.0.1):
     - Flutter
+  - VGSL (6.4.1):
+    - VGSLFundamentals (= 6.4.1)
+    - VGSLNetworking (= 6.4.1)
+    - VGSLUI (= 6.4.1)
+  - VGSLFundamentals (6.4.1)
+  - VGSLNetworking (6.4.1):
+    - VGSLFundamentals (= 6.4.1)
+    - VGSLUI (= 6.4.1)
+  - VGSLUI (6.4.1):
+    - VGSLFundamentals (= 6.4.1)
 
 DEPENDENCIES:
   - appmetrica_plugin (from `.symlinks/plugins/appmetrica_plugin/ios`)
+  - div_expressions_resolver (from `.symlinks/plugins/div_expressions_resolver/ios`)
   - Flutter (from `Flutter`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - sqflite (from `.symlinks/plugins/sqflite/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
@@ -127,12 +156,22 @@ SPEC REPOS:
     - AppMetricaProtobufUtils
     - AppMetricaStorageUtils
     - AppMetricaWebKit
+    - DivKit
+    - DivKit_LayoutKit
+    - DivKit_LayoutKitInterface
+    - DivKit_Serialization
     - KSCrash
     - sqlite3
+    - VGSL
+    - VGSLFundamentals
+    - VGSLNetworking
+    - VGSLUI
 
 EXTERNAL SOURCES:
   appmetrica_plugin:
     :path: ".symlinks/plugins/appmetrica_plugin/ios"
+  div_expressions_resolver:
+    :path: ".symlinks/plugins/div_expressions_resolver/ios"
   Flutter:
     :path: Flutter
   home_widget:
@@ -143,6 +182,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  sqflite:
+    :path: ".symlinks/plugins/sqflite/darwin"
   sqlite3_flutter_libs:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
   url_launcher_ios:
@@ -166,15 +207,25 @@ SPEC CHECKSUMS:
   AppMetricaProtobufUtils: 69272f30e19e30d814b7f05cbd1130e888764c8d
   AppMetricaStorageUtils: d72c866868dce22626441349bcd45eeec43b9e86
   AppMetricaWebKit: bf5a05e7ed13857807522639c8984a1c192e88ef
+  div_expressions_resolver: 4de71072592939bc93c771766e252a21ee07cfd2
+  DivKit: b410363a61bfbd42dd75765f78ec868eedc3007a
+  DivKit_LayoutKit: a7e0441fbfa9ef9aa406b9a492b2b086fc57e5ba
+  DivKit_LayoutKitInterface: 86f4d1823b42dfeabbd10f1d8cc4be92cee0f8ed
+  DivKit_Serialization: 8f5d3b3b05f03cb5c3e7f68eb0eb683891089a0f
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   home_widget: 0434835a4c9a75704264feff6be17ea40e0f0d57
   KSCrash: 158a0998f08ae7d4e54ef8a2da62d6e08b46d03a
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   share_plus: 8875f4f2500512ea181eef553c3e27dba5135aad
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   sqlite3: 19d8c26842078b45fa2deed63c4bbbe0c0e786ce
   sqlite3_flutter_libs: c00457ebd31e59fa6bb830380ddba24d44fbcd3b
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+  VGSL: f933d558164acfa8df87e1365fa47b069871761c
+  VGSLFundamentals: a957918fb54f377e1f75b4e46923a8f4b8db9b3b
+  VGSLNetworking: 79a991a7695839a2c80715c7bc5a06327a1a0259
+  VGSLUI: 71495727b634be4042a805eb52ce2e0297d02812
 
 PODFILE CHECKSUM: c4c93c5f6502fe2754f48404d3594bf779584011
 

@@ -47,5 +47,9 @@
     "share": "Поделиться",
     "lastWeekOfCurrentStudyYear": "Это последняя неделя текущего учебного года. Скоро должно появиться расписание для следующего учебного года",
     "checkOutOfficialWebsiteForPreciseInformation": "Проверяйте точную информацию на официальном веб-сайте",
-    "openOfficialWebsite": "Открыть официальный вебсайт"
+    "openOfficialWebsite": "Открыть официальный вебсайт",
+    "news": "Новости",
+    "error": "Ошибка",
+    "tryAgain": "Попробовать снова",
+    "homeWidget": "Виджет на главном экране"
 }

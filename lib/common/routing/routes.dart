@@ -6,13 +6,17 @@ import 'package:uneconly/feature/schedule/widget/home_page.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
 import 'package:uneconly/feature/select/widget/select_page.dart';
 import 'package:uneconly/feature/settings/widget/settings_page.dart';
+import 'package:uneconly/feature/tutorials/widget/home_widget_tutorial.dart';
+import 'package:uneconly/feature/tutorials/widget/tutorials_page.dart';
 
 enum Routes with OctopusRoute {
   loading('loading', title: 'Loading'),
   schedule('schedule', title: 'Schedule'),
   select('select', title: 'Select'),
   settings('settings', title: 'Settings'),
-  home('home', title: 'Home');
+  home('home', title: 'Home'),
+  tutorials('tutorials', title: 'Tutorials'),
+  homeWidgetTutorial('homeWidgetTutorial', title: 'Home Widget Tutorial');
 
   const Routes(this.name, {this.title});
 
@@ -49,6 +53,10 @@ enum Routes with OctopusRoute {
         return const SettingsPage();
       case Routes.home:
         return const HomePage();
+      case Routes.tutorials:
+        return const TutorialsPage();
+      case Routes.homeWidgetTutorial:
+        return const HomeWidgetTutorial();
     }
   }
 }

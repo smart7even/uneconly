@@ -50,5 +50,9 @@
     "share": "Share",
     "lastWeekOfCurrentStudyYear": "This is the last week of current study year. Next study year schedule should be available soon",
     "checkOutOfficialWebsiteForPreciseInformation": "Check out official website for precise info",
-    "openOfficialWebsite": "Open official website"
+    "openOfficialWebsite": "Open official website",
+    "news": "News",
+    "error": "Error",
+    "tryAgain": "Try again",
+    "homeWidget": "Home widget"
 }

@@ -10,6 +10,8 @@ import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/initialization/data/platform/platform_initialization.dart';
 import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
+import 'package:uneconly/feature/tutorials/data/tutorial_network_data_provider.dart';
+import 'package:uneconly/feature/tutorials/data/tutorial_repository.dart';
 
 /// Initializes the app and returns a [Dependencies] object
 Future<Dependencies> $initializeDependencies({
@@ -72,6 +74,12 @@ Map<String, _InitializationStep> _getInitializationSteps({
     'Initialize dio': (dependencies) async => dependencies.dio = Dio(
           BaseOptions(
             baseUrl: serverAddress,
+          ),
+        ),
+    'Initialize tutorial repository': (dependencies) async =>
+        dependencies.tutorialRepository = TutorialRepository(
+          networkDataProvider: TutorialNetworkDataProvider(
+            dio: dependencies.dio,
           ),
         ),
     'Log app initialized': (_) {},
