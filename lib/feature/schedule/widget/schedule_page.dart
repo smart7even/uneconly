@@ -19,6 +19,7 @@ import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_actions_popup.dart';
+import 'package:uneconly/feature/schedule/widget/schedule_drawer.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
@@ -215,198 +216,24 @@ class _SchedulePageState extends State<SchedulePage>
     );
   }
 
-  Future<void> waitReturnToHomeSchedule(
-    Octopus octopus,
-  ) async {
-    await waitRouteChange(
-      octopus,
-      shouldStopListen: () {
-        final lastNode = octopus.observer.value.children.last;
+  Future<void> _onFavoriteGroupsRefresh() async {
+    final dependencies = Dependencies.of(context);
 
-        return lastNode.name == Routes.home.name;
-      },
-    );
+    final value = await dependencies.settingsRepository.getFavoriteGroups();
+
+    setState(() {
+      favoriteGroups.clear();
+      favoriteGroups.addAll(value);
+    });
   }
 
   Widget _buildDrawer(
     BuildContext context,
     ScheduleState state,
   ) {
-    return Drawer(
-      semanticLabel: AppLocalizations.of(context)!.options,
-      child: ListView(
-        children: [
-          DrawerHeader(
-            margin: EdgeInsets.zero,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.selectedGroup,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  state.shortGroupInfo?.groupName ?? '',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ListTile(
-            title: Text(
-              AppLocalizations.of(context)!.selectAnotherGroup,
-            ),
-            onTap: () {
-              Octopus.of(context).push(
-                Routes.select,
-              );
-            },
-          ),
-          // ListTile for settings
-          ListTile(
-            title: Text(
-              AppLocalizations.of(context)!.settings,
-            ),
-            onTap: () {
-              Octopus.of(
-                context,
-              ).push(
-                Routes.settings,
-              );
-            },
-          ),
-          // ListTile to view schedule of another group
-          ListTile(
-            title: Text(
-              AppLocalizations.of(context)!.viewScheduleOfAnotherGroup,
-            ),
-            onTap: () async {
-              final dependenciesScope = Dependencies.of(context);
-
-              final octopus = context.octopus;
-
-              await octopus.push(
-                Routes.select,
-                arguments: {
-                  'mode': 'view',
-                },
-              );
-
-              await waitReturnToHomeSchedule(
-                octopus,
-              );
-
-              final value = await dependenciesScope.settingsRepository
-                  .getFavoriteGroups();
-
-              setState(() {
-                favoriteGroups.clear();
-                favoriteGroups.addAll(value);
-              });
-            },
-          ),
-          // Title for lisview of favorite groups
-          ListTile(
-            title: Text(
-              AppLocalizations.of(context)!.favoriteGroups,
-              // heading style
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          // If there are no favorite groups show button to add one
-          if (favoriteGroups.isEmpty)
-            ListTile(
-              title: Text(
-                AppLocalizations.of(context)!.addFirstFavoriteGroup,
-              ),
-            ),
-
-          // Listview to view favorite groups
-          if (favoriteGroups.isNotEmpty)
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: favoriteGroups.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                    favoriteGroups[index].name,
-                  ),
-                  onTap: () async {
-                    final octopus = context.octopus;
-                    final dependenciesScope = Dependencies.of(context);
-
-                    await octopus.push(
-                      Routes.schedule,
-                      arguments: {
-                        'groupId': favoriteGroups[index].id.toString(),
-                        'groupName': favoriteGroups[index].name,
-                        'isViewMode': 'true',
-                      },
-                    );
-
-                    await waitReturnToHomeSchedule(octopus);
-
-                    final value = await dependenciesScope.settingsRepository
-                        .getFavoriteGroups();
-
-                    setState(() {
-                      favoriteGroups.clear();
-                      favoriteGroups.addAll(value);
-                    });
-                  },
-                );
-              },
-            ),
-          // Elevated Button with minimum possible width to add favorite group
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              width: 132,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-              ),
-              child: ElevatedButton(
-                onPressed: () async {
-                  final dependenciesScope = Dependencies.of(context);
-
-                  final octopus = context.octopus;
-
-                  await octopus.push(
-                    Routes.select,
-                    arguments: {
-                      'mode': SelectPageMode.favorite.name,
-                    },
-                  );
-
-                  await waitReturnToHomeSchedule(octopus);
-
-                  final value = await dependenciesScope.settingsRepository
-                      .getFavoriteGroups();
-
-                  setState(() {
-                    favoriteGroups.clear();
-                    favoriteGroups.addAll(value);
-                  });
-                },
-                child: Text(
-                  AppLocalizations.of(context)!.add,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return ScheduleDrawer(
+      favoriteGroups: favoriteGroups,
+      onFavoriteGroupsRefresh: _onFavoriteGroupsRefresh,
     );
   }
 
@@ -682,4 +509,17 @@ class _SchedulePageState extends State<SchedulePage>
       ),
     );
   }
+}
+
+Future<void> waitReturnToHomeSchedule(
+  Octopus octopus,
+) async {
+  await waitRouteChange(
+    octopus,
+    shouldStopListen: () {
+      final lastNode = octopus.observer.value.children.last;
+
+      return lastNode.name == Routes.home.name;
+    },
+  );
 }
