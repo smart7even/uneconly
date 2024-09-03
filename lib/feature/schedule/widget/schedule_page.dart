@@ -46,7 +46,7 @@ class SchedulePage extends StatefulWidget {
 /// State for widget SchedulePage
 class _SchedulePageState extends State<SchedulePage>
     with WidgetsBindingObserver {
-  static const initialPageIndex = 0;
+  static const initialPageIndex = 4242;
 
   final controller = PageController(
     initialPage: initialPageIndex,
@@ -609,7 +609,6 @@ class _SchedulePageState extends State<SchedulePage>
       ),
       body: PageView.builder(
         controller: controller,
-        itemCount: 52,
         scrollDirection: Axis.horizontal,
         onPageChanged: (int newIndex) => onPageChanged(context, newIndex, week),
         itemBuilder: (context, index) {
