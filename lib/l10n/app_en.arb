@@ -54,5 +54,6 @@
     "news": "News",
     "error": "Error",
     "tryAgain": "Try again",
-    "homeWidget": "Home widget"
+    "homeWidget": "Home widget",
+    "viewNews": "View news"
 }

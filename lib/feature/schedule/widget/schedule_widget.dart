@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/localization/localization.dart';
+import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
@@ -117,6 +120,49 @@ class ScheduleWidget extends StatelessWidget {
         );
       }
     }
+
+    slivers.add(
+      SliverToBoxAdapter(
+        child: Container(
+          height: 100,
+          // color: Theme.of(context).secondaryHeaderColor,
+          child: Column(
+            children: [
+              const Spacer(),
+              Padding(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  bottom: MediaQuery.of(context).padding.bottom,
+                ),
+                child: SizedBox(
+                  height: 50,
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      context.octopus.push(
+                        Routes.tutorials,
+                      );
+                    },
+                    // shape rounded
+                    style: ButtonStyle(
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.viewNews,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
 
     return slivers;
   }
