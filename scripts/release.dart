@@ -4,7 +4,14 @@ import 'dart:io';
 import 'version.dart';
 
 void main(List<String> args) async {
-  await updatePubspecVersion();
+  Version releaseType = switch (args[0]) {
+    'major' => Version.major(),
+    'minor' => Version.minor(),
+    'patch' => Version.patch(),
+    _ => Version.patch(),
+  };
+
+  await updatePubspecVersion(releaseType);
   await makeCodeGeneration();
   await buildIosApp();
   await pushIosAppToTestFlight();
@@ -69,7 +76,7 @@ Future<void> pushIosAppToTestFlight() async {
   print(await result.exitCode);
 }
 
-Future<Version?> updatePubspecVersion() async {
+Future<Version?> updatePubspecVersion(Version releaseType) async {
   final pubspecFile = File('pubspec.yaml');
 
   final pubspecContent = await pubspecFile.readAsString();
@@ -80,7 +87,8 @@ Future<Version?> updatePubspecVersion() async {
     return null;
   }
 
-  final newVersion = version.getNewPatchReleaseVersion().toVersionString();
+  final newVersion =
+      version.getNewReleaseVersion(releaseType).toVersionString();
 
   final updatedPubspec = getPubspecWithReplacedVersion(
     pubspecContent,

@@ -72,12 +72,29 @@ class Version {
     return '$major.$minor.$patch+$buildNumber';
   }
 
+  Version getNewReleaseVersion(Version releaseType) {
+    if (releaseType == Version.major()) {
+      return getNewMajorReleaseVersion();
+    } else if (releaseType == Version.minor()) {
+      return getNewMinorReleaseVersion();
+    } else if (releaseType == Version.patch()) {
+      return getNewPatchReleaseVersion();
+    }
+
+    throw ArgumentError('Invalid release type');
+  }
+
   Version getNewMajorReleaseVersion() {
-    return this + Version.major();
+    return (this + Version.major()).copyWith(
+      minor: 0,
+      patch: 0,
+    );
   }
 
   Version getNewMinorReleaseVersion() {
-    return this + Version.minor();
+    return (this + Version.minor()).copyWith(
+      patch: 0,
+    );
   }
 
   Version getNewPatchReleaseVersion() {
