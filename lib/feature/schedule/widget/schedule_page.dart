@@ -60,6 +60,8 @@ class _SchedulePageState extends State<SchedulePage>
   final List<Group> favoriteGroups = [];
   bool isFavorite = false;
 
+  Timer? _rebuildTimer;
+
   /* #region Lifecycle */
   @override
   void initState() {
@@ -91,11 +93,23 @@ class _SchedulePageState extends State<SchedulePage>
         });
       },
     );
+
+    _rebuildTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (timer) {
+        if (context.mounted) {
+          setState(() {
+            log('rebuild');
+          });
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _rebuildTimer?.cancel();
     super.dispose();
   }
 

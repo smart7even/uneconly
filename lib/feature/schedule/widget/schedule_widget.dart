@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:l/l.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/routing/routes.dart';
@@ -44,6 +43,8 @@ class ScheduleWidget extends StatelessWidget {
       return slivers;
     }
 
+    final today = DateTime.now();
+
     for (var daySchedule in currentSchedule.daySchedules) {
       String sectionTitle = capitalize(
         DateFormat('EEEE, d MMMM', 'ru').format(
@@ -51,7 +52,6 @@ class ScheduleWidget extends StatelessWidget {
         ),
       );
 
-      final today = DateTime.now();
       final difference = calculateDifferenceInDays(daySchedule.day, today);
 
       if (difference == 0) {
@@ -69,9 +69,10 @@ class ScheduleWidget extends StatelessWidget {
           child: ListTile(
             title: Text(
               sectionTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
+                color: difference == 0 ? Theme.of(context).primaryColor : null,
               ),
             ),
           ),
@@ -92,7 +93,10 @@ class ScheduleWidget extends StatelessWidget {
             (BuildContext context, int index) {
               final lesson = daySchedule.lessons[index];
 
-              return LessonTile(lesson: lesson);
+              return LessonTile(
+                lesson: lesson,
+                currentTime: today,
+              );
             },
             childCount: daySchedule.lessons.length,
           ),
