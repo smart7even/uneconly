@@ -5,6 +5,7 @@ import 'version.dart';
 
 void main(List<String> args) async {
   await updatePubspecVersion();
+  await makeCodeGeneration();
   await buildIosApp();
   await pushIosAppToTestFlight();
 }
@@ -12,7 +13,29 @@ void main(List<String> args) async {
 Future<void> buildIosApp() async {
   final result = await Process.start(
     'flutter',
-    ['build', 'ipa'],
+    [
+      'build',
+      'ipa',
+      '--dart-define-from-file=env.json',
+    ],
+    runInShell: true,
+  );
+
+  result.stdout.transform(const Utf8Decoder()).listen((data) {
+    print(data);
+  });
+
+  result.stderr.transform(const Utf8Decoder()).listen((data) {
+    print(data);
+  });
+
+  print(await result.exitCode);
+}
+
+Future<void> makeCodeGeneration() async {
+  final result = await Process.start(
+    'make',
+    ['generate'],
     runInShell: true,
   );
 
