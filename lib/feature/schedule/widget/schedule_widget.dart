@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:l/l.dart';
@@ -7,6 +9,7 @@ import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
+import 'package:uneconly/feature/schedule/widget/day_schedule_page.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_tile.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -67,13 +70,35 @@ class ScheduleWidget extends StatelessWidget {
       slivers.add(
         SliverToBoxAdapter(
           child: ListTile(
-            title: Text(
-              sectionTitle,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: difference == 0 ? Theme.of(context).primaryColor : null,
-              ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    sectionTitle,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: difference == 0
+                          ? Theme.of(context).primaryColor
+                          : null,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(Icons.info_outlined),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return DaySchedulePage(daySchedule: daySchedule);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),
