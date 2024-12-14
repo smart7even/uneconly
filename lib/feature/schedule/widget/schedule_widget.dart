@@ -84,20 +84,20 @@ class ScheduleWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  icon: const Icon(Icons.info_outlined),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return DaySchedulePage(daySchedule: daySchedule);
-                        },
-                      ),
-                    );
-                  },
-                ),
+                // IconButton(
+                //   padding: EdgeInsets.zero,
+                //   constraints: const BoxConstraints(),
+                //   icon: const Icon(Icons.info_outlined),
+                //   onPressed: () {
+                //     Navigator.of(context).push(
+                //       MaterialPageRoute(
+                //         builder: (context) {
+                //           return DaySchedulePage(daySchedule: daySchedule);
+                //         },
+                //       ),
+                //     );
+                //   },
+                // ),
               ],
             ),
           ),
@@ -154,6 +154,9 @@ class ScheduleWidget extends StatelessWidget {
       SliverToBoxAdapter(
         child: Container(
           height: 100,
+          padding: const EdgeInsets.only(
+            bottom: 16,
+          ),
           // color: Theme.of(context).secondaryHeaderColor,
           child: Column(
             children: [

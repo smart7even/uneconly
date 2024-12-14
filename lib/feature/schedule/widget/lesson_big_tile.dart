@@ -53,7 +53,7 @@ class LessonBigTile extends StatelessWidget {
                 RichText(
                   text: TextSpan(children: [
                     const TextSpan(
-                      text: 'A',
+                      text: ' ',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,

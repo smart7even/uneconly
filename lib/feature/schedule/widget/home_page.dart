@@ -8,6 +8,24 @@ import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
 import 'package:uneconly/feature/select/model/group.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
 
+enum HomeTabsEnum implements Comparable<HomeTabsEnum> {
+  schedule,
+  vacancies;
+
+  static HomeTabsEnum fromValue(String? value, {HomeTabsEnum? fallback}) =>
+      switch (value?.trim().toLowerCase()) {
+        'schedule' => schedule,
+        'vacancies' => vacancies,
+        _ => fallback ?? (throw ArgumentError.value(value)),
+      };
+
+  @override
+  int compareTo(HomeTabsEnum other) => index.compareTo(other.index);
+
+  @override
+  String toString() => name;
+}
+
 /// {@template home_page}
 /// HomePage widget
 /// {@endtemplate}
@@ -21,7 +39,12 @@ class HomePage extends StatefulWidget {
 
 /// State for widget HomePage
 class _HomePageState extends State<HomePage> {
+  HomeTabsEnum _tab = HomeTabsEnum.schedule;
+  late final OctopusStateObserver _octopusStateObserver;
+
   Group? myGroup;
+
+  bool bottomBarEnabled = false;
 
   /* #region Lifecycle */
   @override
@@ -29,6 +52,32 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     // Initial state initialization
     onOpen();
+
+    _octopusStateObserver = context.octopus.observer;
+
+    // Restore tab from router arguments
+    _tab = HomeTabsEnum.fromValue(
+      _octopusStateObserver.value.arguments['page'],
+      fallback: HomeTabsEnum.schedule,
+    );
+    _octopusStateObserver.addListener(_onOctopusStateChanged);
+  }
+
+  // Router state changed
+  void _onOctopusStateChanged() {
+    final newTab = HomeTabsEnum.fromValue(
+      _octopusStateObserver.value.arguments['page'],
+      fallback: HomeTabsEnum.schedule,
+    );
+    _switchTab(newTab);
+  }
+
+  // Change tab
+  void _switchTab(HomeTabsEnum tab) {
+    if (!mounted) return;
+    if (_tab == tab) return;
+    context.octopus.setArguments((args) => args['page'] = tab.name);
+    setState(() => _tab = tab);
   }
 
   @override
@@ -86,6 +135,18 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Bottom navigation bar item tapped
+  void _onItemTapped(int index) {
+    final newTab = HomeTabsEnum.values[index];
+    if (_tab == newTab) {
+      // The same tab tapped twice
+      return;
+    } else {
+      // Switch tab to new one
+      _switchTab(newTab);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentMyGroup = myGroup;
@@ -99,12 +160,48 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return SchedulePage(
-      shortGroupInfo: ShortGroupInfo(
-        groupId: currentMyGroup.id,
-        groupName: currentMyGroup.name,
+    return Scaffold(
+      bottomNavigationBar: bottomBarEnabled
+          ? BottomNavigationBar(
+              elevation: 0,
+              currentIndex: _tab.index,
+              onTap: _onItemTapped,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'Home',
+                ),
+                // BottomNavigationBarItem(
+                //   icon: Icon(Icons.today),
+                //   label: 'Daily',
+                // ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.work),
+                  label: 'Vacancies',
+                ),
+              ],
+            )
+          : null,
+      body: IndexedStack(
+        index: _tab.index,
+        children: [
+          SchedulePage(
+            shortGroupInfo: ShortGroupInfo(
+              groupId: currentMyGroup.id,
+              groupName: currentMyGroup.name,
+            ),
+            isViewMode: false,
+          ),
+          Scaffold(
+            appBar: AppBar(
+              title: const Text('Vacancies'),
+            ),
+            body: const Center(
+              child: Text('Vacancies'),
+            ),
+          ),
+        ],
       ),
-      isViewMode: false,
     );
   }
 } // _HomePageState
