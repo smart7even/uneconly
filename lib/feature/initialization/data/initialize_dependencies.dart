@@ -82,7 +82,9 @@ Map<String, _InitializationStep> _getInitializationSteps({
             dio: dependencies.dio,
           ),
         ),
-    'Log app initialized': (_) {},
+    'Log app initialized': (_) {
+      return;
+    },
   };
 
   return initializationSteps;

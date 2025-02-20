@@ -54,11 +54,15 @@ Future<Dependencies> $initializeApp({
 
 /// Resets the app's state to its initial state.
 @visibleForTesting
-Future<void> $resetApp(Dependencies dependencies) async {}
+Future<void> $resetApp(Dependencies dependencies) async {
+  return;
+}
 
 /// Disposes the app and releases all resources.
 @visibleForTesting
-Future<void> $disposeApp(Dependencies dependencies) async {}
+Future<void> $disposeApp(Dependencies dependencies) async {
+  return;
+}
 
 Future<void> _catchExceptions(ILoggingRepository loggingRepository) async {
   try {

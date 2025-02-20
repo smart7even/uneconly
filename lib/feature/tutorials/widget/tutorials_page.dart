@@ -7,7 +7,6 @@ import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/routes.dart';
-import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
 import 'package:uneconly/feature/tutorials/bloc/tutorial_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 

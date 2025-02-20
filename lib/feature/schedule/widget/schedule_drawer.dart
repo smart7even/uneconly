@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/localization/localization.dart';
-import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
@@ -144,7 +143,6 @@ class ScheduleDrawer extends StatelessWidget {
                       ),
                       onTap: () async {
                         final octopus = context.octopus;
-                        final dependenciesScope = Dependencies.of(context);
 
                         await octopus.push(
                           Routes.schedule,

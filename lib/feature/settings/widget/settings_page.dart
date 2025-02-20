@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -13,11 +12,11 @@ import 'package:uneconly/feature/settings/bloc/settings_bloc.dart';
 import 'package:uneconly/feature/settings/model/settings_entity.dart';
 import 'package:uneconly/feature/settings/widget/settings_tile.dart';
 
-const double _kItemExtent = 32.0;
-const List<String> _languageNames = <String>[
-  'Русский',
-  'English',
-];
+// const double _kItemExtent = 32.0;
+// const List<String> _languageNames = <String>[
+//   'Русский',
+//   'English',
+// ];
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -27,7 +26,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  int _selectedLanguage = 0;
+  // int _selectedLanguage = 0;
 
   List<MaterialColor> colors = [
     Colors.blue,
@@ -48,47 +47,47 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
 
-    final dependenciesScope = Dependencies.of(context);
+    // final dependenciesScope = Dependencies.of(context);
 
-    dependenciesScope.settingsRepository.getLanguage().then((value) {
-      if (value == 'ru') {
-        setState(() {
-          _selectedLanguage = 0;
-        });
-      } else if (value == 'en') {
-        setState(() {
-          _selectedLanguage = 1;
-        });
-      } else {
-        setState(() {
-          final defaultLocale = Platform.localeName;
-          _selectedLanguage = defaultLocale.split('_')[0] == 'ru' ? 0 : 1;
-        });
-      }
-    });
+    // dependenciesScope.settingsRepository.getLanguage().then((value) {
+    //   if (value == 'ru') {
+    //     setState(() {
+    //       _selectedLanguage = 0;
+    //     });
+    //   } else if (value == 'en') {
+    //     setState(() {
+    //       _selectedLanguage = 1;
+    //     });
+    //   } else {
+    //     setState(() {
+    //       final defaultLocale = Platform.localeName;
+    //       _selectedLanguage = defaultLocale.split('_')[0] == 'ru' ? 0 : 1;
+    //     });
+    //   }
+    // });
   }
 
   // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoPicker.
-  void _showDialog(Widget child) {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (BuildContext context) => Container(
-        height: 216,
-        padding: const EdgeInsets.only(top: 6.0),
-        // The Bottom margin is provided to align the popup above the system navigation bar.
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        // Provide a background color for the popup.
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        // Use a SafeArea widget to avoid system overlaps.
-        child: SafeArea(
-          top: false,
-          child: child,
-        ),
-      ),
-    );
-  }
+  // void _showDialog(Widget child) {
+  //   showCupertinoModalPopup<void>(
+  //     context: context,
+  //     builder: (BuildContext context) => Container(
+  //       height: 216,
+  //       padding: const EdgeInsets.only(top: 6.0),
+  //       // The Bottom margin is provided to align the popup above the system navigation bar.
+  //       margin: EdgeInsets.only(
+  //         bottom: MediaQuery.of(context).viewInsets.bottom,
+  //       ),
+  //       // Provide a background color for the popup.
+  //       color: CupertinoColors.systemBackground.resolveFrom(context),
+  //       // Use a SafeArea widget to avoid system overlaps.
+  //       child: SafeArea(
+  //         top: false,
+  //         child: child,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {

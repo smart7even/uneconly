@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/feature/schedule/model/lesson.dart';
 
 class LessonTile extends StatefulWidget {

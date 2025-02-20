@@ -121,7 +121,10 @@ class TutorialBLoC extends Bloc<TutorialEvent, TutorialState>
 
   /// Create event handler
   Future<void> _create(
-      CreateTutorialEvent event, Emitter<TutorialState> emit) async {
+    CreateTutorialEvent event,
+    Emitter<TutorialState> emit,
+  ) async {
+    return;
     // try {
     //   emit(event.inProgress(state: state));
     //   //final newData = await _repository.();
@@ -137,7 +140,9 @@ class TutorialBLoC extends Bloc<TutorialEvent, TutorialState>
 
   /// Read event handler
   Future<void> _read(
-      ReadTutorialEvent event, Emitter<TutorialState> emit) async {
+    ReadTutorialEvent event,
+    Emitter<TutorialState> emit,
+  ) async {
     try {
       emit(event.inProgress(state: state));
       final newData = await _repository.fetchNews().timeout(
@@ -161,7 +166,10 @@ class TutorialBLoC extends Bloc<TutorialEvent, TutorialState>
 
   /// Update event handler
   Future<void> _update(
-      UpdateTutorialEvent event, Emitter<TutorialState> emit) async {
+    UpdateTutorialEvent event,
+    Emitter<TutorialState> emit,
+  ) async {
+    return;
     // try {
     //   emit(event.inProgress(state: state));
     //   final newData = await _repository.();
@@ -177,7 +185,10 @@ class TutorialBLoC extends Bloc<TutorialEvent, TutorialState>
 
   /// Delete event handler
   Future<void> _delete(
-      DeleteTutorialEvent event, Emitter<TutorialState> emit) async {
+    DeleteTutorialEvent event,
+    Emitter<TutorialState> emit,
+  ) async {
+    return;
     // try {
     //   emit(event.inProgress(state: state));
     //   //final newData = await _repository.();

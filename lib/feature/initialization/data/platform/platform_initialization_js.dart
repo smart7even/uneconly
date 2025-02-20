@@ -5,6 +5,10 @@ Future<void> $platformInitialization() =>
         ? _mobileInitialization()
         : _desktopInitialization();
 
-Future<void> _mobileInitialization() async {}
+Future<void> _mobileInitialization() async {
+  return;
+}
 
-Future<void> _desktopInitialization() async {}
+Future<void> _desktopInitialization() async {
+  return;
+}

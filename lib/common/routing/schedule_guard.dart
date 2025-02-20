@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/routing/routes.dart';
-import 'package:uneconly/feature/select/model/group.dart';
 
 class ScheduleGuard extends OctopusGuard {
   ScheduleGuard({

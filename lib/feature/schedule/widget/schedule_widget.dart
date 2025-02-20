@@ -1,15 +1,11 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:l/l.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
-import 'package:uneconly/feature/schedule/widget/day_schedule_page.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_tile.dart';
 import 'package:url_launcher/url_launcher.dart';
 

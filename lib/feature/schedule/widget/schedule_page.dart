@@ -24,7 +24,6 @@ import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
 import 'package:uneconly/feature/select/model/group.dart';
-import 'package:uneconly/feature/select/widget/select_page.dart';
 
 /// {@template schedule_page}
 /// SchedulePage widget
@@ -69,7 +68,7 @@ class _SchedulePageState extends State<SchedulePage>
     initializeDateFormatting('en');
     // Initial state initialization
 
-    print(Octopus.of(context).state.uri.toString());
+    log(Octopus.of(context).state.uri.toString());
 
     scheduleBLoC = _initBloc(context);
 
