@@ -56,6 +56,7 @@ dependencies:
   appmetrica_plugin: ^2.1.1
   url_launcher: ^6.3.0
   divkit: ^0.3.0
+  logging: ^1.3.0
 
 dev_dependencies:
   flutter_test:

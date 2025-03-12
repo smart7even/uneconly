@@ -6,6 +6,7 @@ import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
+import 'package:uneconly/feature/schedule/widget/day_schedule_page.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_tile.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -80,20 +81,21 @@ class ScheduleWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                // IconButton(
-                //   padding: EdgeInsets.zero,
-                //   constraints: const BoxConstraints(),
-                //   icon: const Icon(Icons.info_outlined),
-                //   onPressed: () {
-                //     Navigator.of(context).push(
-                //       MaterialPageRoute(
-                //         builder: (context) {
-                //           return DaySchedulePage(daySchedule: daySchedule);
-                //         },
-                //       ),
-                //     );
-                //   },
-                // ),
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  alignment: Alignment.center,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(Icons.info_outlined),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return DaySchedulePage(daySchedule: daySchedule);
+                        },
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),

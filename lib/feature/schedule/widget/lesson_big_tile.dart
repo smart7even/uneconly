@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/lesson.dart';
+import 'package:uneconly/feature/schedule/widget/lesson_badge.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_property.dart';
 
 /// {@template lesson_big_tile}
@@ -9,11 +10,13 @@ import 'package:uneconly/feature/schedule/widget/lesson_property.dart';
 /// {@endtemplate}
 class LessonBigTile extends StatelessWidget {
   final Lesson lesson;
+  final int lessonNumber;
 
   /// {@macro lesson_big_tile}
   const LessonBigTile({
     super.key,
     required this.lesson,
+    required this.lessonNumber,
   });
 
   Widget _buildLessonProperty(
@@ -30,6 +33,7 @@ class LessonBigTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final professor = lesson.professor;
+    final lessonType = lesson.lessonType;
 
     return Container(
       padding: const EdgeInsets.all(8),
@@ -83,9 +87,9 @@ class LessonBigTile extends StatelessWidget {
                     fontSize: 18,
                   ),
                 ),
-                const SizedBox(
-                  height: 4,
-                ),
+                // const SizedBox(
+                //   height: 4,
+                // ),
                 _buildLessonProperty(
                   context,
                   Icons.location_on,
@@ -97,6 +101,41 @@ class LessonBigTile extends StatelessWidget {
                     Icons.person,
                     professor,
                   ),
+                const SizedBox(
+                  height: 4,
+                ),
+                SingleChildScrollView(
+                  child: Row(
+                    children: [
+                      LessonBadge.text(
+                        text: '$lessonNumber пара',
+                      ),
+                      if (lessonType != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: LessonBadge.text(
+                            text: lessonType,
+                            // onTap: () {},
+                          ),
+                        ),
+                      // if (professor != null)
+                      //   Padding(
+                      //     padding: const EdgeInsets.only(left: 4),
+                      //     child: LessonBadge.icon(
+                      //       icon: Icons.school,
+                      //       onTap: () {},
+                      //     ),
+                      //   ),
+                      // Padding(
+                      //   padding: const EdgeInsets.only(left: 4),
+                      //   child: LessonBadge.icon(
+                      //     icon: Icons.location_on,
+                      //     onTap: () {},
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                ),
                 const Divider(),
               ],
             ),

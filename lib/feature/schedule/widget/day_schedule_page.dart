@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:uneconly/common/utils/lesson_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/day_schedule.dart';
+import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_big_tile.dart';
 
 /// {@template day_schedule_widget}
@@ -13,6 +14,16 @@ class DaySchedulePage extends StatelessWidget {
 
   /// {@macro day_schedule_widget}
   const DaySchedulePage({super.key, required this.daySchedule});
+
+  int getLessonNumber(List<List<Lesson>> grouppedLessonsByTime, Lesson lesson) {
+    for (var i = 0; i < grouppedLessonsByTime.length; i++) {
+      if (grouppedLessonsByTime[i].contains(lesson)) {
+        return i + 1;
+      }
+    }
+
+    return 0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,26 +46,59 @@ class DaySchedulePage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          if (overlappingLessons.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                'Внимание! На это время назначено несколько пар',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
+          if (daySchedule.lessons.isEmpty)
+            const Expanded(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Text(
+                    'На этот день нет пар 🍀',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
                 ),
               ),
             ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: daySchedule.lessons.length,
-              itemBuilder: (context, index) {
-                return LessonBigTile(
-                  lesson: daySchedule.lessons[index],
-                );
-              },
+          if (grouppedLessonsByTime.isNotEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                'Всего пар: ${grouppedLessonsByTime.length}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+                textAlign: TextAlign.start,
+              ),
             ),
-          ),
+          // if (overlappingLessons.isNotEmpty)
+          //   Padding(
+          //     padding: const EdgeInsets.all(8),
+          //     child: Text(
+          //       'Внимание! На это время назначено несколько пар',
+          //       style: TextStyle(
+          //         color: Theme.of(context).colorScheme.error,
+          //       ),
+          //     ),
+          //   ),
+          if (daySchedule.lessons.isNotEmpty)
+            Expanded(
+              child: ListView.builder(
+                itemCount: daySchedule.lessons.length,
+                itemBuilder: (context, index) {
+                  return LessonBigTile(
+                    lesson: daySchedule.lessons[index],
+                    lessonNumber: getLessonNumber(
+                      grouppedLessonsByTime,
+                      daySchedule.lessons[index],
+                    ),
+                  );
+                },
+              ),
+            ),
         ],
       ),
     );
