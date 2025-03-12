@@ -3,10 +3,9 @@ import 'dart:async';
 import 'package:divkit/divkit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
-import 'package:uneconly/common/routing/routes.dart';
+import 'package:uneconly/common/widget/uneconly_div_kit_view.dart';
 import 'package:uneconly/feature/tutorials/bloc/tutorial_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -70,19 +69,8 @@ class TutorialsPage extends StatelessWidget {
               return _errorWidget(context);
             }
 
-            return DivKitView(
-              data: DefaultDivKitData.fromJson(
-                state.data.news,
-              ),
-              actionHandler: MyDivkitActionHandler(
-                uneconlyUrlHandler: UneconlyUrlHandler(handler: (uri) {
-                  if (uri.host == 'home_widget') {
-                    context.octopus.push(
-                      Routes.homeWidgetTutorial,
-                    );
-                  }
-                }),
-              ),
+            return UneconlyDivKitView(
+              data: state.data.news,
             );
           },
         ),

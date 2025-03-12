@@ -82,10 +82,12 @@ class ScheduleWidget extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  padding: EdgeInsets.zero,
+                  // padding: EdgeInsets.zero,
                   alignment: Alignment.center,
                   constraints: const BoxConstraints(),
-                  icon: const Icon(Icons.info_outlined),
+                  icon: const Icon(
+                    Icons.open_in_new,
+                  ),
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(

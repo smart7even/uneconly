@@ -44,34 +44,36 @@ class DaySchedulePage extends StatelessWidget {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          if (daySchedule.lessons.isEmpty)
-            const Expanded(
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Text(
-                    'На этот день нет пар 🍀',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+      body: CustomScrollView(
+        slivers: [
+          // if (daySchedule.lessons.isEmpty)
+          //   const Expanded(
+          //     child: Center(
+          //       child: Padding(
+          //         padding: EdgeInsets.all(8),
+          //         child: Text(
+          //           'На этот день нет пар 🍀',
+          //           style: TextStyle(
+          //             fontWeight: FontWeight.bold,
+          //             fontSize: 18,
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ),
           if (grouppedLessonsByTime.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                'Всего пар: ${grouppedLessonsByTime.length}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+            SliverToBoxAdapter(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  'Всего пар: ${grouppedLessonsByTime.length}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                  textAlign: TextAlign.start,
                 ),
-                textAlign: TextAlign.start,
               ),
             ),
           // if (overlappingLessons.isNotEmpty)
@@ -85,20 +87,24 @@ class DaySchedulePage extends StatelessWidget {
           //     ),
           //   ),
           if (daySchedule.lessons.isNotEmpty)
-            Expanded(
-              child: ListView.builder(
-                itemCount: daySchedule.lessons.length,
-                itemBuilder: (context, index) {
-                  return LessonBigTile(
-                    lesson: daySchedule.lessons[index],
-                    lessonNumber: getLessonNumber(
-                      grouppedLessonsByTime,
-                      daySchedule.lessons[index],
-                    ),
-                  );
-                },
-              ),
+            SliverList.builder(
+              itemCount: daySchedule.lessons.length,
+              itemBuilder: (context, index) {
+                return LessonBigTile(
+                  lesson: daySchedule.lessons[index],
+                  lessonNumber: getLessonNumber(
+                    grouppedLessonsByTime,
+                    daySchedule.lessons[index],
+                  ),
+                );
+              },
             ),
+          // SliverToBoxAdapter(
+          //   child: UneconlyDivKitView(
+          //     data: {}
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
