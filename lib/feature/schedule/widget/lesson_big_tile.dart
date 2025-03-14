@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:octopus/octopus.dart';
+import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_badge.dart';
@@ -33,6 +35,7 @@ class LessonBigTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final professor = lesson.professor;
+    final professorId = lesson.professorId;
     final lessonType = lesson.lessonType;
 
     return Container(
@@ -118,14 +121,23 @@ class LessonBigTile extends StatelessWidget {
                             // onTap: () {},
                           ),
                         ),
-                      // if (professor != null)
-                      //   Padding(
-                      //     padding: const EdgeInsets.only(left: 4),
-                      //     child: LessonBadge.icon(
-                      //       icon: Icons.school,
-                      //       onTap: () {},
-                      //     ),
-                      //   ),
+                      if (professor != null && professorId != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: LessonBadge.icon(
+                            icon: Icons.school,
+                            onTap: () {
+                              Octopus.of(context).push(
+                                Routes.schedule,
+                                arguments: {
+                                  'professorId': professorId.toString(),
+                                  'professorName': professor,
+                                  'isViewMode': 'true',
+                                },
+                              );
+                            },
+                          ),
+                        ),
                       // Padding(
                       //   padding: const EdgeInsets.only(left: 4),
                       //   child: LessonBadge.icon(

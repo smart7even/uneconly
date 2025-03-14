@@ -16,7 +16,7 @@ class MyDatabase extends _$MyDatabase {
   // you should bump this number whenever you change or add a table definition.
   // Migrations are covered later in the documentation.
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -41,6 +41,12 @@ class MyDatabase extends _$MyDatabase {
           // we added the professorId property in the change from version 3 to
           // version 4
           await m.addColumn(lessons, lessons.professorId);
+        }
+
+        if (from < 5) {
+          // we added the group property in the change from version 4 to
+          // version 5
+          await m.addColumn(lessons, lessons.group);
         }
       },
     );

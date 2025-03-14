@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
+import 'package:uneconly/common/model/short_professor_info.dart';
 import 'package:uneconly/feature/loading/widget/loading_page.dart';
 import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 import 'package:uneconly/feature/schedule/widget/home_page.dart';
@@ -35,17 +36,34 @@ enum Routes with OctopusRoute {
           isActive: true,
         );
       case Routes.schedule:
-        return SchedulePage(
-          scheduleInfo: ScheduleInfo.group(
-            shortGroupInfo: ShortGroupInfo(
-              groupId: int.parse(node.arguments['groupId'] as String),
-              groupName: node.arguments['groupName'] as String,
+        final isGroup = node.arguments['groupId'] != null;
+
+        if (isGroup) {
+          return SchedulePage(
+            scheduleInfo: ScheduleInfo.group(
+              shortGroupInfo: ShortGroupInfo(
+                groupId: int.parse(node.arguments['groupId'] as String),
+                groupName: node.arguments['groupName'] as String,
+              ),
             ),
-          ),
-          isViewMode: node.arguments['isViewMode'] != null
-              ? node.arguments['isViewMode'] as String == 'true'
-              : true,
-        );
+            isViewMode: node.arguments['isViewMode'] != null
+                ? node.arguments['isViewMode'] as String == 'true'
+                : true,
+          );
+        } else {
+          return SchedulePage(
+            scheduleInfo: ScheduleInfo.professor(
+              shortProfessorInfo: ShortProfessorInfo(
+                professorId: int.parse(node.arguments['professorId'] as String),
+                professorName: node.arguments['professorName'] as String,
+              ),
+            ),
+            isViewMode: node.arguments['isViewMode'] != null
+                ? node.arguments['isViewMode'] as String == 'true'
+                : true,
+          );
+        }
+
       case Routes.select:
         return SelectPage(
           mode: node.arguments['mode'] != null

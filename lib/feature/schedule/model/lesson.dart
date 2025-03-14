@@ -17,6 +17,9 @@ class Lesson with _$Lesson {
     required final String location,
     @JsonKey(name: 'lesson_type', required: false, disallowNullValue: false)
     required final String? lessonType,
+    required final String? group,
+    @JsonKey(name: 'professor_id', required: false, disallowNullValue: false)
+    required final int? professorId,
   }) = _Lesson;
 
   const Lesson._();
