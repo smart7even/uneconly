@@ -179,7 +179,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           data: state.data,
           currentWeek: state.currentWeek ?? event.week,
           selectedWeek: event.week,
-          scheduleInfo: state.scheduleInfo,
+          scheduleInfo: info,
         ),
       );
 
