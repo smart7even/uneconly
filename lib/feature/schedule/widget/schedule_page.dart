@@ -8,7 +8,6 @@ import 'package:octopus/octopus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
-import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/routing/routing_utils.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
@@ -16,8 +15,8 @@ import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
-import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
+import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_actions_popup.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_drawer.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
@@ -29,13 +28,13 @@ import 'package:uneconly/feature/select/model/group.dart';
 /// SchedulePage widget
 /// {@endtemplate}
 class SchedulePage extends StatefulWidget {
-  final ShortGroupInfo shortGroupInfo;
+  final ScheduleInfo scheduleInfo;
   final bool isViewMode;
 
   /// {@macro schedule_page}
   const SchedulePage({
     super.key,
-    required this.shortGroupInfo,
+    required this.scheduleInfo,
     required this.isViewMode,
   });
 
@@ -79,16 +78,21 @@ class _SchedulePageState extends State<SchedulePage>
     dependenciesScope.settingsRepository.getFavoriteGroups().then(
       (value) {
         setState(() {
-          favoriteGroups.clear();
-          favoriteGroups.addAll(value);
+          widget.scheduleInfo.map(
+            group: (group) {
+              favoriteGroups.clear();
+              favoriteGroups.addAll(value);
 
-          if (favoriteGroups.any(
-            (element) => element.id == widget.shortGroupInfo.groupId,
-          )) {
-            setState(() {
-              isFavorite = true;
-            });
-          }
+              if (favoriteGroups.any(
+                (element) => element.id == group.shortGroupInfo.groupId,
+              )) {
+                setState(() {
+                  isFavorite = true;
+                });
+              }
+            },
+            professor: (professor) {},
+          );
         });
       },
     );
@@ -120,7 +124,6 @@ class _SchedulePageState extends State<SchedulePage>
     if (state == AppLifecycleState.resumed) {
       scheduleBLoC.add(
         ScheduleEvent.fetch(
-          groupId: widget.shortGroupInfo.groupId,
           week: scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
         ),
       );
@@ -170,9 +173,8 @@ class _SchedulePageState extends State<SchedulePage>
 
     bloc.add(
       ScheduleEvent.fetch(
-        groupId: widget.shortGroupInfo.groupId,
         week: _getCurrentWeek(),
-        shortGroupInfo: widget.shortGroupInfo,
+        info: widget.scheduleInfo,
       ),
     );
 
@@ -183,12 +185,11 @@ class _SchedulePageState extends State<SchedulePage>
   void didUpdateWidget(SchedulePage oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.shortGroupInfo != oldWidget.shortGroupInfo) {
+    if (widget.scheduleInfo != oldWidget.scheduleInfo) {
       scheduleBLoC.add(
         ScheduleEvent.changeGroup(
-          groupId: widget.shortGroupInfo.groupId,
           week: scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
-          shortGroupInfo: widget.shortGroupInfo,
+          info: widget.scheduleInfo,
         ),
       );
 
@@ -217,7 +218,7 @@ class _SchedulePageState extends State<SchedulePage>
 
     context.read<ScheduleBLoC>().add(
           ScheduleEvent.fetch(
-            groupId: widget.shortGroupInfo.groupId,
+            info: widget.scheduleInfo,
             week: newWeek,
           ),
         );
@@ -296,31 +297,27 @@ class _SchedulePageState extends State<SchedulePage>
       isFavorite = !isFavorite;
     });
 
-    if (isFavorite) {
-      Dependencies.of(context).settingsRepository.addGroupToFavorites(
-            Group(
-              id: state.shortGroupInfo?.groupId ??
-                  widget.shortGroupInfo.groupId,
-              name: state.shortGroupInfo?.groupName ??
-                  widget.shortGroupInfo.groupName ??
-                  '',
-              facultyId: 0,
-              course: 0,
-            ),
-          );
-    } else {
-      Dependencies.of(context).settingsRepository.removeGroupFromFavorites(
-            Group(
-              id: state.shortGroupInfo?.groupId ??
-                  widget.shortGroupInfo.groupId,
-              name: state.shortGroupInfo?.groupName ??
-                  widget.shortGroupInfo.groupName ??
-                  '',
-              facultyId: 0,
-              course: 0,
-            ),
-          );
-    }
+    state.scheduleInfo?.map(
+      group: (group) {
+        final groupModel = Group(
+          id: group.shortGroupInfo.groupId,
+          name: group.shortGroupInfo.groupName ?? '',
+          facultyId: 0,
+          course: 0,
+        );
+
+        if (isFavorite) {
+          Dependencies.of(context).settingsRepository.addGroupToFavorites(
+                groupModel,
+              );
+        } else {
+          Dependencies.of(context).settingsRepository.removeGroupFromFavorites(
+                groupModel,
+              );
+        }
+      },
+      professor: (professor) {},
+    );
   }
 
   void onSharePressed(BuildContext context, ScheduleState state) {
@@ -394,7 +391,7 @@ class _SchedulePageState extends State<SchedulePage>
           state,
         ),
         appBar: AppBar(
-          title: Text(state.shortGroupInfo?.groupName ?? ''),
+          title: Text(state.scheduleInfo?.title ?? ''),
         ),
         body: Center(
           child: Text(message),
@@ -402,7 +399,7 @@ class _SchedulePageState extends State<SchedulePage>
       );
     }
 
-    String title = state.shortGroupInfo?.groupName ?? '';
+    String title = state.scheduleInfo?.title ?? '';
 
     if (selectedWeek != null) {
       title += ', ${AppLocalizations.of(context)!.week} $selectedWeek';
@@ -460,7 +457,7 @@ class _SchedulePageState extends State<SchedulePage>
 
           if (currentWeek == null) {
             return ScheduleWidget(
-              schedule: const Schedule.empty(),
+              schedule: null,
               onNextWeek: () => onNextWeek(context),
               onPreviousWeek: () => onPreviousWeek(context),
             );

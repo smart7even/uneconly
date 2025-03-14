@@ -4,9 +4,13 @@ import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/feature/schedule/model/day_schedule.dart';
 import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
+import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 
 abstract class IScheduleNetworkDataProvider {
-  Future<Schedule> fetch({required int groupId, int? week});
+  Future<Schedule> fetch({
+    required ScheduleInfo info,
+    int? week,
+  });
 }
 
 class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
@@ -17,7 +21,7 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
   final Dio _dio;
 
   @override
-  Future<Schedule> fetch({required int groupId, int? week}) async {
+  Future<Schedule> fetch({required ScheduleInfo info, int? week}) async {
     // fetch data from /group/:id/schedule?week=21 endpoint
     try {
       final queryParameters = <String, dynamic>{};
@@ -26,8 +30,14 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
         queryParameters['week'] = week;
       }
 
+      final url = info.map(
+        group: (group) => '/group/${group.shortGroupInfo.groupId}/schedule',
+        professor: (professor) =>
+            '/professor/${professor.shortProfessorInfo.professorId}/schedule',
+      );
+
       final response = await _dio.get(
-        '/group/$groupId/schedule',
+        url,
         queryParameters: queryParameters,
       );
 
@@ -45,7 +55,7 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
         return Schedule(
           daySchedules: [],
           week: responseWeek,
-          groupId: groupId,
+          info: info,
         );
       }
 
@@ -113,7 +123,7 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
       return Schedule(
         daySchedules: daySchedules,
         week: responseWeek,
-        groupId: groupId,
+        info: info,
       );
     } on Object catch (e, stackTrace) {
       l.e('An error occured in ScheduleNetworkDataProvider', stackTrace);

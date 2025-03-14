@@ -1,10 +1,17 @@
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
+import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 
 abstract class IScheduleRepository {
-  Future<Schedule> fetch({required int groupId, required int week});
-  Future<Schedule?> getLocalSchedule({required int groupId, required int week});
+  Future<Schedule> fetch({
+    required ScheduleInfo info,
+    required int week,
+  });
+  Future<Schedule?> getLocalSchedule({
+    required ScheduleInfo info,
+    required int week,
+  });
 }
 
 class ScheduleRepository implements IScheduleRepository {
@@ -18,9 +25,14 @@ class ScheduleRepository implements IScheduleRepository {
   final IScheduleLocalDataProvider _localDataProvider;
 
   @override
-  Future<Schedule> fetch({required int groupId, required int week}) async {
-    Schedule schedule =
-        await _networkDataProvider.fetch(groupId: groupId, week: week);
+  Future<Schedule> fetch({
+    required ScheduleInfo info,
+    required int week,
+  }) async {
+    Schedule schedule = await _networkDataProvider.fetch(
+      info: info,
+      week: week,
+    );
     await _localDataProvider.saveSchedule(schedule);
 
     return schedule;
@@ -28,12 +40,12 @@ class ScheduleRepository implements IScheduleRepository {
 
   @override
   Future<Schedule?> getLocalSchedule({
-    required int groupId,
+    required ScheduleInfo info,
     required int week,
   }) {
     return _localDataProvider.getSchedule(
       week,
-      groupId,
+      info,
     );
   }
 }

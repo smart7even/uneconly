@@ -1,18 +1,14 @@
 import 'package:uneconly/feature/schedule/model/day_schedule.dart';
+import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 
 class Schedule {
   final List<DaySchedule> daySchedules;
   final int week;
-  final int groupId;
+  final ScheduleInfo info;
 
   const Schedule({
     required this.week,
-    required this.groupId,
+    required this.info,
     required this.daySchedules,
   });
-
-  const Schedule.empty()
-      : daySchedules = const <DaySchedule>[],
-        groupId = 0,
-        week = 0;
 }

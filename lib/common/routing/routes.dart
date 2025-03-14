@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/feature/loading/widget/loading_page.dart';
+import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 import 'package:uneconly/feature/schedule/widget/home_page.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
 import 'package:uneconly/feature/select/widget/select_page.dart';
@@ -35,9 +36,11 @@ enum Routes with OctopusRoute {
         );
       case Routes.schedule:
         return SchedulePage(
-          shortGroupInfo: ShortGroupInfo(
-            groupId: int.parse(node.arguments['groupId'] as String),
-            groupName: node.arguments['groupName'] as String,
+          scheduleInfo: ScheduleInfo.group(
+            shortGroupInfo: ShortGroupInfo(
+              groupId: int.parse(node.arguments['groupId'] as String),
+              groupName: node.arguments['groupName'] as String,
+            ),
           ),
           isViewMode: node.arguments['isViewMode'] != null
               ? node.arguments['isViewMode'] as String == 'true'

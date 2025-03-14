@@ -4,6 +4,7 @@ import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/routing/routes.dart';
+import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_page.dart';
 import 'package:uneconly/feature/select/model/group.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
@@ -186,9 +187,11 @@ class _HomePageState extends State<HomePage> {
         index: _tab.index,
         children: [
           SchedulePage(
-            shortGroupInfo: ShortGroupInfo(
-              groupId: currentMyGroup.id,
-              groupName: currentMyGroup.name,
+            scheduleInfo: ScheduleInfo.group(
+              shortGroupInfo: ShortGroupInfo(
+                groupId: currentMyGroup.id,
+                groupName: currentMyGroup.name,
+              ),
             ),
             isViewMode: false,
           ),

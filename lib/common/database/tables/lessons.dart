@@ -11,4 +11,5 @@ class Lessons extends Table {
   DateTimeColumn get createdAt => dateTime()();
   IntColumn get groupId => integer().nullable()();
   TextColumn get lessonType => text().nullable()();
+  IntColumn get professorId => integer().nullable()();
 }

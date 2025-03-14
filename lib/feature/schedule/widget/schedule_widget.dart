@@ -281,10 +281,15 @@ class ScheduleWidget extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () async {
                         // TODO: add error handling and make proper setup checking canLaunchUrl before opening url
-                        await launchUrl(
-                          Uri.parse(
-                            'https://rasp.unecon.ru/raspisanie_grp.php?g=${currentSchedule.groupId}',
-                          ),
+                        await currentSchedule.info.map(
+                          group: (group) async {
+                            await launchUrl(
+                              Uri.parse(
+                                'https://rasp.unecon.ru/raspisanie_grp.php?g=${group.shortGroupInfo.groupId}',
+                              ),
+                            );
+                          },
+                          professor: (professor) {},
                         );
                       },
                       child: Text(

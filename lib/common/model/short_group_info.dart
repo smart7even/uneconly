@@ -16,4 +16,8 @@ class ShortGroupInfo with _$ShortGroupInfo {
   /// Generate ShortGroupInfo class from Map<String, Object?>
   factory ShortGroupInfo.fromJson(Map<String, Object?> json) =>
       _$ShortGroupInfoFromJson(json);
+
+  bool isComplete() {
+    return groupName != null;
+  }
 }

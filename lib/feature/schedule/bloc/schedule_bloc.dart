@@ -10,6 +10,7 @@ import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
 import 'package:uneconly/feature/schedule/domain/schedule_transformer.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
+import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
 
 part 'schedule_bloc.freezed.dart';
@@ -26,15 +27,13 @@ class ScheduleEvent with _$ScheduleEvent {
 
   /// Fetch
   const factory ScheduleEvent.fetch({
-    required int groupId,
     required int week,
-    ShortGroupInfo? shortGroupInfo,
+    ScheduleInfo? info,
   }) = FetchScheduleEvent;
 
   const factory ScheduleEvent.changeGroup({
-    required int groupId,
     required int week,
-    ShortGroupInfo? shortGroupInfo,
+    required ScheduleInfo info,
   }) = ChangeGroupScheduleEvent;
 
   /// Update
@@ -60,7 +59,7 @@ class ScheduleState with _$ScheduleState {
   const factory ScheduleState.idle({
     required final int? currentWeek,
     required final Map<int, ScheduleDetails> data,
-    required final ShortGroupInfo? shortGroupInfo,
+    required final ScheduleInfo? scheduleInfo,
     final int? selectedWeek,
     @Default('Idle') final String message,
   }) = IdleScheduleState;
@@ -69,7 +68,7 @@ class ScheduleState with _$ScheduleState {
   const factory ScheduleState.processing({
     required final int? currentWeek,
     required final Map<int, ScheduleDetails> data,
-    required final ShortGroupInfo? shortGroupInfo,
+    required final ScheduleInfo? scheduleInfo,
     final int? selectedWeek,
     @Default('Processing') final String message,
   }) = ProcessingScheduleState;
@@ -78,7 +77,7 @@ class ScheduleState with _$ScheduleState {
   const factory ScheduleState.successful({
     required final int? currentWeek,
     required final Map<int, ScheduleDetails> data,
-    required final ShortGroupInfo? shortGroupInfo,
+    required final ScheduleInfo? scheduleInfo,
     final int? selectedWeek,
     @Default('Successful') final String message,
   }) = SuccessfulScheduleState;
@@ -87,7 +86,7 @@ class ScheduleState with _$ScheduleState {
   const factory ScheduleState.error({
     required final int? currentWeek,
     required final Map<int, ScheduleDetails> data,
-    required final ShortGroupInfo? shortGroupInfo,
+    required final ScheduleInfo? scheduleInfo,
     final int? selectedWeek,
     @Default('An error has occurred') final String message,
   }) = ErrorScheduleState;
@@ -137,7 +136,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
                 selectedWeek: null,
                 currentWeek: null,
                 data: {},
-                shortGroupInfo: null,
+                scheduleInfo: null,
                 message: 'Initial idle state',
               ),
         ) {
@@ -169,24 +168,23 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
     Emitter<ScheduleState> emit,
   ) async {
     try {
-      emit(ScheduleState.processing(
-        data: state.data,
-        currentWeek: state.currentWeek ?? event.week,
-        selectedWeek: event.week,
-        shortGroupInfo: state.shortGroupInfo,
-      ));
+      final info = event.info ?? state.scheduleInfo;
 
-      if (event.shortGroupInfo != null && state.shortGroupInfo == null) {
-        emit(ScheduleState.successful(
+      if (info == null) {
+        return;
+      }
+
+      emit(
+        ScheduleState.processing(
           data: state.data,
           currentWeek: state.currentWeek ?? event.week,
           selectedWeek: event.week,
-          shortGroupInfo: event.shortGroupInfo,
-        ));
-      }
+          scheduleInfo: state.scheduleInfo,
+        ),
+      );
 
       final localSchedule = await _repository.getLocalSchedule(
-        groupId: event.groupId,
+        info: info,
         week: event.week,
       );
 
@@ -205,27 +203,38 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
             data: localData,
             currentWeek: state.currentWeek ?? localSchedule.week,
             selectedWeek: event.week,
-            shortGroupInfo: state.shortGroupInfo,
+            scheduleInfo: state.scheduleInfo,
           ),
         );
       }
 
-      if (state.shortGroupInfo == null) {
-        final group = await _groupRepository.fetchGroupById(event.groupId);
+      if (state.scheduleInfo == null) {
+        await info.map(
+          group: (group) async {
+            final fetchedGroup = await _groupRepository.fetchGroupById(
+              group.shortGroupInfo.groupId,
+            );
 
-        emit(ScheduleState.successful(
-          data: state.data,
-          currentWeek: state.currentWeek ?? event.week,
-          selectedWeek: event.week,
-          shortGroupInfo: ShortGroupInfo(
-            groupId: group.id,
-            groupName: group.name,
-          ),
-        ));
+            emit(
+              ScheduleState.successful(
+                data: state.data,
+                currentWeek: state.currentWeek ?? event.week,
+                selectedWeek: event.week,
+                scheduleInfo: ScheduleInfo.group(
+                  shortGroupInfo: ShortGroupInfo(
+                    groupId: fetchedGroup.id,
+                    groupName: fetchedGroup.name,
+                  ),
+                ),
+              ),
+            );
+          },
+          professor: (professor) {},
+        );
       }
 
       final schedule = await _repository.fetch(
-        groupId: event.groupId,
+        info: info,
         week: event.week,
       );
 
@@ -242,7 +251,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         data: newData,
         currentWeek: state.currentWeek ?? schedule.week,
         selectedWeek: event.week,
-        shortGroupInfo: state.shortGroupInfo,
+        scheduleInfo: state.scheduleInfo,
       ));
     } on Object catch (err, stackTrace) {
       l.e('An error occurred in the ScheduleBLoC: $err', stackTrace);
@@ -250,7 +259,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         data: state.data,
         currentWeek: state.currentWeek,
         selectedWeek: state.selectedWeek,
-        shortGroupInfo: state.shortGroupInfo,
+        scheduleInfo: state.scheduleInfo,
       ));
       rethrow;
     } finally {
@@ -259,7 +268,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           data: state.data,
           currentWeek: state.currentWeek,
           selectedWeek: state.selectedWeek,
-          shortGroupInfo: state.shortGroupInfo,
+          scheduleInfo: state.scheduleInfo,
         ),
       );
     }
@@ -269,9 +278,11 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
     ChangeGroupScheduleEvent event,
     Emitter<ScheduleState> emit,
   ) async {
-    if (event.shortGroupInfo?.groupId == state.shortGroupInfo?.groupId) {
+    if (event.info == state.scheduleInfo) {
       return;
     }
+
+    final info = event.info;
 
     emit(
       state.copyWith(
@@ -284,20 +295,11 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         data: state.data,
         currentWeek: state.currentWeek ?? event.week,
         selectedWeek: event.week,
-        shortGroupInfo: state.shortGroupInfo,
+        scheduleInfo: state.scheduleInfo,
       ));
 
-      if (event.shortGroupInfo != null) {
-        emit(ScheduleState.successful(
-          data: state.data,
-          currentWeek: state.currentWeek ?? event.week,
-          selectedWeek: event.week,
-          shortGroupInfo: event.shortGroupInfo,
-        ));
-      }
-
       final localSchedule = await _repository.getLocalSchedule(
-        groupId: event.groupId,
+        info: event.info,
         week: event.week,
       );
 
@@ -315,48 +317,62 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           data: localData,
           currentWeek: state.currentWeek ?? localSchedule.week,
           selectedWeek: event.week,
-          shortGroupInfo: state.shortGroupInfo,
+          scheduleInfo: state.scheduleInfo,
         ));
       }
 
-      if (event.shortGroupInfo != null &&
-          event.shortGroupInfo?.groupName == null) {
-        final group = await _groupRepository.fetchGroupById(event.groupId);
+      await info.map(
+        group: (group) async {
+          ScheduleInfo info = group;
 
-        emit(
-          ScheduleState.successful(
-            data: state.data,
-            currentWeek: state.currentWeek ?? event.week,
-            selectedWeek: event.week,
-            shortGroupInfo: ShortGroupInfo(
-              groupId: group.id,
-              groupName: group.name,
+          if (group.shortGroupInfo.groupName == null) {
+            final fetchedGroup = await _groupRepository.fetchGroupById(
+              group.shortGroupInfo.groupId,
+            );
+
+            final newInfo = ScheduleInfo.group(
+              shortGroupInfo: ShortGroupInfo(
+                groupId: fetchedGroup.id,
+                groupName: fetchedGroup.name,
+              ),
+            );
+
+            info = newInfo;
+
+            emit(
+              ScheduleState.successful(
+                data: state.data,
+                currentWeek: state.currentWeek ?? event.week,
+                selectedWeek: event.week,
+                scheduleInfo: newInfo,
+              ),
+            );
+          }
+
+          final schedule = await _repository.fetch(
+            info: info,
+            week: event.week,
+          );
+
+          final newData = {
+            ...state.data,
+          };
+
+          newData[schedule.week] = ScheduleDetails(
+            schedule: schedule,
+            isLocal: false,
+          );
+
+          emit(
+            ScheduleState.successful(
+              data: newData,
+              currentWeek: state.currentWeek ?? schedule.week,
+              selectedWeek: event.week,
+              scheduleInfo: info,
             ),
-          ),
-        );
-      }
-
-      final schedule = await _repository.fetch(
-        groupId: event.groupId,
-        week: event.week,
-      );
-
-      final newData = {
-        ...state.data,
-      };
-
-      newData[schedule.week] = ScheduleDetails(
-        schedule: schedule,
-        isLocal: false,
-      );
-
-      emit(
-        ScheduleState.successful(
-          data: newData,
-          currentWeek: state.currentWeek ?? schedule.week,
-          selectedWeek: event.week,
-          shortGroupInfo: state.shortGroupInfo,
-        ),
+          );
+        },
+        professor: (professor) {},
       );
     } on Object catch (err, stackTrace) {
       l.e('An error occurred in the ScheduleBLoC: $err', stackTrace);
@@ -365,7 +381,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           data: state.data,
           currentWeek: state.currentWeek,
           selectedWeek: state.selectedWeek,
-          shortGroupInfo: state.shortGroupInfo,
+          scheduleInfo: state.scheduleInfo,
         ),
       );
       rethrow;
@@ -375,7 +391,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           data: state.data,
           currentWeek: state.currentWeek,
           selectedWeek: state.selectedWeek,
-          shortGroupInfo: state.shortGroupInfo,
+          scheduleInfo: state.scheduleInfo,
         ),
       );
     }
@@ -386,17 +402,23 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
     Emitter<ScheduleState> emit,
   ) async {
     final selectedScheduleDetails = state.getSelectedScheduleDetails();
-    final groupInfo = state.shortGroupInfo;
 
-    if (selectedScheduleDetails == null || groupInfo == null) {
-      return;
-    }
+    await state.scheduleInfo?.map(
+      group: (group) async {
+        final groupInfo = group.shortGroupInfo;
 
-    final content = ScheduleTransformer().transformScheduleToString(
-      selectedScheduleDetails.schedule,
-      groupInfo,
+        if (selectedScheduleDetails == null) {
+          return;
+        }
+
+        final content = ScheduleTransformer().transformScheduleToString(
+          selectedScheduleDetails.schedule,
+          groupInfo,
+        );
+
+        event.onShare(content);
+      },
+      professor: (professor) {},
     );
-
-    event.onShare(content);
   }
 }

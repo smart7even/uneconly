@@ -4,9 +4,13 @@ import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/feature/schedule/model/day_schedule.dart';
 import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
+import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 
 abstract class IScheduleLocalDataProvider {
-  Future<Schedule?> getSchedule(int week, int groupId);
+  Future<Schedule?> getSchedule(
+    int week,
+    ScheduleInfo info,
+  );
   Future<void> saveSchedule(Schedule schedule);
 }
 
@@ -16,7 +20,10 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
   ScheduleLocalDataProvider(this._database);
 
   @override
-  Future<Schedule?> getSchedule(int week, int groupId) async {
+  Future<Schedule?> getSchedule(
+    int week,
+    ScheduleInfo info,
+  ) async {
     final nowTime = DateTime.now();
     final startOfWeekDateTime = getStartOfStudyWeek(week, nowTime);
     final endOfWeekDateTime = startOfWeekDateTime
@@ -27,6 +34,19 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
           const Duration(seconds: 1),
         );
 
+    final expression = info.map(
+      group: (group) {
+        return ($LessonsTable tbl) => tbl.groupId.equals(
+              group.shortGroupInfo.groupId,
+            );
+      },
+      professor: (professor) {
+        return ($LessonsTable tbl) => tbl.professorId.equals(
+              professor.shortProfessorInfo.professorId,
+            );
+      },
+    );
+
     final lessons = await (_database.select(_database.lessons)
           ..where((tbl) {
             return tbl.start.year
@@ -35,7 +55,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
                 //     .isBiggerOrEqualValue(startOfWeekDateTime.month) &
                 // tbl.start.day.isBiggerOrEqualValue(startOfWeekDateTime.day) &
                 tbl.end.year.isSmallerOrEqualValue(endOfWeekDateTime.year) &
-                tbl.groupId.equals(groupId);
+                expression(tbl);
             // tbl.end.month.isSmallerOrEqualValue(endOfWeekDateTime.month) &
             // tbl.end.day.isSmallerOrEqualValue(endOfWeekDateTime.day);
           }))
@@ -83,7 +103,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
     return Schedule(
       week: week,
       daySchedules: daySchedules,
-      groupId: groupId,
+      info: info,
     );
   }
 
@@ -107,18 +127,32 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
 
       for (final daySchedule in schedule.daySchedules) {
         for (final lesson in daySchedule.lessons) {
+          final lessonsCompanion = LessonsCompanion(
+            name: Value(lesson.name),
+            professor: Value(lesson.professor),
+            location: Value(lesson.location),
+            start: Value(lesson.start),
+            end: Value(lesson.end),
+            createdAt: Value(currentDateTime),
+            lessonType: Value(lesson.lessonType),
+          );
+
+          final lessonsCompanionWithEntityId = schedule.info.map(
+            group: (group) {
+              return lessonsCompanion.copyWith(
+                groupId: Value(group.shortGroupInfo.groupId),
+              );
+            },
+            professor: (professor) {
+              return lessonsCompanion.copyWith(
+                professorId: Value(professor.shortProfessorInfo.professorId),
+              );
+            },
+          );
+
           // save to db
           await _database.into(_database.lessons).insert(
-                LessonsCompanion(
-                  name: Value(lesson.name),
-                  professor: Value(lesson.professor),
-                  location: Value(lesson.location),
-                  start: Value(lesson.start),
-                  end: Value(lesson.end),
-                  createdAt: Value(currentDateTime),
-                  groupId: Value(schedule.groupId),
-                  lessonType: Value(lesson.lessonType),
-                ),
+                lessonsCompanionWithEntityId,
               );
         }
       }

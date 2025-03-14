@@ -44,7 +44,7 @@ class ScheduleDrawer extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      state.shortGroupInfo?.groupName ?? '',
+                      state.scheduleInfo?.title ?? '',
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
