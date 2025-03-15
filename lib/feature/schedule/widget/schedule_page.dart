@@ -91,7 +91,10 @@ class _SchedulePageState extends State<SchedulePage>
                 });
               }
             },
-            professor: (professor) {},
+            professor: (professor) {
+              // TODO: add favorite professors
+              return;
+            },
           );
         });
       },
@@ -316,7 +319,10 @@ class _SchedulePageState extends State<SchedulePage>
               );
         }
       },
-      professor: (professor) {},
+      professor: (professor) {
+        // TODO: add favorite professors
+        return;
+      },
     );
   }
 
@@ -409,6 +415,11 @@ class _SchedulePageState extends State<SchedulePage>
       }
     }
 
+    final isGroupSchedule = widget.scheduleInfo.map(
+      group: (group) => true,
+      professor: (professor) => false,
+    );
+
     return Scaffold(
       key: _scaffoldKey,
       drawer: !widget.isViewMode
@@ -423,7 +434,7 @@ class _SchedulePageState extends State<SchedulePage>
         actions: [
           ScheduleActionsPopup(
             actions: [
-              if (widget.isViewMode)
+              if (widget.isViewMode && isGroupSchedule)
                 ScheduleActionConfig(
                   Text(
                     isFavorite

@@ -403,22 +403,17 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
   ) async {
     final selectedScheduleDetails = state.getSelectedScheduleDetails();
 
-    await state.scheduleInfo?.map(
-      group: (group) async {
-        final groupInfo = group.shortGroupInfo;
+    final title = state.scheduleInfo?.title;
 
-        if (selectedScheduleDetails == null) {
-          return;
-        }
+    if (selectedScheduleDetails == null) {
+      return;
+    }
 
-        final content = ScheduleTransformer().transformScheduleToString(
-          selectedScheduleDetails.schedule,
-          groupInfo,
-        );
-
-        event.onShare(content);
-      },
-      professor: (professor) {},
+    final content = ScheduleTransformer().transformScheduleToString(
+      selectedScheduleDetails.schedule,
+      title,
     );
+
+    event.onShare(content);
   }
 }

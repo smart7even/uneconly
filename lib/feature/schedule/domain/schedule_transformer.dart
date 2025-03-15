@@ -1,21 +1,18 @@
 import 'package:intl/intl.dart';
-import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 
 class ScheduleTransformer {
   String transformScheduleToString(
     Schedule schedule,
-    ShortGroupInfo groupInfo,
+    String? title,
   ) {
     const space = ' ';
     const newLine = '\n';
     String result = '';
 
-    final groupName = groupInfo.groupName;
-
-    if (groupName != null) {
-      result += groupName;
+    if (title != null) {
+      result += title;
       result += newLine;
     }
 
