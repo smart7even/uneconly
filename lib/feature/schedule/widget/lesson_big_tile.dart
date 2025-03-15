@@ -37,6 +37,7 @@ class LessonBigTile extends StatelessWidget {
     final professor = lesson.professor;
     final professorId = lesson.professorId;
     final lessonType = lesson.lessonType;
+    final group = lesson.group;
 
     return Container(
       padding: const EdgeInsets.all(8),
@@ -103,6 +104,12 @@ class LessonBigTile extends StatelessWidget {
                     context,
                     Icons.person,
                     professor,
+                  ),
+                if (group != null && group.isNotEmpty)
+                  _buildLessonProperty(
+                    context,
+                    Icons.group,
+                    group,
                   ),
                 const SizedBox(
                   height: 4,

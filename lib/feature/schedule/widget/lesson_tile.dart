@@ -34,7 +34,13 @@ class _LessonTileState extends State<LessonTile> {
     String? professor = widget.lesson.professor;
 
     if (professor != null) {
-      subtitle = professor;
+      subtitle = _appendWithSpace(subtitle, professor);
+    }
+
+    final group = widget.lesson.group;
+
+    if (group != null && group.isNotEmpty) {
+      subtitle = _appendWithSpace(subtitle, group);
     }
 
     String location = widget.lesson.location.replaceAll('\n', ' ').trim();
