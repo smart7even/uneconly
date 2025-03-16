@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:uneconly/common/analytics/page_logging_wrapper.dart';
+import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/utils/lesson_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
+import 'package:uneconly/common/widget/uneconly_div_kit_view.dart';
+import 'package:uneconly/feature/schedule/bloc/day_schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/model/day_schedule.dart';
+import 'package:uneconly/feature/schedule/model/day_schedule_entity.dart';
 import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_big_tile.dart';
 
@@ -28,98 +33,127 @@ class DaySchedulePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final grouppedLessonsByTime = groupLessonsByTime(daySchedule.lessons);
-    final overlappingLessons = grouppedLessonsByTime
-        .where(
-          (element) => element.length > 1,
-        )
-        .toList();
-
-    return PageLoggingWrapper(
-      pageName: 'daySchedule',
-      parameters: {
-        'day': daySchedule.day.toIso8601String(),
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            capitalize(
-              DateFormat('EEEE, d MMMM', 'ru').format(
-                daySchedule.day,
-              ),
-            ),
+    return BlocProvider<DayScheduleBLoC>(
+      create: (context) => DayScheduleBLoC(
+        repository: Dependencies.of(context).dayScheduleRepository,
+        initialState: DayScheduleState.idle(
+          data: DayScheduleEntity(
+            daySchedule: daySchedule,
+            news: null,
           ),
         ),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            return CustomScrollView(
-              slivers: [
-                if (daySchedule.lessons.isEmpty)
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: constraints.maxHeight,
-                      child: const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Text(
-                            'На этот день нет пар 🍀',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
+      )..add(
+          const DayScheduleEvent.fetch(),
+        ),
+      child: BlocBuilder<DayScheduleBLoC, DayScheduleState>(
+        builder: (context, state) {
+          final data = state.data;
+
+          if (data == null) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          final daySchedule = data.daySchedule;
+          final news = data.news;
+
+          final grouppedLessonsByTime = groupLessonsByTime(daySchedule.lessons);
+
+          final overlappingLessons = grouppedLessonsByTime
+              .where(
+                (element) => element.length > 1,
+              )
+              .toList();
+
+          return PageLoggingWrapper(
+            pageName: 'daySchedule',
+            parameters: {
+              'day': daySchedule.day.toIso8601String(),
+            },
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  capitalize(
+                    DateFormat('EEEE, d MMMM', 'ru').format(
+                      daySchedule.day,
+                    ),
+                  ),
+                ),
+              ),
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  return CustomScrollView(
+                    slivers: [
+                      if (daySchedule.lessons.isEmpty)
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: constraints.maxHeight,
+                            child: const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8),
+                                child: Text(
+                                  'На этот день нет пар 🍀',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                if (grouppedLessonsByTime.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(8),
-                      child: Text(
-                        'Всего пар: ${grouppedLessonsByTime.length}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                      if (grouppedLessonsByTime.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(8),
+                            child: Text(
+                              'Всего пар: ${grouppedLessonsByTime.length}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                              textAlign: TextAlign.start,
+                            ),
+                          ),
                         ),
-                        textAlign: TextAlign.start,
-                      ),
-                    ),
-                  ),
-                // if (overlappingLessons.isNotEmpty)
-                //   Padding(
-                //     padding: const EdgeInsets.all(8),
-                //     child: Text(
-                //       'Внимание! На это время назначено несколько пар',
-                //       style: TextStyle(
-                //         color: Theme.of(context).colorScheme.error,
-                //       ),
-                //     ),
-                //   ),
-                if (daySchedule.lessons.isNotEmpty)
-                  SliverList.builder(
-                    itemCount: daySchedule.lessons.length,
-                    itemBuilder: (context, index) {
-                      return LessonBigTile(
-                        lesson: daySchedule.lessons[index],
-                        lessonNumber: getLessonNumber(
-                          grouppedLessonsByTime,
-                          daySchedule.lessons[index],
+                      // if (overlappingLessons.isNotEmpty)
+                      //   Padding(
+                      //     padding: const EdgeInsets.all(8),
+                      //     child: Text(
+                      //       'Внимание! На это время назначено несколько пар',
+                      //       style: TextStyle(
+                      //         color: Theme.of(context).colorScheme.error,
+                      //       ),
+                      //     ),
+                      //   ),
+                      if (daySchedule.lessons.isNotEmpty)
+                        SliverList.builder(
+                          itemCount: daySchedule.lessons.length,
+                          itemBuilder: (context, index) {
+                            return LessonBigTile(
+                              lesson: daySchedule.lessons[index],
+                              lessonNumber: getLessonNumber(
+                                grouppedLessonsByTime,
+                                daySchedule.lessons[index],
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                // SliverToBoxAdapter(
-                //   child: UneconlyDivKitView(
-                //     data: {}
-                //     ),
-                //   ),
-                // ),
-              ],
-            );
-          },
-        ),
+                      if (news != null && news.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: UneconlyDivKitView(
+                            data: news,
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }

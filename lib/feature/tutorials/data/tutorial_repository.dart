@@ -1,5 +1,6 @@
 import 'package:l/l.dart';
 import 'package:uneconly/feature/tutorials/data/tutorial_network_data_provider.dart';
+import 'package:uneconly/feature/tutorials/model/asset_path.dart';
 
 abstract class ITutorialRepository {
   Future<Map<String, dynamic>> fetchNews();
@@ -7,15 +8,15 @@ abstract class ITutorialRepository {
 
 class TutorialRepository implements ITutorialRepository {
   TutorialRepository({
-    required final ITutorialNetworkDataProvider networkDataProvider,
+    required final IAssetNetworkDataProvider networkDataProvider,
   }) : _networkDataProvider = networkDataProvider;
 
-  final ITutorialNetworkDataProvider _networkDataProvider;
+  final IAssetNetworkDataProvider _networkDataProvider;
 
   @override
   Future<Map<String, dynamic>> fetchNews() async {
     try {
-      return await _networkDataProvider.fetchNews();
+      return await _networkDataProvider.fetchNewsByPath(AssetPath.news);
     } on Object catch (e, stackTrace) {
       l.e('An error occured in TutorialRepository', stackTrace);
 

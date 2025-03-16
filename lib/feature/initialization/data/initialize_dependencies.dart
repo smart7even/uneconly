@@ -9,6 +9,7 @@ import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/initialization/data/platform/platform_initialization.dart';
+import 'package:uneconly/feature/schedule/data/day_schedule_repository.dart';
 import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
 import 'package:uneconly/feature/tutorials/data/tutorial_network_data_provider.dart';
@@ -81,11 +82,17 @@ Map<String, _InitializationStep> _getInitializationSteps({
             baseUrl: serverAddress,
           ),
         ),
+    'Initialize asset network data provider': (dependencies) async =>
+        dependencies.assetNetworkDataProvider = AssetNetworkDataProvider(
+          dio: dependencies.dio,
+        ),
     'Initialize tutorial repository': (dependencies) async =>
         dependencies.tutorialRepository = TutorialRepository(
-          networkDataProvider: TutorialNetworkDataProvider(
-            dio: dependencies.dio,
-          ),
+          networkDataProvider: dependencies.assetNetworkDataProvider,
+        ),
+    'Initialize day schedule repository': (dependencies) async =>
+        dependencies.dayScheduleRepository = DayScheduleRepository(
+          networkDataProvider: dependencies.assetNetworkDataProvider,
         ),
     'Log app initialized': (_) {
       return;

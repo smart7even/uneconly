@@ -1,0 +1,4 @@
+enum AssetPath {
+  news,
+  contacts,
+}

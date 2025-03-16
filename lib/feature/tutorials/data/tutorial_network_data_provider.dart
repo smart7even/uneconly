@@ -1,25 +1,26 @@
 import 'package:dio/dio.dart';
 import 'package:l/l.dart';
+import 'package:uneconly/feature/tutorials/model/asset_path.dart';
 
-abstract class ITutorialNetworkDataProvider {
-  Future<Map<String, dynamic>> fetchNews();
+abstract class IAssetNetworkDataProvider {
+  Future<Map<String, dynamic>> fetchNewsByPath(AssetPath path);
 }
 
-class TutorialNetworkDataProvider implements ITutorialNetworkDataProvider {
-  TutorialNetworkDataProvider({
+class AssetNetworkDataProvider implements IAssetNetworkDataProvider {
+  AssetNetworkDataProvider({
     required final Dio dio,
   }) : _dio = dio;
 
   final Dio _dio;
 
   @override
-  Future<Map<String, dynamic>> fetchNews() async {
+  Future<Map<String, dynamic>> fetchNewsByPath(AssetPath path) async {
     try {
-      final response = await _dio.get('/asset/news');
+      final response = await _dio.get('/asset/${path.name}');
 
       return response.data['content'] as Map<String, dynamic>;
     } on Object catch (e, stackTrace) {
-      l.e('An error occured in TutorialNetworkDataProvider', stackTrace);
+      l.e('An error occured in AssetNetworkDataProvider', stackTrace);
 
       rethrow;
     }
