@@ -29,6 +29,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
+    namespace "com.roadmapik.uneconly"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 

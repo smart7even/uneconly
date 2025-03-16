@@ -321,22 +321,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
-  div_expressions_resolver:
-    dependency: transitive
-    description:
-      name: div_expressions_resolver
-      sha256: "39744d5cff5fddab21a98da177da5c6ebffc8fba8fd15deb1c66910c49180f6e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.3"
   divkit:
     dependency: "direct main"
     description:
       name: divkit
-      sha256: e86a3f3b599f2fc7bf6a6389bffb14d75d95631288558b87f44a5307a2750264
+      sha256: "9e4318539ad134c9f9e66f1e104fdd1a102498aee134ebad66654a3b63fe266f"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.6.0"
   drift:
     dependency: "direct main"
     description:

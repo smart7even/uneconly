@@ -47,7 +47,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+/android/build/reports/problems
+
 # Test coverage report
 coverage
 
 env.json
+
+.cxx
