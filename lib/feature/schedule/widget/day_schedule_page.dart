@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:uneconly/common/analytics/page_logging_wrapper.dart';
 import 'package:uneconly/common/utils/lesson_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/schedule/model/day_schedule.dart';
@@ -34,85 +35,91 @@ class DaySchedulePage extends StatelessWidget {
         )
         .toList();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          capitalize(
-            DateFormat('EEEE, d MMMM', 'ru').format(
-              daySchedule.day,
+    return PageLoggingWrapper(
+      pageName: 'daySchedule',
+      parameters: {
+        'day': daySchedule.day.toIso8601String(),
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            capitalize(
+              DateFormat('EEEE, d MMMM', 'ru').format(
+                daySchedule.day,
+              ),
             ),
           ),
         ),
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return CustomScrollView(
-            slivers: [
-              if (daySchedule.lessons.isEmpty)
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: constraints.maxHeight,
-                    child: const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(8),
-                        child: Text(
-                          'На этот день нет пар 🍀',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return CustomScrollView(
+              slivers: [
+                if (daySchedule.lessons.isEmpty)
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: constraints.maxHeight,
+                      child: const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Text(
+                            'На этот день нет пар 🍀',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              if (grouppedLessonsByTime.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(8),
-                    child: Text(
-                      'Всего пар: ${grouppedLessonsByTime.length}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                if (grouppedLessonsByTime.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(8),
+                      child: Text(
+                        'Всего пар: ${grouppedLessonsByTime.length}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                        textAlign: TextAlign.start,
                       ),
-                      textAlign: TextAlign.start,
                     ),
                   ),
-                ),
-              // if (overlappingLessons.isNotEmpty)
-              //   Padding(
-              //     padding: const EdgeInsets.all(8),
-              //     child: Text(
-              //       'Внимание! На это время назначено несколько пар',
-              //       style: TextStyle(
-              //         color: Theme.of(context).colorScheme.error,
-              //       ),
-              //     ),
-              //   ),
-              if (daySchedule.lessons.isNotEmpty)
-                SliverList.builder(
-                  itemCount: daySchedule.lessons.length,
-                  itemBuilder: (context, index) {
-                    return LessonBigTile(
-                      lesson: daySchedule.lessons[index],
-                      lessonNumber: getLessonNumber(
-                        grouppedLessonsByTime,
-                        daySchedule.lessons[index],
-                      ),
-                    );
-                  },
-                ),
-              // SliverToBoxAdapter(
-              //   child: UneconlyDivKitView(
-              //     data: {}
-              //     ),
-              //   ),
-              // ),
-            ],
-          );
-        },
+                // if (overlappingLessons.isNotEmpty)
+                //   Padding(
+                //     padding: const EdgeInsets.all(8),
+                //     child: Text(
+                //       'Внимание! На это время назначено несколько пар',
+                //       style: TextStyle(
+                //         color: Theme.of(context).colorScheme.error,
+                //       ),
+                //     ),
+                //   ),
+                if (daySchedule.lessons.isNotEmpty)
+                  SliverList.builder(
+                    itemCount: daySchedule.lessons.length,
+                    itemBuilder: (context, index) {
+                      return LessonBigTile(
+                        lesson: daySchedule.lessons[index],
+                        lessonNumber: getLessonNumber(
+                          grouppedLessonsByTime,
+                          daySchedule.lessons[index],
+                        ),
+                      );
+                    },
+                  ),
+                // SliverToBoxAdapter(
+                //   child: UneconlyDivKitView(
+                //     data: {}
+                //     ),
+                //   ),
+                // ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

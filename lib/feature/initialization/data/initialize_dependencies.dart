@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:l/l.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uneconly/common/analytics/analytics_repository.dart';
 import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/model/dependencies.dart';
@@ -60,6 +61,10 @@ Map<String, _InitializationStep> _getInitializationSteps({
     'Log app open': (dependencies) {
       dependencies.loggingRepository.logEvent('appOpen');
     },
+    'Initialize analytics repository': (dependencies) async =>
+        dependencies.analyticsRepository = AnalyticsRepository(
+          loggingRepository: dependencies.loggingRepository,
+        ),
     'Initialize shared preferences': (dependencies) async =>
         dependencies.sharedPreferences = await SharedPreferences.getInstance(),
     'Initialize database': (dependencies) async =>

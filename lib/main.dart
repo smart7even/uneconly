@@ -11,6 +11,7 @@ import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/app_scroll_configuration.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/model/dependencies.dart';
+import 'package:uneconly/common/routing/app_navigator_observer.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/routing/schedule_guard.dart';
 import 'package:uneconly/common/util/error_util.dart';
@@ -152,6 +153,11 @@ class _MyAppState extends State<MyApp> {
         error: error,
         stackTrace: stackTrace,
       ),
+      observers: [
+        AppNavigatorObserver(
+          analyticsRepository: dependencies.analyticsRepository,
+        ),
+      ],
       /* observers: <NavigatorObserver>[
         HeroController(),
       ], */
