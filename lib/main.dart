@@ -94,7 +94,9 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     final dependencies = Dependencies.of(context);
 
-    HomeWidget.setAppGroupId('group.roadmapik.test');
+    if (Platform.isAndroid || Platform.isIOS) {
+      HomeWidget.setAppGroupId('group.roadmapik.test');
+    }
 
     // TODO: add multiple language support
     Intl.defaultLocale = 'ru';

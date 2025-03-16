@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
@@ -10,12 +12,16 @@ abstract class ILoggingRepositoryFactory {
 class LoggingRepositoryFactory implements ILoggingRepositoryFactory {
   @override
   Future<ILoggingRepository> create() async {
-    await AppMetrica.activate(
-      kDebugMode
-          ? const AppMetricaConfig(appMetricaDevKey)
-          : const AppMetricaConfig(appMetricaProductionKey),
-    );
+    if (Platform.isAndroid || Platform.isIOS) {
+      await AppMetrica.activate(
+        kDebugMode
+            ? const AppMetricaConfig(appMetricaDevKey)
+            : const AppMetricaConfig(appMetricaProductionKey),
+      );
 
-    return AppMetricaLoggingRepository();
+      return AppMetricaLoggingRepository();
+    }
+
+    return LocalLoggingRepository();
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:octopus/octopus.dart';
@@ -120,15 +122,17 @@ class _HomePageState extends State<HomePage> {
           );
       });
     } else {
-      HomeWidget.saveWidgetData<int>(
-        'groupId',
-        group.id,
-      ).then((value) {
-        HomeWidget.updateWidget(
-          name: 'UWidget',
-          iOSName: 'UWidget',
-        );
-      });
+      if (Platform.isAndroid || Platform.isIOS) {
+        HomeWidget.saveWidgetData<int>(
+          'groupId',
+          group.id,
+        ).then((value) {
+          HomeWidget.updateWidget(
+            name: 'UWidget',
+            iOSName: 'UWidget',
+          );
+        });
+      }
 
       setState(() {
         myGroup = group;
