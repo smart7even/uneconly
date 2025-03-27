@@ -79,6 +79,7 @@ android {
             // minifyEnabled false   // Set this to false to disable minification
             // useProguard false     // Set this to false to disable ProGuard
             // shrinkResources false // Set this to false to disable resource shrinking
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             ndk {
                 abiFilters 'armeabi-v7a','arm64-v8a','x86_64'
@@ -95,7 +96,7 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0" // Use the latest version
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0" // Use the latest version
+    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
 }
