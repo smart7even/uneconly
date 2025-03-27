@@ -124,7 +124,10 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
       ];
 
       for (final day in days) {
-        await _deleteDay(day);
+        await _deleteDay(
+          day,
+          schedule.info,
+        );
       }
 
       for (final daySchedule in schedule.daySchedules) {
@@ -163,14 +166,26 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
     });
   }
 
-  Future<void> _deleteDay(DateTime day) async {
-    final deleteStamement = _database.delete(_database.lessons)
-      ..where(
-        (tbl) =>
+  Future<void> _deleteDay(DateTime day, ScheduleInfo info) async {
+    final Expression<bool> Function($LessonsTable) deleteCondition = info.map(
+      group: (group) {
+        return (tbl) =>
             tbl.start.year.equals(day.year) &
             tbl.start.month.equals(day.month) &
-            tbl.start.day.equals(day.day),
-      );
+            tbl.start.day.equals(day.day) &
+            tbl.groupId.equals(group.shortGroupInfo.groupId);
+      },
+      professor: (professor) {
+        return (tbl) =>
+            tbl.start.year.equals(day.year) &
+            tbl.start.month.equals(day.month) &
+            tbl.start.day.equals(day.day) &
+            tbl.professorId.equals(professor.shortProfessorInfo.professorId);
+      },
+    );
+
+    final deleteStamement = _database.delete(_database.lessons)
+      ..where(deleteCondition);
 
     await deleteStamement.go();
 
