@@ -16,7 +16,7 @@ class AppNavigatorObserver extends NavigatorObserver {
     final routeArguments = route.settings.arguments;
 
     if (routeName != null && routeArguments is Map<String, dynamic>) {
-      log('didPush ${routeName} ${routeArguments}');
+      log('didPush $routeName $routeArguments');
       _analyticsRepository.logPageOpen(
         routeName,
         routeArguments,
@@ -30,7 +30,7 @@ class AppNavigatorObserver extends NavigatorObserver {
     final routeArguments = route.settings.arguments;
 
     if (routeName != null && routeArguments is Map<String, dynamic>) {
-      log('didPop ${routeName} ${routeArguments}');
+      log('didPop $routeName $routeArguments');
       _analyticsRepository.logPageClose(
         routeName,
         routeArguments,
@@ -44,7 +44,7 @@ class AppNavigatorObserver extends NavigatorObserver {
     final routeArguments = route.settings.arguments;
 
     if (routeName != null && routeArguments is Map<String, dynamic>) {
-      log('didRemove ${routeName} ${routeArguments}');
+      log('didRemove $routeName $routeArguments');
       _analyticsRepository.logPageClose(
         routeName,
         routeArguments,
@@ -58,7 +58,7 @@ class AppNavigatorObserver extends NavigatorObserver {
     final oldRouteArguments = oldRoute?.settings.arguments;
 
     if (oldRouteName != null && oldRouteArguments is Map<String, dynamic>) {
-      log('didReplace ${oldRouteName} ${oldRouteArguments}');
+      log('didReplace $oldRouteName $oldRouteArguments');
       _analyticsRepository.logPageClose(
         oldRouteName,
         oldRouteArguments,
@@ -69,7 +69,7 @@ class AppNavigatorObserver extends NavigatorObserver {
     final routeArguments = newRoute?.settings.arguments;
 
     if (routeName != null && routeArguments is Map<String, dynamic>) {
-      log('didReplace ${routeName} ${routeArguments}');
+      log('didReplace $routeName $routeArguments');
       _analyticsRepository.logPageClose(
         routeName,
         routeArguments,

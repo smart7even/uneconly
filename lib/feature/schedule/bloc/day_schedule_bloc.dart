@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:l/l.dart';
 import 'package:uneconly/feature/schedule/data/day_schedule_repository.dart';
 import 'package:uneconly/feature/schedule/model/day_schedule.dart';
 import 'package:uneconly/feature/schedule/model/day_schedule_entity.dart';
@@ -112,7 +113,7 @@ class DayScheduleBLoC extends Bloc<DayScheduleEvent, DayScheduleState>
         ),
       );
     } on Object catch (err, stackTrace) {
-      //l.e('An error occurred in the DayScheduleBLoC: $err', stackTrace);
+      l.e('An error occurred in the DayScheduleBLoC: $err', stackTrace);
       emit(DayScheduleState.error(data: state.data));
       rethrow;
     } finally {
