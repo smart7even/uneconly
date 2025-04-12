@@ -71,6 +71,17 @@ class CalendarBlock extends StatelessWidget {
         },
         listener: (context, state) {
           print('CalendarBlock listener');
+
+          final data = state.data;
+
+          if (data == null) {
+            return;
+          }
+
+          final isCalendarSyncingEnabled =
+              data.calendarSettings.isCalendarSyncingEnabled;
+
+          onChanged?.call(isCalendarSyncingEnabled);
         },
         builder: (context, state) {
           return Container(

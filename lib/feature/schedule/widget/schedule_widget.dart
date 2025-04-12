@@ -181,7 +181,9 @@ class ScheduleWidget extends StatelessWidget {
         child: ScheduleWidgetContent(
           child: CalendarBlock(
             onChanged: (value) {
-              onUpdate();
+              if (value) {
+                onUpdate();
+              }
             },
           ),
         ),
