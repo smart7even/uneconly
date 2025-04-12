@@ -23,7 +23,8 @@ class ScheduleCalendarDataProvider implements IScheduleCalendarDataProvider {
           await _deviceCalendarPlugin.requestPermissions();
 
       if (!permissionGrantedResult.isSuccess ||
-          !permissionGrantedResult.data!) {
+          permissionGrantedResult.data == null ||
+          permissionGrantedResult.data == false) {
         return false;
       }
     }
@@ -103,9 +104,15 @@ class ScheduleCalendarDataProvider implements IScheduleCalendarDataProvider {
 
       if (oldEvents != null) {
         for (final event in oldEvents) {
+          final eventId = event.eventId;
+
+          if (eventId == null) {
+            continue;
+          }
+
           await _deviceCalendarPlugin.deleteEvent(
             calendar.id,
-            event.eventId!,
+            eventId,
           );
         }
       }
@@ -124,6 +131,11 @@ class ScheduleCalendarDataProvider implements IScheduleCalendarDataProvider {
             lesson.end,
             location,
           ),
+          reminders: [
+            Reminder(
+              minutes: 15,
+            ),
+          ],
         );
         await _deviceCalendarPlugin.createOrUpdateEvent(event);
       }
