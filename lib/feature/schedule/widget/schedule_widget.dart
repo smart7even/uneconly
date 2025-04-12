@@ -176,19 +176,21 @@ class ScheduleWidget extends StatelessWidget {
       ),
     );
 
-    slivers.add(
-      SliverToBoxAdapter(
-        child: ScheduleWidgetContent(
-          child: CalendarBlock(
-            onChanged: (value) {
-              if (value) {
-                onUpdate();
-              }
-            },
+    if (showCalendarBlock) {
+      slivers.add(
+        SliverToBoxAdapter(
+          child: ScheduleWidgetContent(
+            child: CalendarBlock(
+              onChanged: (value) {
+                if (value) {
+                  onUpdate();
+                }
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
     slivers.add(
       SliverToBoxAdapter(
