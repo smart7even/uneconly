@@ -164,11 +164,13 @@ class CalendarBlock extends StatelessWidget {
                             ),
                           );
                         } else if (Platform.isAndroid) {
+                          final millis = DateTime.now().millisecondsSinceEpoch;
+                          final uri = Uri.parse(
+                            'content://com.android.calendar/time/$millis',
+                          );
+
                           await launchUrl(
-                            Uri.parse(
-                              'intent://calendar/#Intent;scheme=content;package=com.android.calendar;end',
-                            ),
-                            mode: LaunchMode.externalApplication,
+                            uri,
                           );
                         }
                       },
