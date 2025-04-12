@@ -51,11 +51,13 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
-	<string>Uneconly needs access to editing calendar.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Contacts access allows Uneconly to edit event attendees for lessons</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>Uneconly needs access to viewing and editing calendar.</string>
+	<string>Calendar access allows Uneconly to sync lessons with your calendar</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>Uneconly needs access to viewing and editing reminders.</string>
+	<string>Reminders access allows Uneconly to add reminders for lessons</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Calendar access allows Uneconly to sync lessons with your calendar</string>
 </dict>
 </plist>
