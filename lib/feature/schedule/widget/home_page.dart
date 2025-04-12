@@ -198,6 +198,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             isViewMode: false,
+            isHomePage: true,
           ),
           Scaffold(
             appBar: AppBar(

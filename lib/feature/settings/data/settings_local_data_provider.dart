@@ -17,6 +17,8 @@ abstract class ISettingsLocalDataProvider {
   Future<String?> getTheme();
   Future<void> clearAppCache();
   Future<bool> isAppCacheEmpty();
+  Future<bool> isSystemCalendarSyncingEnabled();
+  Future<void> setSystemCalendarSyncingEnabled(bool isEnabled);
 }
 
 class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
@@ -30,6 +32,8 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
   static const String _languageKey = 'language';
   static const String _themeKey = 'theme';
   static const String _favoriteGroupsKey = 'favoriteGroups';
+  static const String _systemCalendarSyncingEnabledKey =
+      'systemCalendarSyncingEnabled';
 
   SettingsLocalDataProvider({
     required SharedPreferences prefs,
@@ -165,5 +169,21 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
     final isLessonsEmpty = lessonsCount == 0;
 
     return isLessonsEmpty;
+  }
+
+  @override
+  Future<bool> isSystemCalendarSyncingEnabled() async {
+    final isEnabled = _prefs.getBool(_systemCalendarSyncingEnabledKey);
+
+    if (isEnabled == null) {
+      return false;
+    }
+
+    return isEnabled;
+  }
+
+  @override
+  Future<void> setSystemCalendarSyncingEnabled(bool isEnabled) {
+    return _prefs.setBool(_systemCalendarSyncingEnabledKey, isEnabled);
   }
 }

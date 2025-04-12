@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:octopus/octopus.dart';
@@ -12,6 +14,7 @@ import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/routing/routing_utils.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
+import 'package:uneconly/feature/schedule/data/schedule_calendar_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
@@ -30,12 +33,14 @@ import 'package:uneconly/feature/select/model/group.dart';
 class SchedulePage extends StatefulWidget {
   final ScheduleInfo scheduleInfo;
   final bool isViewMode;
+  final bool isHomePage;
 
   /// {@macro schedule_page}
   const SchedulePage({
     super.key,
     required this.scheduleInfo,
     required this.isViewMode,
+    this.isHomePage = false,
   });
 
   @override
@@ -155,9 +160,16 @@ class _SchedulePageState extends State<SchedulePage>
       dependenciesScope.database,
     );
 
+    IScheduleCalendarDataProvider calendarDataProvider =
+        ScheduleCalendarDataProvider(
+      deviceCalendarPlugin: DeviceCalendarPlugin(),
+    );
+
     IScheduleRepository repository = ScheduleRepository(
       networkDataProvider: scheduleNetworkDataProvider,
       localDataProvider: localDataProvider,
+      calendarDataProvider: calendarDataProvider,
+      settingsLocalDataProvider: dependenciesScope.settingsLocalDataProvider,
     );
 
     IGroupNetworkDataProvider groupNetworkDataProvider =
@@ -251,6 +263,19 @@ class _SchedulePageState extends State<SchedulePage>
     return ScheduleDrawer(
       favoriteGroups: favoriteGroups,
       onFavoriteGroupsRefresh: _onFavoriteGroupsRefresh,
+    );
+  }
+
+  void onUpdate(
+    BuildContext context,
+    ScheduleState state,
+  ) {
+    final bloc = context.read<ScheduleBLoC>();
+
+    bloc.add(
+      ScheduleEvent.fetch(
+        week: scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
+      ),
     );
   }
 
@@ -471,6 +496,11 @@ class _SchedulePageState extends State<SchedulePage>
               schedule: null,
               onNextWeek: () => onNextWeek(context),
               onPreviousWeek: () => onPreviousWeek(context),
+              showCalendarBlock: widget.isHomePage,
+              onUpdate: () => onUpdate(
+                context,
+                state,
+              ),
             );
           }
 
@@ -486,6 +516,11 @@ class _SchedulePageState extends State<SchedulePage>
             schedule: data[currentWeek]?.schedule,
             onNextWeek: () => onNextWeek(context),
             onPreviousWeek: () => onPreviousWeek(context),
+            showCalendarBlock: widget.isHomePage,
+            onUpdate: () => onUpdate(
+              context,
+              state,
+            ),
           );
         },
       ),

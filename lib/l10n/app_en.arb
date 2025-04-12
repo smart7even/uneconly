@@ -55,5 +55,13 @@
     "error": "Error",
     "tryAgain": "Try again",
     "homeWidget": "Home widget",
-    "viewNews": "View news"
+    "viewNews": "View news",
+    "syncWithCalendar": "Sync schedule with calendar",
+    "syncWithCalendarDescription": "Sync schedule with your calendar to get notifications about lessons start",
+    "syncWithCalendarExperimentalDescription": "В данный момент расписание в календаре обновляется только при открытии приложения. В будущем будет добавлена синхронизация в фоновом режиме",
+    "openCalendar": "Открыть календарь",
+    "calendar": "Календарь",
+    "grantCalendarPermission": "Разрешите доступ к календарю",
+    "calendarPermissionDescription": "Чтобы синхронизировать расписание с вашим календарем, необходимо предоставить доступ к календарю. Откройте настройки приложения и предоставьте доступ к календарю",
+    "goToSettings": "Перейти в настройки"
 }

@@ -255,6 +255,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
       ));
     } on Object catch (err, stackTrace) {
       l.e('An error occurred in the ScheduleBLoC: $err', stackTrace);
+      l.e(stackTrace.toString());
       emit(ScheduleState.error(
         data: state.data,
         currentWeek: state.currentWeek,

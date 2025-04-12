@@ -5,6 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart' as bloc_concurrency;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:l/l.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
+import 'package:uneconly/feature/settings/model/calendar_settings_entity.dart';
 import 'package:uneconly/feature/settings/model/settings_entity.dart';
 
 part 'settings_bloc.freezed.dart';
@@ -66,25 +67,25 @@ class SettingsState with _$SettingsState {
 
   /// Idling state
   const factory SettingsState.idle({
-    required final SettingsEntity data,
+    required final SettingsEntity? data,
     @Default('Idle') final String message,
   }) = IdleSettingsState;
 
   /// Processing
   const factory SettingsState.processing({
-    required final SettingsEntity data,
+    required final SettingsEntity? data,
     @Default('Processing') final String message,
   }) = ProcessingSettingsState;
 
   /// Successful
   const factory SettingsState.successful({
-    required final SettingsEntity data,
+    required final SettingsEntity? data,
     @Default('Successful') final String message,
   }) = SuccessfulSettingsState;
 
   /// An error has occurred
   const factory SettingsState.error({
-    required final SettingsEntity data,
+    required final SettingsEntity? data,
     @Default('An error has occurred') final String message,
   }) = ErrorSettingsState;
 }
@@ -99,9 +100,7 @@ class SettingsBLoC extends Bloc<SettingsEvent, SettingsState>
         super(
           initialState ??
               const SettingsState.idle(
-                data: SettingsEntity(
-                  themeColor: '',
-                ),
+                data: null,
                 message: 'Initial idle state',
               ),
         ) {
@@ -148,11 +147,15 @@ class SettingsBLoC extends Bloc<SettingsEvent, SettingsState>
     try {
       emit(event.inProgress(state: state));
       final themeColor = await _repository.getTheme();
+      final calendarSettings = await _repository.getCalendarSettings();
 
       emit(
         event.successful(
           state: state,
-          newData: SettingsEntity(themeColor: themeColor ?? ''),
+          newData: SettingsEntity(
+            themeColor: themeColor ?? '',
+            calendarSettings: calendarSettings,
+          ),
         ),
       );
     } on Object catch (err, stackTrace) {
@@ -172,6 +175,9 @@ class SettingsBLoC extends Bloc<SettingsEvent, SettingsState>
     try {
       emit(event.inProgress(state: state));
       await _repository.saveTheme(event.entity.themeColor);
+      await _repository.saveCalendarSettings(
+        event.entity.calendarSettings,
+      );
       emit(
         event.successful(
           state: state,

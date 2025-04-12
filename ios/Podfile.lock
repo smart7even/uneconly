@@ -1,4 +1,6 @@
 PODS:
+  - app_settings (5.1.1):
+    - Flutter
   - appmetrica_plugin (3.1.0):
     - AppMetricaAnalytics (~> 5.8)
     - Flutter
@@ -79,6 +81,8 @@ PODS:
     - AppMetricaCore (= 5.9.0)
     - AppMetricaCoreUtils (= 5.9.0)
     - AppMetricaLog (= 5.9.0)
+  - device_calendar (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - home_widget (0.0.1):
     - Flutter
@@ -121,7 +125,9 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - app_settings (from `.symlinks/plugins/app_settings/ios`)
   - appmetrica_plugin (from `.symlinks/plugins/appmetrica_plugin/ios`)
+  - device_calendar (from `.symlinks/plugins/device_calendar/ios`)
   - Flutter (from `Flutter`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -157,8 +163,12 @@ SPEC REPOS:
     - sqlite3
 
 EXTERNAL SOURCES:
+  app_settings:
+    :path: ".symlinks/plugins/app_settings/ios"
   appmetrica_plugin:
     :path: ".symlinks/plugins/appmetrica_plugin/ios"
+  device_calendar:
+    :path: ".symlinks/plugins/device_calendar/ios"
   Flutter:
     :path: Flutter
   home_widget:
@@ -177,6 +187,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
+  app_settings: 5127ae0678de1dcc19f2293271c51d37c89428b2
   appmetrica_plugin: b3b0464a4e534a4ed1af76d02f8f991193027c41
   AppMetricaAdSupport: 030ecf754defdf915849ed5b2c0a9f2a2f44658d
   AppMetricaAnalytics: 9c05ad0993395f88e68ba9a28ab1212fb68376c6
@@ -198,6 +209,7 @@ SPEC CHECKSUMS:
   AppMetricaStorageUtils: 42c3f8163226516aec3e183db4f3e1a29fac1c41
   AppMetricaSynchronization: ed4196effc6997921fab53503e79c6505dbae707
   AppMetricaWebKit: 568f2057ae462b792b0b04eeeaffdd3b2af1f2b3
+  device_calendar: b55b2c5406cfba45c95a59f9059156daee1f74ed
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   home_widget: f169fc41fd807b4d46ab6615dc44d62adbf9f64f
   KSCrash: ad271a7799f0a2841be0fb7d6bd105444c440832

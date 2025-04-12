@@ -110,7 +110,9 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           child: BlocBuilder<SettingsBLoC, SettingsState>(
             builder: (context, state) {
-              final selectedColor = getColorFromString(state.data.themeColor);
+              final selectedColor = getColorFromString(
+                state.data?.themeColor ?? '',
+              );
 
               return Center(
                 child: Column(
@@ -288,12 +290,19 @@ class _SettingsPageState extends State<SettingsPage> {
                         itemBuilder: (context, index) {
                           return GestureDetector(
                             onTap: () async {
+                              final data = state.data;
+
+                              if (data == null) {
+                                return;
+                              }
+
                               context.read<SettingsBLoC>().add(
                                     SettingsEvent.update(
                                       entity: SettingsEntity(
                                         themeColor: getStringFromColor(
                                           colors[index],
                                         ),
+                                        calendarSettings: data.calendarSettings,
                                       ),
                                     ),
                                   );
@@ -329,6 +338,33 @@ class _SettingsPageState extends State<SettingsPage> {
                           return const SizedBox(
                             width: 10,
                           );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    // setting with cupertinoSwitch
+                    SettingsTile(
+                      title: AppLocalizations.of(context)!.syncWithCalendar,
+                      description: AppLocalizations.of(context)!
+                          .syncWithCalendarDescription,
+                      trailing: CupertinoSwitch(
+                        value: state.data?.calendarSettings
+                                .isCalendarSyncingEnabled ??
+                            false,
+                        onChanged: (value) {
+                          final data = state.data;
+
+                          if (data == null) {
+                            return;
+                          }
+
+                          context.read<SettingsBLoC>().add(
+                                SettingsEvent.update(
+                                  entity: data.copyWith.calendarSettings(
+                                    isCalendarSyncingEnabled: value,
+                                  ),
+                                ),
+                              );
                         },
                       ),
                     ),

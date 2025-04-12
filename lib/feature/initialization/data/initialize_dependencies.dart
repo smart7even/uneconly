@@ -70,12 +70,14 @@ Map<String, _InitializationStep> _getInitializationSteps({
         dependencies.sharedPreferences = await SharedPreferences.getInstance(),
     'Initialize database': (dependencies) async =>
         dependencies.database = MyDatabase(),
+    'Initialize settings local data provider': (dependencies) async =>
+        dependencies.settingsLocalDataProvider = SettingsLocalDataProvider(
+          prefs: dependencies.sharedPreferences,
+          database: dependencies.database,
+        ),
     'Initialize settings repository': (dependencies) async =>
         dependencies.settingsRepository = SettingsRepository(
-          localDataProvider: SettingsLocalDataProvider(
-            prefs: dependencies.sharedPreferences,
-            database: dependencies.database,
-          ),
+          localDataProvider: dependencies.settingsLocalDataProvider,
         ),
     'Initialize dio': (dependencies) async => dependencies.dio = Dio(
           BaseOptions(

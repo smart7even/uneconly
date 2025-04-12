@@ -20,3 +20,5 @@
 -keep class kotlin.Metadata { *; }
 -keep class kotlin.jvm.internal.** { *; }
 -dontwarn kotlin.**
+
+-keep class com.builttoroam.devicecalendar.** { *; }

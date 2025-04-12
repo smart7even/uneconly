@@ -5,9 +5,12 @@ import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
+import 'package:uneconly/common/widget/app_button.dart';
+import 'package:uneconly/feature/calendar/calendar_block.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/widget/day_schedule_page.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_tile.dart';
+import 'package:uneconly/feature/schedule/widget/schedule_widget_content.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// {@template schedule_widget}
@@ -17,6 +20,8 @@ class ScheduleWidget extends StatelessWidget {
   final Schedule? schedule;
   final VoidCallback? onNextWeek;
   final VoidCallback? onPreviousWeek;
+  final bool showCalendarBlock;
+  final VoidCallback onUpdate;
 
   /// {@macro schedule_widget}
   const ScheduleWidget({
@@ -24,6 +29,8 @@ class ScheduleWidget extends StatelessWidget {
     required this.schedule,
     this.onNextWeek,
     this.onPreviousWeek,
+    required this.showCalendarBlock,
+    required this.onUpdate,
   });
 
   List<Widget> _buildSchedule(BuildContext context) {
@@ -152,46 +159,39 @@ class ScheduleWidget extends StatelessWidget {
 
     slivers.add(
       SliverToBoxAdapter(
-        child: Container(
-          height: 100,
-          padding: const EdgeInsets.only(
-            bottom: 16,
+        child: ScheduleWidgetContent(
+          child: SizedBox(
+            height: 50,
+            width: double.infinity,
+            child: AppButton(
+              title: context.string.viewNews,
+              onPressed: () {
+                context.octopus.push(
+                  Routes.tutorials,
+                );
+              },
+            ),
           ),
-          // color: Theme.of(context).secondaryHeaderColor,
-          child: Column(
-            children: [
-              const Spacer(),
-              Padding(
-                padding: EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  bottom: MediaQuery.of(context).padding.bottom,
-                ),
-                child: SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.octopus.push(
-                        Routes.tutorials,
-                      );
-                    },
-                    // shape rounded
-                    style: ButtonStyle(
-                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context)!.viewNews,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+        ),
+      ),
+    );
+
+    slivers.add(
+      SliverToBoxAdapter(
+        child: ScheduleWidgetContent(
+          child: CalendarBlock(
+            onChanged: (value) {
+              onUpdate();
+            },
           ),
+        ),
+      ),
+    );
+
+    slivers.add(
+      SliverToBoxAdapter(
+        child: SizedBox(
+          height: MediaQuery.of(context).padding.bottom,
         ),
       ),
     );

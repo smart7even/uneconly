@@ -6,6 +6,7 @@ import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/feature/initialization/widget/inherited_dependencies.dart';
 import 'package:uneconly/feature/schedule/data/day_schedule_repository.dart';
+import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
 import 'package:uneconly/feature/tutorials/data/tutorial_network_data_provider.dart';
 import 'package:uneconly/feature/tutorials/data/tutorial_repository.dart';
@@ -16,6 +17,7 @@ class Dependencies {
   late final ILoggingRepository loggingRepository;
   late final IAnalyticsRepository analyticsRepository;
   late final SharedPreferences sharedPreferences;
+  late final ISettingsLocalDataProvider settingsLocalDataProvider;
   late final ISettingsRepository settingsRepository;
   late final MyDatabase database;
   late final Dio dio;

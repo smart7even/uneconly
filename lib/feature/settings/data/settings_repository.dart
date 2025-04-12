@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:home_widget/home_widget.dart';
 import 'package:uneconly/feature/select/model/group.dart';
 import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
+import 'package:uneconly/feature/settings/model/calendar_settings_entity.dart';
 
 abstract class ISettingsRepository {
   Future<void> saveGroup(Group group);
@@ -19,6 +20,10 @@ abstract class ISettingsRepository {
   Stream<String> getThemeChangedStream();
   Future<void> clearAppCache();
   Future<bool> isAppCacheEmpty();
+  Future<CalendarSettingsEntity> getCalendarSettings();
+  Future<void> saveCalendarSettings(
+    CalendarSettingsEntity calendarSettings,
+  );
 }
 
 class SettingsRepository implements ISettingsRepository {
@@ -108,5 +113,24 @@ class SettingsRepository implements ISettingsRepository {
   @override
   Future<bool> isAppCacheEmpty() {
     return _localDataProvider.isAppCacheEmpty();
+  }
+
+  @override
+  Future<CalendarSettingsEntity> getCalendarSettings() async {
+    final isCalendarSyncingEnabled =
+        await _localDataProvider.isSystemCalendarSyncingEnabled();
+
+    return CalendarSettingsEntity(
+      isCalendarSyncingEnabled: isCalendarSyncingEnabled,
+    );
+  }
+
+  @override
+  Future<void> saveCalendarSettings(
+    CalendarSettingsEntity calendarSettings,
+  ) async {
+    await _localDataProvider.setSystemCalendarSyncingEnabled(
+      calendarSettings.isCalendarSyncingEnabled,
+    );
   }
 }
