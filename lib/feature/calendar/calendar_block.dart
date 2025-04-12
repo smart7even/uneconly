@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:app_settings/app_settings.dart';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -108,6 +107,9 @@ class CalendarBlock extends StatelessWidget {
                               .isCalendarSyncingEnabled ??
                           false,
                       onChanged: (value) async {
+                        final loggingRepository =
+                            Dependencies.of(context).loggingRepository;
+
                         final data = state.data;
 
                         if (data == null) {
@@ -116,9 +118,21 @@ class CalendarBlock extends StatelessWidget {
 
                         final bloc = context.read<SettingsBLoC>();
 
+                        loggingRepository.logEvent(
+                          'calendar/enable/start',
+                          {},
+                        );
+
                         if (value) {
                           bool hasPermissions =
                               await _requestCalendarPermission();
+
+                          loggingRepository.logEvent(
+                            'calendar/permission',
+                            {
+                              'granted': hasPermissions,
+                            },
+                          );
 
                           if (!hasPermissions) {
                             await showModalBottomSheet<void>(
@@ -131,6 +145,18 @@ class CalendarBlock extends StatelessWidget {
 
                             return;
                           }
+                        }
+
+                        if (value) {
+                          loggingRepository.logEvent(
+                            'calendar/enable/success',
+                            {},
+                          );
+                        } else {
+                          loggingRepository.logEvent(
+                            'calendar/disable',
+                            {},
+                          );
                         }
 
                         bloc.add(
@@ -157,6 +183,16 @@ class CalendarBlock extends StatelessWidget {
                     child: AppButton(
                       title: context.string.openCalendar,
                       onPressed: () async {
+                        final loggingRepository =
+                            Dependencies.of(context).loggingRepository;
+
+                        loggingRepository.logEvent(
+                          'calendar/open',
+                          {
+                            'source': 'calendar_block',
+                          },
+                        );
+
                         if (Platform.isIOS) {
                           await launchUrl(
                             Uri.parse(
