@@ -94,7 +94,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          AppLocalizations.of(context)!.settings,
+          context.string.settings,
         ),
       ),
       body: DefaultTextStyle(
@@ -121,7 +121,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     // Row(
                     //   mainAxisAlignment: MainAxisAlignment.center,
                     //   children: <Widget>[
-                    //     Text('${AppLocalizations.of(context)!.language}: '),
+                    //     Text('${context.string.language}: '),
                     //     CupertinoButton(
                     //       padding: EdgeInsets.zero,
                     //       // Display a CupertinoPicker with list of fruits.
@@ -187,14 +187,13 @@ class _SettingsPageState extends State<SettingsPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         SettingsTile(
-                          title: AppLocalizations.of(context)!.appVersion,
+                          title: context.string.appVersion,
                           description: version,
                         ),
                         const SizedBox(height: 15),
                         SettingsTile(
-                          title: AppLocalizations.of(context)!.licenses,
-                          description:
-                              AppLocalizations.of(context)!.showLicenses,
+                          title: context.string.licenses,
+                          description: context.string.showLicenses,
                           onPressed: () {
                             showLicensePage(
                               context: context,
@@ -203,8 +202,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         const SizedBox(height: 15),
                         SettingsTile(
-                          title: AppLocalizations.of(context)!.cache,
-                          description: AppLocalizations.of(context)!.clearCache,
+                          title: context.string.cache,
+                          description: context.string.clearCache,
                           onPressed: () async {
                             final settingsRepository =
                                 Dependencies.of(context).settingsRepository;
@@ -220,8 +219,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        AppLocalizations.of(context)!
-                                            .cacheIsEmpty,
+                                        context.string.cacheIsEmpty,
                                       ),
                                     ),
                                   );
@@ -236,8 +234,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      AppLocalizations.of(context)!
-                                          .cacheIsCleared,
+                                      context.string.cacheIsCleared,
                                     ),
                                   ),
                                 );
@@ -248,8 +245,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      AppLocalizations.of(context)!
-                                          .errorWhileCleaningCache,
+                                      context.string.errorWhileCleaningCache,
                                     ),
                                   ),
                                 );
@@ -267,7 +263,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           horizontal: 10,
                         ),
                         child: Text(
-                          '${AppLocalizations.of(context)!.theme}: ',
+                          '${context.string.theme}: ',
                           style: const TextStyle(
                             fontWeight: FontWeight.w500,
                             fontSize: 18,
@@ -344,9 +340,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     const SizedBox(height: 15),
                     // setting with cupertinoSwitch
                     SettingsTile(
-                      title: AppLocalizations.of(context)!.syncWithCalendar,
-                      description: AppLocalizations.of(context)!
-                          .syncWithCalendarDescription,
+                      title: context.string.syncWithCalendar,
+                      description: context.string.syncWithCalendarDescription,
                       trailing: CupertinoSwitch(
                         value: state.data?.calendarSettings
                                 .isCalendarSyncingEnabled ??

@@ -433,10 +433,10 @@ class _SchedulePageState extends State<SchedulePage>
     String title = state.scheduleInfo?.title ?? '';
 
     if (selectedWeek != null) {
-      title += ', ${AppLocalizations.of(context)!.week} $selectedWeek';
+      title += ', ${context.string.week} $selectedWeek';
 
       if (week != null && week == selectedWeek) {
-        title += ' (${AppLocalizations.of(context)!.now})';
+        title += ' (${context.string.now})';
       }
     }
 
@@ -463,15 +463,15 @@ class _SchedulePageState extends State<SchedulePage>
                 ScheduleActionConfig(
                   Text(
                     isFavorite
-                        ? AppLocalizations.of(context)!.removeFromFavorites
-                        : AppLocalizations.of(context)!.addToFavorites,
+                        ? context.string.removeFromFavorites
+                        : context.string.addToFavorites,
                   ),
                   action: ScheduleAction.favorite,
                   onPressed: () => onFavoritePressed(context, state),
                 ),
               ScheduleActionConfig(
                 Text(
-                  AppLocalizations.of(context)!.share,
+                  context.string.share,
                 ),
                 action: ScheduleAction.share,
                 onPressed: () => onSharePressed(context, state),
@@ -550,12 +550,12 @@ class _SchedulePageState extends State<SchedulePage>
               return Scaffold(
                 appBar: AppBar(
                   title: Text(
-                    AppLocalizations.of(context)!.scheduleError,
+                    context.string.scheduleError,
                   ),
                 ),
                 body: Center(
                   child: Text(
-                    AppLocalizations.of(context)!.schedule,
+                    context.string.schedule,
                   ),
                 ),
               );

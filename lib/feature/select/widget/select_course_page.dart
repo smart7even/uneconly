@@ -17,7 +17,7 @@ class SelectCoursePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.selectCourse),
+        title: Text(context.string.selectCourse),
       ),
       body: ListView.builder(
         itemCount: courses.length,
@@ -26,7 +26,7 @@ class SelectCoursePage extends StatelessWidget {
 
           return ListTile(
             title: Text(
-              AppLocalizations.of(context)!.nCourse(
+              context.string.nCourse(
                 course,
               ),
             ),

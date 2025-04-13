@@ -27,7 +27,7 @@ class ScheduleDrawer extends StatelessWidget {
     return BlocBuilder<ScheduleBLoC, ScheduleState>(
       builder: (context, state) {
         return Drawer(
-          semanticLabel: AppLocalizations.of(context)!.options,
+          semanticLabel: context.string.options,
           child: ListView(
             children: [
               DrawerHeader(
@@ -36,7 +36,7 @@ class ScheduleDrawer extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.selectedGroup,
+                      context.string.selectedGroup,
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -55,7 +55,7 @@ class ScheduleDrawer extends StatelessWidget {
               ),
               ListTile(
                 title: Text(
-                  AppLocalizations.of(context)!.selectAnotherGroup,
+                  context.string.selectAnotherGroup,
                 ),
                 onTap: () {
                   Octopus.of(context).push(
@@ -66,7 +66,7 @@ class ScheduleDrawer extends StatelessWidget {
               // ListTile for settings
               ListTile(
                 title: Text(
-                  AppLocalizations.of(context)!.settings,
+                  context.string.settings,
                 ),
                 onTap: () {
                   Octopus.of(
@@ -79,7 +79,7 @@ class ScheduleDrawer extends StatelessWidget {
               // ListTile for news
               ListTile(
                 title: Text(
-                  AppLocalizations.of(context)!.news,
+                  context.string.news,
                 ),
                 onTap: () {
                   Octopus.of(
@@ -92,7 +92,7 @@ class ScheduleDrawer extends StatelessWidget {
               // ListTile to view schedule of another group
               ListTile(
                 title: Text(
-                  AppLocalizations.of(context)!.viewScheduleOfAnotherGroup,
+                  context.string.viewScheduleOfAnotherGroup,
                 ),
                 onTap: () async {
                   final octopus = context.octopus;
@@ -114,7 +114,7 @@ class ScheduleDrawer extends StatelessWidget {
               // Title for lisview of favorite groups
               ListTile(
                 title: Text(
-                  AppLocalizations.of(context)!.favoriteGroups,
+                  context.string.favoriteGroups,
                   // heading style
                   style: const TextStyle(
                     fontSize: 20,
@@ -126,7 +126,7 @@ class ScheduleDrawer extends StatelessWidget {
               if (favoriteGroups.isEmpty)
                 ListTile(
                   title: Text(
-                    AppLocalizations.of(context)!.addFirstFavoriteGroup,
+                    context.string.addFirstFavoriteGroup,
                   ),
                 ),
 
@@ -184,7 +184,7 @@ class ScheduleDrawer extends StatelessWidget {
                       onFavoriteGroupsRefresh();
                     },
                     child: Text(
-                      AppLocalizations.of(context)!.add,
+                      context.string.add,
                     ),
                   ),
                 ),

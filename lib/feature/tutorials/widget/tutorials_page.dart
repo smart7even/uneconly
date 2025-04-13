@@ -24,7 +24,7 @@ class TutorialsPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            AppLocalizations.of(context)!.error,
+            context.string.error,
           ),
           ElevatedButton(
             onPressed: () {
@@ -33,7 +33,7 @@ class TutorialsPage extends StatelessWidget {
               );
             },
             child: Text(
-              AppLocalizations.of(context)!.tryAgain,
+              context.string.tryAgain,
             ),
           ),
         ],
@@ -45,7 +45,7 @@ class TutorialsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.news),
+        title: Text(context.string.news),
       ),
       body: BlocProvider(
         create: (context) => TutorialBLoC(

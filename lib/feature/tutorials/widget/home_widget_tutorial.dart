@@ -10,7 +10,7 @@ class HomeWidgetTutorial extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.homeWidget),
+        title: Text(context.string.homeWidget),
       ),
       body: Align(
         alignment: Alignment.center,

@@ -280,7 +280,7 @@ class _SelectPageState extends State<SelectPage> {
                       style: const TextStyle(color: Colors.white),
                       cursorColor: Colors.white,
                       decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context)!.searchThreeDots,
+                        hintText: context.string.searchThreeDots,
                         hintStyle: const TextStyle(color: Colors.white54),
                         border: InputBorder.none,
                       ),
@@ -293,7 +293,7 @@ class _SelectPageState extends State<SelectPage> {
                       },
                     )
                   : Text(
-                      AppLocalizations.of(context)!.selectGroup,
+                      context.string.selectGroup,
                     ),
               actions: [
                 // search
@@ -334,7 +334,7 @@ class _SelectPageState extends State<SelectPage> {
                           child: Text(
                             selectedFaculty != null
                                 ? selectedFaculty.name
-                                : AppLocalizations.of(context)!.faculty,
+                                : context.string.faculty,
                           ),
                         ),
                         if (!(Platform.isAndroid || Platform.isIOS))
@@ -347,9 +347,8 @@ class _SelectPageState extends State<SelectPage> {
                           },
                           child: Text(
                             selectedCourse != null
-                                ? AppLocalizations.of(context)!
-                                    .nCourse(selectedCourse)
-                                : AppLocalizations.of(context)!.course,
+                                ? context.string.nCourse(selectedCourse)
+                                : context.string.course,
                           ),
                         ),
                       ],
@@ -376,7 +375,7 @@ class _SelectPageState extends State<SelectPage> {
                             title: Text(
                               group.name,
                               semanticsLabel:
-                                  '${AppLocalizations.of(context)!.group} ${group.name}',
+                                  '${context.string.group} ${group.name}',
                             ),
                             trailing: widget.mode == SelectPageMode.view ||
                                     widget.mode == SelectPageMode.favorite
@@ -388,10 +387,8 @@ class _SelectPageState extends State<SelectPage> {
                                       );
                                     },
                                     tooltip: isFavorite
-                                        ? AppLocalizations.of(context)!
-                                            .removeFromFavorites
-                                        : AppLocalizations.of(context)!
-                                            .addToFavorites,
+                                        ? context.string.removeFromFavorites
+                                        : context.string.addToFavorites,
                                     icon: isFavorite
                                         ? const Icon(Icons.star)
                                         : const Icon(

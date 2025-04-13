@@ -108,7 +108,7 @@ class CalendarBlock extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   SettingsTile.withoutPadding(
-                    title: AppLocalizations.of(context)!.syncWithCalendar,
+                    title: context.string.syncWithCalendar,
                     titleStyle: const TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 16,

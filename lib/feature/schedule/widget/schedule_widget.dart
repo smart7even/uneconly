@@ -42,7 +42,7 @@ class ScheduleWidget extends StatelessWidget {
       slivers.add(
         SliverToBoxAdapter(
           child: ListTile(
-            title: Text('${AppLocalizations.of(context)!.loadingSchedule}...'),
+            title: Text('${context.string.loadingSchedule}...'),
           ),
         ),
       );
@@ -62,13 +62,11 @@ class ScheduleWidget extends StatelessWidget {
       final difference = calculateDifferenceInDays(daySchedule.day, today);
 
       if (difference == 0) {
-        sectionTitle = '${AppLocalizations.of(context)!.today}, $sectionTitle';
+        sectionTitle = '${context.string.today}, $sectionTitle';
       } else if (difference == 1) {
-        sectionTitle =
-            '${AppLocalizations.of(context)!.tomorrow}, $sectionTitle';
+        sectionTitle = '${context.string.tomorrow}, $sectionTitle';
       } else if (difference == -1) {
-        sectionTitle =
-            '${AppLocalizations.of(context)!.yesterday}, $sectionTitle';
+        sectionTitle = '${context.string.yesterday}, $sectionTitle';
       }
 
       slivers.add(
@@ -115,7 +113,7 @@ class ScheduleWidget extends StatelessWidget {
         slivers.add(
           SliverToBoxAdapter(
             child: ListTile(
-              title: Text(AppLocalizations.of(context)!.noLessons),
+              title: Text(context.string.noLessons),
             ),
           ),
         );
@@ -143,7 +141,7 @@ class ScheduleWidget extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 32.0),
               child: ListTile(
                 title: Text(
-                  '${AppLocalizations.of(context)!.newYearCongratulation} 🎄',
+                  '${context.string.newYearCongratulation} 🎄',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
@@ -209,7 +207,7 @@ class ScheduleWidget extends StatelessWidget {
 
     if (currentSchedule == null) {
       return Center(
-        child: Text(AppLocalizations.of(context)!.schedule),
+        child: Text(context.string.schedule),
       );
     }
 
@@ -260,7 +258,7 @@ class ScheduleWidget extends StatelessWidget {
                       height: 8,
                     ),
                     Text(
-                      AppLocalizations.of(context)!.lastWeekOfCurrentStudyYear,
+                      context.string.lastWeekOfCurrentStudyYear,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
@@ -271,8 +269,8 @@ class ScheduleWidget extends StatelessWidget {
                       height: 8,
                     ),
                     Text(
-                      AppLocalizations.of(context)!
-                          .checkOutOfficialWebsiteForPreciseInformation,
+                      context
+                          .string.checkOutOfficialWebsiteForPreciseInformation,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
@@ -297,7 +295,7 @@ class ScheduleWidget extends StatelessWidget {
                         );
                       },
                       child: Text(
-                        AppLocalizations.of(context)!.openOfficialWebsite,
+                        context.string.openOfficialWebsite,
                       ),
                     ),
                   ],
@@ -313,7 +311,7 @@ class ScheduleWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(AppLocalizations.of(context)!.noSchedule),
+            Text(context.string.noSchedule),
             Text('$weekStart - $weekEnd'),
             const SizedBox(
               height: 8,
@@ -321,7 +319,7 @@ class ScheduleWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                AppLocalizations.of(context)!.noScheduleDescription,
+                context.string.noScheduleDescription,
                 textAlign: TextAlign.center,
               ),
             ),

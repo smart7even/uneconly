@@ -3,12 +3,12 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:l/l.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/app_scroll_configuration.dart';
+import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/app_navigator_observer.dart';
@@ -176,7 +176,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      onGenerateTitle: (context) => AppLocalizations.of(context)!.scheduleApp,
+      onGenerateTitle: (context) => context.string.scheduleApp,
       locale: const Locale('ru'), // Locale(locale),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
