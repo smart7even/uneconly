@@ -19,6 +19,7 @@ import 'package:uneconly/common/utils/colors_utils.dart';
 import 'package:uneconly/common/widget/app_error.dart';
 import 'package:uneconly/feature/initialization/data/initialization.dart';
 import 'package:uneconly/feature/initialization/widget/inherited_dependencies.dart';
+import 'package:uneconly/l10n/app_localizations.dart';
 
 void main() async {
   ILoggingRepository? loggingRepository;
