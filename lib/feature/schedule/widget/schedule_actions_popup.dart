@@ -28,9 +28,9 @@ class ScheduleActionsPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
-      popUpAnimationStyle: AnimationStyle(
+      popUpAnimationStyle: const AnimationStyle(
         curve: Curves.easeIn,
-        duration: const Duration(milliseconds: 300),
+        duration: Duration(milliseconds: 300),
       ),
       offset: const Offset(0, 40),
       onSelected: (value) {

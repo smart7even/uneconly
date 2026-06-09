@@ -60,11 +60,11 @@ class DaySchedulePage extends StatelessWidget {
 
           final grouppedLessonsByTime = groupLessonsByTime(daySchedule.lessons);
 
-          final overlappingLessons = grouppedLessonsByTime
-              .where(
-                (element) => element.length > 1,
-              )
-              .toList();
+          // final overlappingLessons = grouppedLessonsByTime
+          //     .where(
+          //       (element) => element.length > 1,
+          //     )
+          //     .toList();
 
           return PageLoggingWrapper(
             pageName: 'daySchedule',
