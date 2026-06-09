@@ -357,7 +357,11 @@ class _SchedulePageState extends State<SchedulePage>
     bloc.add(
       ScheduleEvent.share(
         (content) async {
-          await Share.share(content);
+          await SharePlus.instance.share(
+            ShareParams(
+              text: content,
+            ),
+          );
 
           // final groupInfo = state.shortGroupInfo;
 
