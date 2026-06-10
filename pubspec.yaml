@@ -36,14 +36,14 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   dio: ^5.8.0
-  flutter_bloc: ^8.1.1
-  bloc_concurrency: ^0.2.0
-  freezed_annotation: ^2.2.0
+  flutter_bloc: ^9.1.1
+  bloc_concurrency: ^0.3.0
+  freezed_annotation: ^3.1.0
   json_annotation: ^4.8.0
-  l: ^3.2.0
+  l: ^5.0.1
   intl: any
-  drift: ^2.4.2
-  sqlite3_flutter_libs: ^0.5.13
+  drift: ^2.33.0
+  sqlite3: ^3.0.0
   path_provider: ^2.0.13
   path: ^1.8.2
   flutter_localizations:
@@ -69,13 +69,16 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
-  build_runner: ^2.4.12
-  freezed: ^2.3.2
+  flutter_lints: ^6.0.0
+  build_runner: ^2.15.0
+  freezed: ^3.2.5
   json_serializable: ^6.6.0
-  drift_dev: ^2.4.1
-  flutter_launcher_icons: ^0.13.1
-  pubspec_generator: ^3.0.1
+  drift_dev: ^2.33.0
+  flutter_launcher_icons: ^0.14.4
+  pubspec_generator:
+    git:
+      url: https://github.com/PlugFox/pubspec_generator.git
+      ref: dependabot/pub/analyzer-13.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

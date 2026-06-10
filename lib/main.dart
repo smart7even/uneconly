@@ -64,8 +64,8 @@ void main() async {
 }
 
 /// Formats the log message.
-Object _messageFormatting(Object message, LogLevel logLevel, DateTime now) =>
-    '${_timeFormat(now)} | $message';
+Object _messageFormatting(LogMessage message) =>
+    '${_timeFormat(message.timestamp)} | ${message.message}';
 
 /// Formats the time.
 String _timeFormat(DateTime time) =>
