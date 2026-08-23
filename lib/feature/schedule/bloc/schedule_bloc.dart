@@ -18,7 +18,7 @@ part 'schedule_bloc.freezed.dart';
 /* Schedule Events */
 
 @freezed
-class ScheduleEvent with _$ScheduleEvent {
+abstract class ScheduleEvent with _$ScheduleEvent {
   const ScheduleEvent._();
 
   /// Create
@@ -29,11 +29,14 @@ class ScheduleEvent with _$ScheduleEvent {
   const factory ScheduleEvent.fetch({
     required int week,
     ScheduleInfo? info,
+    DateTime? periodStart,
+    @Default(false) bool setAsCurrent,
   }) = FetchScheduleEvent;
 
   const factory ScheduleEvent.changeGroup({
     required int week,
     required ScheduleInfo info,
+    DateTime? periodStart,
   }) = ChangeGroupScheduleEvent;
 
   /// Update
@@ -52,7 +55,7 @@ class ScheduleEvent with _$ScheduleEvent {
 /* Schedule States */
 
 @freezed
-class ScheduleState with _$ScheduleState {
+abstract class ScheduleState with _$ScheduleState {
   const ScheduleState._();
 
   /// Idling state
@@ -177,7 +180,8 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
       emit(
         ScheduleState.processing(
           data: state.data,
-          currentWeek: state.currentWeek ?? event.week,
+          currentWeek:
+              event.setAsCurrent ? event.week : state.currentWeek ?? event.week,
           selectedWeek: event.week,
           scheduleInfo: info,
         ),
@@ -186,6 +190,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
       final localSchedule = await _repository.getLocalSchedule(
         info: info,
         week: event.week,
+        periodStart: event.periodStart,
       );
 
       if (localSchedule != null) {
@@ -201,7 +206,9 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         emit(
           ScheduleState.successful(
             data: localData,
-            currentWeek: state.currentWeek ?? localSchedule.week,
+            currentWeek: event.setAsCurrent
+                ? event.week
+                : state.currentWeek ?? localSchedule.week,
             selectedWeek: event.week,
             scheduleInfo: state.scheduleInfo,
           ),
@@ -249,7 +256,9 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
 
       emit(ScheduleState.successful(
         data: newData,
-        currentWeek: state.currentWeek ?? schedule.week,
+        currentWeek: event.setAsCurrent
+            ? event.week
+            : state.currentWeek ?? schedule.week,
         selectedWeek: event.week,
         scheduleInfo: state.scheduleInfo,
       ));
@@ -302,6 +311,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
       final localSchedule = await _repository.getLocalSchedule(
         info: event.info,
         week: event.week,
+        periodStart: event.periodStart,
       );
 
       if (localSchedule != null) {

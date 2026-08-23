@@ -5,7 +5,6 @@ import 'package:bloc_concurrency/bloc_concurrency.dart' as bloc_concurrency;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:l/l.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
-import 'package:uneconly/feature/settings/model/calendar_settings_entity.dart';
 import 'package:uneconly/feature/settings/model/settings_entity.dart';
 
 part 'settings_bloc.freezed.dart';
@@ -13,7 +12,7 @@ part 'settings_bloc.freezed.dart';
 /* Settings Events */
 
 @freezed
-class SettingsEvent with _$SettingsEvent {
+abstract class SettingsEvent with _$SettingsEvent {
   const SettingsEvent._();
 
   @Implements<ISettingsEvent>()
@@ -50,7 +49,7 @@ class SettingsEvent with _$SettingsEvent {
 /* Settings States */
 
 @freezed
-class SettingsState with _$SettingsState {
+abstract class SettingsState with _$SettingsState {
   const SettingsState._();
 
   /// Is in idle state

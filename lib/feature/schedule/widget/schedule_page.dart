@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:octopus/octopus.dart';
@@ -57,6 +56,8 @@ class _SchedulePageState extends State<SchedulePage>
   );
 
   late final ScheduleBLoC scheduleBLoC;
+  late final ScheduleNetworkDataProvider scheduleNetworkDataProvider;
+  DateTime? _basePeriodStart;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -121,6 +122,8 @@ class _SchedulePageState extends State<SchedulePage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _rebuildTimer?.cancel();
+    controller.dispose();
+    scheduleBLoC.close();
     super.dispose();
   }
 
@@ -130,11 +133,7 @@ class _SchedulePageState extends State<SchedulePage>
     // Called when the application state changes
 
     if (state == AppLifecycleState.resumed) {
-      scheduleBLoC.add(
-        ScheduleEvent.fetch(
-          week: scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
-        ),
-      );
+      unawaited(_loadRecommendedSchedule(refresh: true));
 
       setState(() {
         log('app resumed');
@@ -148,11 +147,77 @@ class _SchedulePageState extends State<SchedulePage>
     return getStudyWeekNumber(currentTime, currentTime);
   }
 
+  DateTime _getCurrentPeriodStart() {
+    final currentTime = DateTime.now();
+    return getStartOfStudyWeek(_getCurrentWeek(), currentTime);
+  }
+
+  DateTime? _periodStartForWeek(int week) {
+    final baseWeek = scheduleBLoC.state.currentWeek;
+    final basePeriodStart = _basePeriodStart;
+    if (baseWeek == null || basePeriodStart == null) {
+      return null;
+    }
+    return basePeriodStart.add(Duration(days: (week - baseWeek) * 7));
+  }
+
+  Future<void> _loadRecommendedSchedule({bool refresh = false}) async {
+    int recommendedWeek;
+    DateTime recommendedPeriodStart;
+
+    try {
+      final context = await scheduleNetworkDataProvider.fetchContext();
+      recommendedWeek = context.recommended.week;
+      recommendedPeriodStart = context.recommended.periodStart;
+    } on Object catch (error, stackTrace) {
+      // An older backend does not have /schedule/context. Retain the released
+      // app's local calculation as a compatibility fallback.
+      log('Schedule context is unavailable',
+          error: error, stackTrace: stackTrace);
+      recommendedWeek = _getCurrentWeek();
+      recommendedPeriodStart = _getCurrentPeriodStart();
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    final state = scheduleBLoC.state;
+    final shouldRebase = state.currentWeek == null ||
+        (refresh &&
+            state.selectedWeek == state.currentWeek &&
+            recommendedWeek != state.currentWeek);
+
+    if (shouldRebase) {
+      _basePeriodStart = recommendedPeriodStart;
+      if (controller.hasClients) {
+        controller.jumpToPage(initialPageIndex);
+      }
+      scheduleBLoC.add(
+        ScheduleEvent.fetch(
+          week: recommendedWeek,
+          periodStart: recommendedPeriodStart,
+          setAsCurrent: true,
+          info: widget.scheduleInfo,
+        ),
+      );
+      return;
+    }
+
+    final selectedWeek = state.selectedWeek ?? recommendedWeek;
+    scheduleBLoC.add(
+      ScheduleEvent.fetch(
+        week: selectedWeek,
+        periodStart: _periodStartForWeek(selectedWeek),
+        info: widget.scheduleInfo,
+      ),
+    );
+  }
+
   ScheduleBLoC _initBloc(BuildContext context) {
     final dependenciesScope = Dependencies.of(context);
 
-    ScheduleNetworkDataProvider scheduleNetworkDataProvider =
-        ScheduleNetworkDataProvider(
+    scheduleNetworkDataProvider = ScheduleNetworkDataProvider(
       dio: dependenciesScope.dio,
     );
 
@@ -186,12 +251,7 @@ class _SchedulePageState extends State<SchedulePage>
       groupRepository: groupRepository,
     );
 
-    bloc.add(
-      ScheduleEvent.fetch(
-        week: _getCurrentWeek(),
-        info: widget.scheduleInfo,
-      ),
-    );
+    unawaited(_loadRecommendedSchedule());
 
     return bloc;
   }
@@ -205,6 +265,9 @@ class _SchedulePageState extends State<SchedulePage>
         ScheduleEvent.changeGroup(
           week: scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
           info: widget.scheduleInfo,
+          periodStart: _periodStartForWeek(
+            scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
+          ),
         ),
       );
 
@@ -235,6 +298,7 @@ class _SchedulePageState extends State<SchedulePage>
           ScheduleEvent.fetch(
             info: widget.scheduleInfo,
             week: newWeek,
+            periodStart: _periodStartForWeek(newWeek),
           ),
         );
 
@@ -270,13 +334,7 @@ class _SchedulePageState extends State<SchedulePage>
     BuildContext context,
     ScheduleState state,
   ) {
-    final bloc = context.read<ScheduleBLoC>();
-
-    bloc.add(
-      ScheduleEvent.fetch(
-        week: scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
-      ),
-    );
+    unawaited(_loadRecommendedSchedule(refresh: true));
   }
 
   void onNextWeek(BuildContext context) {
@@ -512,7 +570,7 @@ class _SchedulePageState extends State<SchedulePage>
             return const SizedBox();
           }
 
-          if (currentWeek > 52) {
+          if (currentWeek > 53) {
             return null;
           }
 

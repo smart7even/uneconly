@@ -102,4 +102,31 @@ void main() {
       );
     },
   );
+
+  test('late August can be week 53 of the existing academic year', () {
+    final nowTime = DateTime(2025, 8, 25);
+
+    expect(getStudyWeekNumber(nowTime, nowTime), equals(53));
+    expect(getStartOfStudyWeek(53, nowTime), equals(DateTime(2025, 8, 25)));
+  });
+
+  test('period containing September 1 belongs to the new academic year', () {
+    expect(
+      getAcademicYearStartForPeriod(
+        DateTime(2026, 8, 31),
+        DateTime(2026, 9, 6),
+      ),
+      equals(2026),
+    );
+  });
+
+  test('period before September belongs to the previous academic year', () {
+    expect(
+      getAcademicYearStartForPeriod(
+        DateTime(2026, 8, 24),
+        DateTime(2026, 8, 30),
+      ),
+      equals(2025),
+    );
+  });
 }

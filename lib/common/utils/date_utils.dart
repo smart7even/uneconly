@@ -73,3 +73,14 @@ DateTime getStartOfStudyYearDate(DateTime nowTime) {
     );
   }
 }
+
+int getAcademicYearStartForPeriod(DateTime start, DateTime end) {
+  for (int year = start.year; year <= end.year; year++) {
+    final septemberFirst = DateTime(year, DateTime.september);
+    if (!septemberFirst.isBefore(start) && !septemberFirst.isAfter(end)) {
+      return year;
+    }
+  }
+
+  return start.month >= DateTime.september ? start.year : start.year - 1;
+}

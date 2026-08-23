@@ -5,12 +5,14 @@ import 'package:uneconly/feature/schedule/model/day_schedule.dart';
 import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_info.dart';
+import 'package:uneconly/feature/schedule/model/schedule_context.dart';
 
 abstract class IScheduleNetworkDataProvider {
   Future<Schedule> fetch({
     required ScheduleInfo info,
     int? week,
   });
+  Future<ScheduleContext> fetchContext();
 }
 
 class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
@@ -19,6 +21,12 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
   }) : _dio = dio;
 
   final Dio _dio;
+
+  @override
+  Future<ScheduleContext> fetchContext() async {
+    final response = await _dio.get('/schedule/context');
+    return ScheduleContext.fromJson(response.data as Map<String, dynamic>);
+  }
 
   @override
   Future<Schedule> fetch({required ScheduleInfo info, int? week}) async {
@@ -47,19 +55,42 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
 
       int responseWeek = response.data['week'];
 
+      DateTime? responsePeriodStart;
+      DateTime? responsePeriodEnd;
+      final periodStartValue = response.data['period_start'];
+      final periodEndValue = response.data['period_end'];
+      if (periodStartValue is String && periodEndValue is String) {
+        responsePeriodStart = DateTime.parse(periodStartValue);
+        responsePeriodEnd = DateTime.parse(periodEndValue);
+      }
+
       if (week != null && week != responseWeek) {
         throw Exception('Weeks do not match');
       }
 
       if (lessons.isEmpty) {
+        final fallbackStart = getStartOfStudyWeek(
+          responseWeek,
+          DateTime.now(),
+        );
+        final periodStart = responsePeriodStart ?? fallbackStart;
+        final periodEnd =
+            responsePeriodEnd ?? periodStart.add(const Duration(days: 6));
         return Schedule(
           daySchedules: [],
           week: responseWeek,
           info: info,
+          academicYearStart: response.data['academic_year_start'] as int? ??
+              getAcademicYearStartForPeriod(periodStart, periodEnd),
+          periodStart: periodStart,
+          periodEnd: periodEnd,
         );
       }
 
       var weekStart = getWeekStart(lessons.first.day);
+      final periodStart = responsePeriodStart ?? weekStart;
+      final periodEnd =
+          responsePeriodEnd ?? periodStart.add(const Duration(days: 6));
 
       var lessonsByDay = <DateTime, List<Lesson>>{};
       for (var lesson in lessons) {
@@ -124,6 +155,10 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
         daySchedules: daySchedules,
         week: responseWeek,
         info: info,
+        academicYearStart: response.data['academic_year_start'] as int? ??
+            getAcademicYearStartForPeriod(periodStart, periodEnd),
+        periodStart: periodStart,
+        periodEnd: periodEnd,
       );
     } on Object catch (e, stackTrace) {
       l.e('An error occured in ScheduleNetworkDataProvider', stackTrace);

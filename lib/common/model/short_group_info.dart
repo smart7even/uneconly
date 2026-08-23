@@ -5,7 +5,7 @@ part 'short_group_info.g.dart';
 
 /// ShortGroupInfo data class
 @freezed
-class ShortGroupInfo with _$ShortGroupInfo {
+abstract class ShortGroupInfo with _$ShortGroupInfo {
   const factory ShortGroupInfo({
     required final int groupId,
     required final String? groupName,

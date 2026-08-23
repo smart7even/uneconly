@@ -188,7 +188,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         SettingsTile(
                           title: context.string.appVersion,
-                          description: version,
+                          description: Pubspec.version.representation,
                         ),
                         const SizedBox(height: 15),
                         SettingsTile(

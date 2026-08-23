@@ -7,7 +7,7 @@ part 'schedule_info.g.dart';
 
 /// ScheduleInfo data class
 @freezed
-class ScheduleInfo with _$ScheduleInfo {
+abstract class ScheduleInfo with _$ScheduleInfo {
   const factory ScheduleInfo.group({
     required final ShortGroupInfo shortGroupInfo,
   }) = _GroupScheduleInfo;

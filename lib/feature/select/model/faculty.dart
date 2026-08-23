@@ -5,7 +5,7 @@ part 'faculty.g.dart';
 
 /// Faculty data class
 @freezed
-class Faculty with _$Faculty {
+abstract class Faculty with _$Faculty {
   const factory Faculty({
     required final int id,
     required final String name,

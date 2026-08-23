@@ -5,7 +5,7 @@ part 'short_professor_info.g.dart';
 
 /// ShortProfessorInfo data class
 @freezed
-class ShortProfessorInfo with _$ShortProfessorInfo {
+abstract class ShortProfessorInfo with _$ShortProfessorInfo {
   const factory ShortProfessorInfo({
     required final int professorId,
     required final String? professorName,

@@ -5,7 +5,7 @@ part 'lesson.g.dart';
 
 /// Lesson data class
 @freezed
-class Lesson with _$Lesson {
+abstract class Lesson with _$Lesson {
   const factory Lesson({
     required final String name,
     required final DateTime day,

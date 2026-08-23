@@ -12,7 +12,7 @@ part 'tutorial_bloc.freezed.dart';
 /* Tutorial Events */
 
 @freezed
-class TutorialEvent with _$TutorialEvent {
+abstract class TutorialEvent with _$TutorialEvent {
   const TutorialEvent._();
 
   @Implements<ITutorialEvent>()
@@ -47,7 +47,7 @@ class TutorialEvent with _$TutorialEvent {
 /* Tutorial States */
 
 @freezed
-class TutorialState with _$TutorialState {
+abstract class TutorialState with _$TutorialState {
   const TutorialState._();
 
   /// Is in idle state

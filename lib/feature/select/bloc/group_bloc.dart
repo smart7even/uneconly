@@ -9,7 +9,7 @@ part 'group_bloc.g.dart';
 
 /// GroupEvent data class
 @freezed
-class GroupEvent with _$GroupEvent {
+abstract class GroupEvent with _$GroupEvent {
   const factory GroupEvent.intiial() = _InitialGroupEvent;
   const factory GroupEvent.facultySelected({
     required final Faculty? faculty,
@@ -37,7 +37,7 @@ class GroupEvent with _$GroupEvent {
 /// - ErrorGroupState
 
 @freezed
-class GroupState with _$GroupState {
+abstract class GroupState with _$GroupState {
   const GroupState._();
 
   /// Idle state

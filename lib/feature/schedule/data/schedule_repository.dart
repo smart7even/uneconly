@@ -13,6 +13,7 @@ abstract class IScheduleRepository {
   Future<Schedule?> getLocalSchedule({
     required ScheduleInfo info,
     required int week,
+    DateTime? periodStart,
   });
 }
 
@@ -64,10 +65,12 @@ class ScheduleRepository implements IScheduleRepository {
   Future<Schedule?> getLocalSchedule({
     required ScheduleInfo info,
     required int week,
+    DateTime? periodStart,
   }) {
     return _localDataProvider.getSchedule(
       week,
       info,
+      periodStart,
     );
   }
 }

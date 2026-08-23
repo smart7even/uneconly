@@ -13,7 +13,7 @@ part 'day_schedule_bloc.freezed.dart';
 /* DaySchedule States */
 
 @freezed
-class DayScheduleState with _$DayScheduleState {
+abstract class DayScheduleState with _$DayScheduleState {
   const DayScheduleState._();
 
   /// Idling state
@@ -57,7 +57,7 @@ class DayScheduleState with _$DayScheduleState {
 /* DaySchedule Events */
 
 @freezed
-class DayScheduleEvent with _$DayScheduleEvent {
+abstract class DayScheduleEvent with _$DayScheduleEvent {
   const DayScheduleEvent._();
 
   /// Create

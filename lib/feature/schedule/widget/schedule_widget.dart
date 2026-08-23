@@ -11,7 +11,6 @@ import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/widget/day_schedule_page.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_tile.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget_content.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// {@template schedule_widget}
 /// ScheduleWidget widget
@@ -215,96 +214,8 @@ class ScheduleWidget extends StatelessWidget {
       final dateFormat = DateFormat(
         'dd MMMM yyyy',
       );
-      final currentTime = DateTime.now();
-      final weekStart = dateFormat.format(
-        getStartOfStudyWeek(
-          currentSchedule.week,
-          currentTime,
-        ),
-      );
-      final weekEnd = dateFormat.format(
-        getEndOfStudyWeek(
-          currentSchedule.week,
-          currentTime,
-        ),
-      );
-
-      final isLastStudyWeekOfCurrentYear = currentSchedule.week == 52;
-
-      if (isLastStudyWeekOfCurrentYear) {
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 8,
-                  right: 8,
-                  top: 0,
-                  bottom: 20,
-                ),
-                child: Column(
-                  children: [
-                    const Text(
-                      '🍀',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 100,
-                      ),
-                    ),
-                    Text('$weekStart - $weekEnd'),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    Text(
-                      context.string.lastWeekOfCurrentStudyYear,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    Text(
-                      context
-                          .string.checkOutOfficialWebsiteForPreciseInformation,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        // TODO: add error handling and make proper setup checking canLaunchUrl before opening url
-                        await currentSchedule.info.map(
-                          group: (group) async {
-                            await launchUrl(
-                              Uri.parse(
-                                'https://rasp.unecon.ru/raspisanie_grp.php?g=${group.shortGroupInfo.groupId}',
-                              ),
-                            );
-                          },
-                          professor: (professor) {},
-                        );
-                      },
-                      child: Text(
-                        context.string.openOfficialWebsite,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      }
+      final weekStart = dateFormat.format(currentSchedule.periodStart);
+      final weekEnd = dateFormat.format(currentSchedule.periodEnd);
 
       return Center(
         child: Column(

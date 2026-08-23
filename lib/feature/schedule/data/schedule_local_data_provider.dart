@@ -10,6 +10,7 @@ abstract class IScheduleLocalDataProvider {
   Future<Schedule?> getSchedule(
     int week,
     ScheduleInfo info,
+    DateTime? periodStart,
   );
   Future<void> saveSchedule(Schedule schedule);
 }
@@ -23,9 +24,11 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
   Future<Schedule?> getSchedule(
     int week,
     ScheduleInfo info,
+    DateTime? periodStart,
   ) async {
     final nowTime = DateTime.now();
-    final startOfWeekDateTime = getStartOfStudyWeek(week, nowTime);
+    final startOfWeekDateTime =
+        periodStart ?? getStartOfStudyWeek(week, nowTime);
     final endOfWeekDateTime = startOfWeekDateTime
         .add(
           const Duration(days: 7),
@@ -106,6 +109,12 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
       week: week,
       daySchedules: daySchedules,
       info: info,
+      academicYearStart: getAcademicYearStartForPeriod(
+        startOfWeekDateTime,
+        endOfWeekDateTime,
+      ),
+      periodStart: startOfWeekDateTime,
+      periodEnd: endOfWeekDateTime,
     );
   }
 
@@ -114,10 +123,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
     DateTime currentDateTime = DateTime.now();
 
     return _database.transaction(() async {
-      final startOfWeekDateTime = getStartOfStudyWeek(
-        schedule.week,
-        currentDateTime,
-      );
+      final startOfWeekDateTime = schedule.periodStart;
 
       final days = [
         for (int i = 0; i < 7; i++) startOfWeekDateTime.add(Duration(days: i)),

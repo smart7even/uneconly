@@ -5,7 +5,7 @@ part 'settings_entity.freezed.dart';
 
 /// SettingsEntity data class
 @freezed
-class SettingsEntity with _$SettingsEntity {
+abstract class SettingsEntity with _$SettingsEntity {
   const factory SettingsEntity({
     required final String themeColor,
     required final CalendarSettingsEntity calendarSettings,
