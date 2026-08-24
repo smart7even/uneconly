@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/routing/routes.dart';
+import 'package:uneconly/common/theme/app_theme.dart';
 
 /// {@template loading_page}
 /// LoadingPage widget
@@ -55,9 +56,19 @@ class _LoadingPageState extends State<LoadingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: const Center(
-        child: CircularProgressIndicator(),
+      body: SafeArea(
+        child: ListView.builder(
+          padding: const EdgeInsets.fromLTRB(20, 30, 20, 24),
+          itemCount: 8,
+          itemBuilder: (_, index) => Container(
+            height: index == 0 ? 32 : (index % 3 == 0 ? 22 : 66),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: context.palette.nestedSurface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
+import 'package:uneconly/common/utils/lesson_utils.dart';
 import 'package:uneconly/feature/schedule/model/day_schedule.dart';
 import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
@@ -27,11 +28,23 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
     DateTime? periodStart,
   ) async {
     final nowTime = DateTime.now();
-    final startOfWeekDateTime =
-        periodStart ?? getStartOfStudyWeek(week, nowTime);
-    final endOfWeekDateTime = startOfWeekDateTime
+    final scope = _scheduleScope(info);
+    final cachedPeriod = await (_database.select(_database.schedulePeriods)
+          ..where(
+              (table) => table.scope.equals(scope) & table.week.equals(week)))
+        .getSingleOrNull();
+    final periodMatchesRequest = periodStart == null ||
+        (cachedPeriod != null &&
+            getDate(cachedPeriod.periodStart) == getDate(periodStart));
+    final startOfWeekDateTime = periodMatchesRequest && cachedPeriod != null
+        ? cachedPeriod.periodStart
+        : periodStart ?? getStartOfStudyWeek(week, nowTime);
+    final periodEnd = periodMatchesRequest && cachedPeriod != null
+        ? cachedPeriod.periodEnd
+        : startOfWeekDateTime.add(const Duration(days: 6));
+    final endOfWeekDateTime = getDate(periodEnd)
         .add(
-          const Duration(days: 7),
+          const Duration(days: 1),
         )
         .subtract(
           const Duration(seconds: 1),
@@ -73,10 +86,11 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
             start: e.start,
             end: e.end,
             professor: e.professor,
-            location: e.location,
+            location: cleanLessonLocation(e.location),
             lessonType: e.lessonType,
             professorId: e.professorId,
             group: e.group,
+            roomUrl: e.roomUrl,
           ),
         )
         .where((element) =>
@@ -91,7 +105,13 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
     }
 
     final days = [
-      for (int i = 0; i < 7; i++) startOfWeekDateTime.add(Duration(days: i)),
+      for (int i = 0;
+          i <=
+              getDate(periodEnd)
+                  .difference(getDate(startOfWeekDateTime))
+                  .inDays;
+          i++)
+        startOfWeekDateTime.add(Duration(days: i)),
     ];
     List<DaySchedule> daySchedules = [];
 
@@ -114,7 +134,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
         endOfWeekDateTime,
       ),
       periodStart: startOfWeekDateTime,
-      periodEnd: endOfWeekDateTime,
+      periodEnd: periodEnd,
     );
   }
 
@@ -124,6 +144,17 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
 
     return _database.transaction(() async {
       final startOfWeekDateTime = schedule.periodStart;
+
+      await _database.into(_database.schedulePeriods).insertOnConflictUpdate(
+            SchedulePeriodsCompanion.insert(
+              scope: _scheduleScope(schedule.info),
+              week: schedule.week,
+              academicYearStart: schedule.academicYearStart,
+              periodStart: schedule.periodStart,
+              periodEnd: schedule.periodEnd,
+              updatedAt: currentDateTime,
+            ),
+          );
 
       final days = [
         for (int i = 0; i < 7; i++) startOfWeekDateTime.add(Duration(days: i)),
@@ -141,13 +172,14 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
           final lessonsCompanion = LessonsCompanion(
             name: Value(lesson.name),
             professor: Value(lesson.professor),
-            location: Value(lesson.location),
+            location: Value(cleanLessonLocation(lesson.location)),
             start: Value(lesson.start),
             end: Value(lesson.end),
             createdAt: Value(currentDateTime),
             lessonType: Value(lesson.lessonType),
             professorId: Value(lesson.professorId),
             group: Value(lesson.group),
+            roomUrl: Value(lesson.roomUrl),
           );
 
           final lessonsCompanionWithEntityId = schedule.info.map(
@@ -197,4 +229,10 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
 
     return;
   }
+
+  String _scheduleScope(ScheduleInfo info) => info.map(
+        group: (group) => 'group:${group.shortGroupInfo.groupId}',
+        professor: (professor) =>
+            'professor:${professor.shortProfessorInfo.professorId}',
+      );
 }

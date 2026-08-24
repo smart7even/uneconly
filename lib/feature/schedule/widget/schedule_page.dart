@@ -5,18 +5,23 @@ import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:octopus/octopus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/routing/routing_utils.dart';
+import 'package:uneconly/common/theme/app_theme.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
+import 'package:uneconly/common/utils/schedule_week_utils.dart';
 import 'package:uneconly/feature/schedule/bloc/schedule_bloc.dart';
 import 'package:uneconly/feature/schedule/data/schedule_calendar_data_provider.dart';
+import 'package:uneconly/feature/schedule/data/lesson_choice_repository.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
+import 'package:uneconly/feature/schedule/model/app_config.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
 import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_actions_popup.dart';
@@ -58,6 +63,7 @@ class _SchedulePageState extends State<SchedulePage>
   late final ScheduleBLoC scheduleBLoC;
   late final ScheduleNetworkDataProvider scheduleNetworkDataProvider;
   DateTime? _basePeriodStart;
+  AppConfig _appConfig = const AppConfig.safeDefaults();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -76,6 +82,7 @@ class _SchedulePageState extends State<SchedulePage>
     log(Octopus.of(context).state.uri.toString());
 
     scheduleBLoC = _initBloc(context);
+    unawaited(_refreshAppConfig());
 
     WidgetsBinding.instance.addObserver(this);
 
@@ -133,6 +140,7 @@ class _SchedulePageState extends State<SchedulePage>
     // Called when the application state changes
 
     if (state == AppLifecycleState.resumed) {
+      unawaited(_refreshAppConfig());
       unawaited(_loadRecommendedSchedule(refresh: true));
 
       setState(() {
@@ -214,6 +222,21 @@ class _SchedulePageState extends State<SchedulePage>
     );
   }
 
+  Future<void> _refreshAppConfig() async {
+    AppConfig config;
+    try {
+      config = await scheduleNetworkDataProvider.fetchAppConfig();
+    } on Object catch (error, stackTrace) {
+      // Fail closed: an old or unavailable backend must not expose a broken map.
+      log('App config is unavailable', error: error, stackTrace: stackTrace);
+      config = const AppConfig.safeDefaults();
+    }
+
+    if (mounted && config != _appConfig) {
+      setState(() => _appConfig = config);
+    }
+  }
+
   ScheduleBLoC _initBloc(BuildContext context) {
     final dependenciesScope = Dependencies.of(context);
 
@@ -228,6 +251,9 @@ class _SchedulePageState extends State<SchedulePage>
     IScheduleCalendarDataProvider calendarDataProvider =
         ScheduleCalendarDataProvider(
       deviceCalendarPlugin: DeviceCalendarPlugin(),
+      lessonChoiceRepository: LessonChoiceRepository(
+        dependenciesScope.sharedPreferences,
+      ),
     );
 
     IScheduleRepository repository = ScheduleRepository(
@@ -249,6 +275,9 @@ class _SchedulePageState extends State<SchedulePage>
     var bloc = ScheduleBLoC(
       repository: repository,
       groupRepository: groupRepository,
+      lessonChoiceRepository: LessonChoiceRepository(
+        dependenciesScope.sharedPreferences,
+      ),
     );
 
     unawaited(_loadRecommendedSchedule());
@@ -294,6 +323,23 @@ class _SchedulePageState extends State<SchedulePage>
 
     int newWeek = week + newIndex - initialPageIndex;
 
+    if (!isValidScheduleWeek(newWeek)) {
+      final selectedWeek = scheduleBLoC.state.selectedWeek ?? week;
+      final selectedIndex = initialPageIndex + selectedWeek - week;
+      if (controller.hasClients) {
+        unawaited(
+          controller.animateToPage(
+            selectedIndex,
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+          ),
+        );
+      }
+      return;
+    }
+
+    unawaited(_refreshAppConfig());
+
     context.read<ScheduleBLoC>().add(
           ScheduleEvent.fetch(
             info: widget.scheduleInfo,
@@ -334,14 +380,18 @@ class _SchedulePageState extends State<SchedulePage>
     BuildContext context,
     ScheduleState state,
   ) {
+    unawaited(_refreshAppConfig());
     unawaited(_loadRecommendedSchedule(refresh: true));
   }
 
   void onNextWeek(BuildContext context) {
     final currentPage = controller.page;
     final week = scheduleBLoC.state.currentWeek;
+    final selectedWeek = scheduleBLoC.state.selectedWeek;
 
-    if (currentPage == null) {
+    if (currentPage == null ||
+        selectedWeek == null ||
+        selectedWeek >= maxScheduleWeek) {
       return;
     }
 
@@ -359,8 +409,11 @@ class _SchedulePageState extends State<SchedulePage>
   void onPreviousWeek(BuildContext context) {
     final currentPage = controller.page;
     final week = scheduleBLoC.state.currentWeek;
+    final selectedWeek = scheduleBLoC.state.selectedWeek;
 
-    if (currentPage == null) {
+    if (currentPage == null ||
+        selectedWeek == null ||
+        selectedWeek <= minScheduleWeek) {
       return;
     }
 
@@ -375,16 +428,15 @@ class _SchedulePageState extends State<SchedulePage>
     onPageChanged(context, newPage.round(), week);
   }
 
-  void onFavoritePressed(
+  Future<void> onFavoritePressed(
     BuildContext context,
     ScheduleState state,
-  ) {
-    setState(() {
-      isFavorite = !isFavorite;
-    });
+  ) async {
+    final wasFavorite = isFavorite;
+    setState(() => isFavorite = !wasFavorite);
 
-    state.scheduleInfo?.map(
-      group: (group) {
+    await state.scheduleInfo?.map(
+      group: (group) async {
         final groupModel = Group(
           id: group.shortGroupInfo.groupId,
           name: group.shortGroupInfo.groupName ?? '',
@@ -393,14 +445,41 @@ class _SchedulePageState extends State<SchedulePage>
         );
 
         if (isFavorite) {
-          Dependencies.of(context).settingsRepository.addGroupToFavorites(
-                groupModel,
-              );
+          await Dependencies.of(context)
+              .settingsRepository
+              .addGroupToFavorites(groupModel);
         } else {
-          Dependencies.of(context).settingsRepository.removeGroupFromFavorites(
-                groupModel,
-              );
+          await Dependencies.of(context)
+              .settingsRepository
+              .removeGroupFromFavorites(groupModel);
         }
+
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isFavorite
+                  ? context.string.addToFavorites
+                  : context.string.removeFromFavorites,
+            ),
+            action: SnackBarAction(
+              label: 'Отменить',
+              onPressed: () async {
+                setState(() => isFavorite = wasFavorite);
+                if (wasFavorite) {
+                  await Dependencies.of(context)
+                      .settingsRepository
+                      .addGroupToFavorites(groupModel);
+                } else {
+                  await Dependencies.of(context)
+                      .settingsRepository
+                      .removeGroupFromFavorites(groupModel);
+                }
+              },
+            ),
+          ),
+        );
       },
       professor: (professor) {
         // TODO: add favorite professors
@@ -469,8 +548,9 @@ class _SchedulePageState extends State<SchedulePage>
 
   Widget _buildPageView(
     BuildContext context,
-    ScheduleState state,
-  ) {
+    ScheduleState state, {
+    bool hasNetworkError = false,
+  }) {
     int? week = state.currentWeek;
     int? selectedWeek = state.selectedWeek;
     Map<int, ScheduleDetails> data = state.data;
@@ -492,23 +572,29 @@ class _SchedulePageState extends State<SchedulePage>
       );
     }
 
-    String title = state.scheduleInfo?.title ?? '';
+    final scheduleTitle = state.scheduleInfo?.title ?? '';
+    String weekSubtitle = '';
 
     if (selectedWeek != null) {
-      title += ', ${context.string.week} $selectedWeek';
-
-      if (week != null && week == selectedWeek) {
-        title += ' (${context.string.now})';
-      }
+      final selectedSchedule = data[selectedWeek]?.schedule;
+      weekSubtitle = selectedSchedule == null
+          ? '${context.string.week} $selectedWeek'
+          : _weekRange(
+              selectedSchedule.periodStart, selectedSchedule.periodEnd);
+      if (week != null && week == selectedWeek) weekSubtitle += ' · эта неделя';
     }
 
     final isGroupSchedule = widget.scheduleInfo.map(
       group: (group) => true,
       professor: (professor) => false,
     );
+    if (!isGroupSchedule && weekSubtitle.isNotEmpty) {
+      weekSubtitle = 'Преподаватель · $weekSubtitle';
+    }
 
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: context.palette.surface,
       drawer: !widget.isViewMode
           ? _buildDrawer(
               context,
@@ -516,75 +602,136 @@ class _SchedulePageState extends State<SchedulePage>
             )
           : null,
       appBar: AppBar(
-        title: Text(title),
-        centerTitle: true,
+        toolbarHeight: 70,
+        elevation: 0,
+        backgroundColor: context.palette.surface,
+        foregroundColor: context.palette.ink,
+        centerTitle: false,
+        titleSpacing: 4,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              scheduleTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+              ),
+            ),
+            if (weekSubtitle.isNotEmpty)
+              Text(
+                weekSubtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: context.palette.muted,
+                ),
+              ),
+          ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            color: context.palette.hairline,
+          ),
+        ),
         actions: [
-          ScheduleActionsPopup(
-            actions: [
-              if (widget.isViewMode && isGroupSchedule)
+          if (!widget.isViewMode)
+            IconButton(
+              onPressed: () => onSharePressed(context, state),
+              tooltip: context.string.share,
+              icon: const Icon(Icons.ios_share_outlined),
+            )
+          else
+            ScheduleActionsPopup(
+              actions: [
+                if (widget.isViewMode && isGroupSchedule)
+                  ScheduleActionConfig(
+                    Text(
+                      isFavorite
+                          ? context.string.removeFromFavorites
+                          : context.string.addToFavorites,
+                    ),
+                    action: ScheduleAction.favorite,
+                    onPressed: () => onFavoritePressed(context, state),
+                  ),
                 ScheduleActionConfig(
                   Text(
-                    isFavorite
-                        ? context.string.removeFromFavorites
-                        : context.string.addToFavorites,
+                    context.string.share,
                   ),
-                  action: ScheduleAction.favorite,
-                  onPressed: () => onFavoritePressed(context, state),
+                  action: ScheduleAction.share,
+                  onPressed: () => onSharePressed(context, state),
                 ),
-              ScheduleActionConfig(
-                Text(
-                  context.string.share,
-                ),
-                action: ScheduleAction.share,
-                onPressed: () => onSharePressed(context, state),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
-      body: PageView.builder(
-        controller: controller,
-        scrollDirection: Axis.horizontal,
-        onPageChanged: (int newIndex) => onPageChanged(context, newIndex, week),
-        itemBuilder: (context, index) {
-          int? currentWeek;
-
-          if (week != null) {
-            currentWeek = week + index - initialPageIndex;
-          }
-
-          if (currentWeek == null) {
-            return ScheduleWidget(
-              schedule: null,
-              onNextWeek: () => onNextWeek(context),
-              onPreviousWeek: () => onPreviousWeek(context),
-              showCalendarBlock: widget.isHomePage,
-              onUpdate: () => onUpdate(
-                context,
-                state,
+      body: Column(
+        children: [
+          if (hasNetworkError)
+            _OfflineBanner(
+                onRetry: () => _loadRecommendedSchedule(refresh: true)),
+          Expanded(
+            child: PageView.builder(
+              controller: controller,
+              scrollDirection: Axis.horizontal,
+              physics: _WeekPageScrollPhysics(
+                canGoPrevious:
+                    selectedWeek == null || selectedWeek > minScheduleWeek,
+                canGoNext:
+                    selectedWeek == null || selectedWeek < maxScheduleWeek,
               ),
-            );
-          }
+              onPageChanged: (int newIndex) =>
+                  onPageChanged(context, newIndex, week),
+              itemBuilder: (context, index) {
+                int? currentWeek;
 
-          if (currentWeek < 1) {
-            return const SizedBox();
-          }
+                if (week != null) {
+                  currentWeek = week + index - initialPageIndex;
+                }
 
-          if (currentWeek > 53) {
-            return null;
-          }
+                if (currentWeek == null) {
+                  return ScheduleWidget(
+                    schedule: null,
+                    onNextWeek: () => onNextWeek(context),
+                    onPreviousWeek: () => onPreviousWeek(context),
+                    showCalendarBlock: widget.isHomePage,
+                    onUpdate: () => onUpdate(
+                      context,
+                      state,
+                    ),
+                    appConfig: _appConfig,
+                  );
+                }
 
-          return ScheduleWidget(
-            schedule: data[currentWeek]?.schedule,
-            onNextWeek: () => onNextWeek(context),
-            onPreviousWeek: () => onPreviousWeek(context),
-            showCalendarBlock: widget.isHomePage,
-            onUpdate: () => onUpdate(
-              context,
-              state,
+                if (currentWeek < minScheduleWeek) {
+                  return const SizedBox();
+                }
+
+                if (currentWeek > maxScheduleWeek) {
+                  return const SizedBox();
+                }
+
+                return ScheduleWidget(
+                  schedule: data[currentWeek]?.schedule,
+                  onNextWeek: () => onNextWeek(context),
+                  onPreviousWeek: () => onPreviousWeek(context),
+                  showCalendarBlock: widget.isHomePage,
+                  onUpdate: () => onUpdate(
+                    context,
+                    state,
+                  ),
+                  appConfig: _appConfig,
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -609,6 +756,13 @@ class _SchedulePageState extends State<SchedulePage>
               state,
             ),
             error: (state) {
+              if (state.hasData) {
+                return _buildPageView(
+                  context,
+                  state,
+                  hasNetworkError: true,
+                );
+              }
               return Scaffold(
                 appBar: AppBar(
                   title: Text(
@@ -616,8 +770,34 @@ class _SchedulePageState extends State<SchedulePage>
                   ),
                 ),
                 body: Center(
-                  child: Text(
-                    context.string.schedule,
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.cloud_off_outlined,
+                            size: 42, color: context.palette.muted),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Не удалось загрузить расписание',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Проверьте интернет-соединение и попробуйте ещё раз.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: context.palette.muted),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          onPressed: () =>
+                              _loadRecommendedSchedule(refresh: true),
+                          icon: const Icon(Icons.refresh),
+                          label: Text(context.string.tryAgain),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -627,6 +807,84 @@ class _SchedulePageState extends State<SchedulePage>
       ),
     );
   }
+}
+
+String _weekRange(DateTime start, DateTime end) {
+  if (start.month == end.month) {
+    return '${start.day}–${end.day} ${_monthInDate(end)}';
+  }
+  return '${start.day} ${DateFormat('MMM', 'ru').format(start)} – '
+      '${end.day} ${DateFormat('MMM', 'ru').format(end)}';
+}
+
+String _monthInDate(DateTime date) =>
+    DateFormat('d MMMM', 'ru').format(date).replaceFirst('${date.day} ', '');
+
+class _OfflineBanner extends StatelessWidget {
+  const _OfflineBanner({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: context.palette.nestedSurface,
+      child: InkWell(
+        onTap: onRetry,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Row(
+            children: [
+              Icon(Icons.cloud_off_outlined,
+                  size: 18, color: context.palette.accent),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Нет связи · показана сохранённая копия',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+              Text('Обновить',
+                  style: TextStyle(
+                    color: context.palette.accent,
+                    fontWeight: FontWeight.w700,
+                  )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WeekPageScrollPhysics extends PageScrollPhysics {
+  const _WeekPageScrollPhysics({
+    required this.canGoPrevious,
+    required this.canGoNext,
+    super.parent,
+  });
+
+  final bool canGoPrevious;
+  final bool canGoNext;
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    if (!canGoPrevious && value < position.pixels) {
+      return value - position.pixels;
+    }
+    if (!canGoNext && value > position.pixels) {
+      return value - position.pixels;
+    }
+    return super.applyBoundaryConditions(position, value);
+  }
+
+  @override
+  _WeekPageScrollPhysics applyTo(ScrollPhysics? ancestor) =>
+      _WeekPageScrollPhysics(
+        canGoPrevious: canGoPrevious,
+        canGoNext: canGoNext,
+        parent: buildParent(ancestor),
+      );
 }
 
 Future<void> waitReturnToHomeSchedule(

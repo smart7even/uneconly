@@ -5,10 +5,11 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:uneconly/common/database/tables/lessons.dart';
+import 'package:uneconly/common/database/tables/schedule_periods.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Lessons])
+@DriftDatabase(tables: [Lessons, SchedulePeriods])
 class MyDatabase extends _$MyDatabase {
   // we tell the database where to store the data with this constructor
   MyDatabase() : super(_openConnection());
@@ -16,7 +17,7 @@ class MyDatabase extends _$MyDatabase {
   // you should bump this number whenever you change or add a table definition.
   // Migrations are covered later in the documentation.
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
@@ -47,6 +48,14 @@ class MyDatabase extends _$MyDatabase {
           // we added the group property in the change from version 4 to
           // version 5
           await m.addColumn(lessons, lessons.group);
+        }
+
+        if (from < 6) {
+          await m.addColumn(lessons, lessons.roomUrl);
+        }
+
+        if (from < 7) {
+          await m.createTable(schedulePeriods);
         }
       },
     );

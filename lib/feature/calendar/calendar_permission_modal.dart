@@ -1,7 +1,7 @@
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:uneconly/common/localization/localization.dart';
-import 'package:uneconly/common/widget/app_button.dart';
+import 'package:uneconly/common/theme/app_theme.dart';
 
 class CalendarPermissionModal extends StatelessWidget {
   const CalendarPermissionModal({
@@ -10,92 +10,49 @@ class CalendarPermissionModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Close button
-        Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.only(
-              right: 8,
-              top: 8,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                color: Theme.of(context).colorScheme.surface,
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: context.palette.hairline,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              child: IconButton(
-                color: Theme.of(context).colorScheme.onSurface,
-                icon: const Icon(Icons.close),
-                onPressed: () {
-                  Navigator.of(context).pop();
+            ),
+            const SizedBox(height: 20),
+            Text(
+              context.string.grantCalendarPermission,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Без доступа к календарю пары добавить не получится. '
+              'Разрешить доступ можно в настройках телефона.',
+              style: TextStyle(color: context.palette.muted),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  await AppSettings.openAppSettings();
+                  if (context.mounted) Navigator.of(context).pop();
                 },
+                child: const Text('Открыть настройки'),
               ),
             ),
-          ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  context.string.grantCalendarPermission,
-                  textAlign: TextAlign.start,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                Text(
-                  context.string.calendarPermissionDescription,
-                  textAlign: TextAlign.start,
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: AppButton(
-                    title: context.string.goToSettings,
-                    onPressed: () async {
-                      await AppSettings.openAppSettings();
-                      // Close the modal after opening settings
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).viewInsets.bottom,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 } // CalendarBlock

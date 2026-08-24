@@ -7,6 +7,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart' as bloc_concurrency;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uneconly/common/model/short_group_info.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
+import 'package:uneconly/feature/schedule/data/lesson_choice_repository.dart';
 import 'package:uneconly/feature/schedule/domain/schedule_transformer.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
@@ -130,9 +131,11 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
   ScheduleBLoC({
     required final IScheduleRepository repository,
     required final IGroupRepository groupRepository,
+    final LessonChoiceRepository? lessonChoiceRepository,
     final ScheduleState? initialState,
   })  : _repository = repository,
         _groupRepository = groupRepository,
+        _lessonChoiceRepository = lessonChoiceRepository,
         super(
           initialState ??
               const ScheduleState.idle(
@@ -164,6 +167,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
 
   final IScheduleRepository _repository;
   final IGroupRepository _groupRepository;
+  final LessonChoiceRepository? _lessonChoiceRepository;
 
   /// Fetch event handler
   Future<void> _fetch(
@@ -271,16 +275,6 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
         selectedWeek: state.selectedWeek,
         scheduleInfo: state.scheduleInfo,
       ));
-      rethrow;
-    } finally {
-      emit(
-        ScheduleState.idle(
-          data: state.data,
-          currentWeek: state.currentWeek,
-          selectedWeek: state.selectedWeek,
-          scheduleInfo: state.scheduleInfo,
-        ),
-      );
     }
   }
 
@@ -395,16 +389,6 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
           scheduleInfo: state.scheduleInfo,
         ),
       );
-      rethrow;
-    } finally {
-      emit(
-        ScheduleState.idle(
-          data: state.data,
-          currentWeek: state.currentWeek,
-          selectedWeek: state.selectedWeek,
-          scheduleInfo: state.scheduleInfo,
-        ),
-      );
     }
   }
 
@@ -423,6 +407,7 @@ class ScheduleBLoC extends Bloc<ScheduleEvent, ScheduleState>
     final content = ScheduleTransformer().transformScheduleToString(
       selectedScheduleDetails.schedule,
       title,
+      choiceRepository: _lessonChoiceRepository,
     );
 
     event.onShare(content);

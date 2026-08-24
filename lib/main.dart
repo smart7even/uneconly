@@ -15,7 +15,7 @@ import 'package:uneconly/common/routing/app_navigator_observer.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/routing/schedule_guard.dart';
 import 'package:uneconly/common/util/error_util.dart';
-import 'package:uneconly/common/utils/colors_utils.dart';
+import 'package:uneconly/common/theme/app_theme.dart';
 import 'package:uneconly/common/widget/app_error.dart';
 import 'package:uneconly/feature/initialization/data/initialization.dart';
 import 'package:uneconly/feature/initialization/widget/inherited_dependencies.dart';
@@ -123,7 +123,7 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
-    const defaultTheme = 'blue';
+    const defaultTheme = 'system';
     theme = defaultTheme;
 
     dependencies.settingsRepository.getTheme().then(
@@ -181,20 +181,15 @@ class _MyAppState extends State<MyApp> {
       locale: const Locale('ru'), // Locale(locale),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      theme: ThemeData(
-        primarySwatch: getColorFromString(
-          theme,
-        ),
-        useMaterial3: false,
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: themeModeFromSetting(theme),
       scrollBehavior: AppScrollBehavior(),
       routerConfig: router.config,
       builder: (context, child) {
         return MediaQuery(
           key: builderKey,
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.noScaling,
-          ),
+          data: MediaQuery.of(context),
           child: OctopusTools(
             enable: false,
             octopus: router,

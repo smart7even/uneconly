@@ -1,8 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:l/l.dart';
+import 'package:uneconly/common/utils/lesson_utils.dart';
+import 'package:uneconly/feature/schedule/data/lesson_choice_repository.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_info.dart';
+import 'package:uneconly/feature/schedule/model/lesson.dart';
 
 abstract class IScheduleCalendarDataProvider {
   Future<void> saveSchedule(Schedule schedule);
@@ -11,9 +14,12 @@ abstract class IScheduleCalendarDataProvider {
 class ScheduleCalendarDataProvider implements IScheduleCalendarDataProvider {
   ScheduleCalendarDataProvider({
     required DeviceCalendarPlugin deviceCalendarPlugin,
-  }) : _deviceCalendarPlugin = deviceCalendarPlugin;
+    LessonChoiceRepository? lessonChoiceRepository,
+  })  : _deviceCalendarPlugin = deviceCalendarPlugin,
+        _lessonChoiceRepository = lessonChoiceRepository;
 
   final DeviceCalendarPlugin _deviceCalendarPlugin;
+  final LessonChoiceRepository? _lessonChoiceRepository;
 
   Future<bool> _requestPermissions() async {
     final isAccessGranted = await _deviceCalendarPlugin.hasPermissions();
@@ -117,18 +123,28 @@ class ScheduleCalendarDataProvider implements IScheduleCalendarDataProvider {
         }
       }
 
-      for (final lesson in daySchedule.lessons) {
+      final clusters = clusterParallelLessons(
+        daySchedule.lessons,
+        combineAlternatives: true,
+      );
+      for (final cluster in clusters) {
+        final lesson = _resolveLesson(schedule, cluster);
+        final unresolved = cluster.hasAlternatives && lesson == null;
+        final visibleLesson = lesson ?? cluster.lesson;
         final event = Event(
           calendar.id,
-          location: lesson.location,
-          title: lesson.name,
-          description: lesson.professor,
+          location:
+              unresolved ? null : cleanLessonLocation(visibleLesson.location),
+          title: lessonDisplayName(visibleLesson),
+          description: unresolved
+              ? 'Выберите подгруппу в Uneconly'
+              : visibleLesson.professor,
           start: TZDateTime.from(
-            lesson.start,
+            visibleLesson.start,
             location,
           ),
           end: TZDateTime.from(
-            lesson.end,
+            visibleLesson.end,
             location,
           ),
           reminders: [
@@ -140,6 +156,23 @@ class ScheduleCalendarDataProvider implements IScheduleCalendarDataProvider {
         await _deviceCalendarPlugin.createOrUpdateEvent(event);
       }
     }
+  }
+
+  Lesson? _resolveLesson(Schedule schedule, LessonCluster cluster) {
+    if (!cluster.hasAlternatives) return cluster.lesson;
+    final repository = _lessonChoiceRepository;
+    if (repository == null) return null;
+    final resolution = repository.resolve(
+      info: schedule.info,
+      lesson: cluster.lesson,
+    );
+    if (resolution == null) return null;
+    for (final lesson in cluster.alternatives) {
+      if (lessonAlternativeId(lesson) == resolution.alternativeId) {
+        return lesson;
+      }
+    }
+    return null;
   }
 
   @override

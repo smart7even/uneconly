@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:octopus/octopus.dart';
 import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
+import 'package:uneconly/common/utils/lesson_utils.dart';
 import 'package:uneconly/feature/schedule/model/lesson.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_badge.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_property.dart';
@@ -97,7 +98,7 @@ class LessonBigTile extends StatelessWidget {
                 _buildLessonProperty(
                   context,
                   Icons.location_on,
-                  trimSeparators(lesson.location),
+                  trimSeparators(cleanLessonLocation(lesson.location)),
                 ),
                 if (professor != null)
                   _buildLessonProperty(

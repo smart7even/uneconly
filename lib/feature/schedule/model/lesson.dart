@@ -20,6 +20,8 @@ abstract class Lesson with _$Lesson {
     required final String? group,
     @JsonKey(name: 'professor_id', required: false, disallowNullValue: false)
     required final int? professorId,
+    @JsonKey(name: 'room_url', required: false, disallowNullValue: false)
+    final String? roomUrl,
   }) = _Lesson;
 
   const Lesson._();

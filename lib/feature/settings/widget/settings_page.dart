@@ -1,539 +1,285 @@
-import 'dart:math';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:l/l.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
-import 'package:uneconly/common/utils/colors_utils.dart';
+import 'package:uneconly/common/theme/app_theme.dart';
 import 'package:uneconly/common/utils/pubspec.yaml.g.dart';
+import 'package:uneconly/feature/calendar/calendar_permission_modal.dart';
+import 'package:uneconly/feature/calendar/calendar_permissions.dart';
 import 'package:uneconly/feature/settings/bloc/settings_bloc.dart';
 import 'package:uneconly/feature/settings/model/settings_entity.dart';
-import 'package:uneconly/feature/settings/widget/settings_tile.dart';
 
-// const double _kItemExtent = 32.0;
-// const List<String> _languageNames = <String>[
-//   'Русский',
-//   'English',
-// ];
-
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  // int _selectedLanguage = 0;
-
-  List<MaterialColor> colors = [
-    Colors.blue,
-    Colors.red,
-    Colors.green,
-    Colors.yellow,
-    Colors.orange,
-    Colors.pink,
-    Colors.purple,
-    Colors.indigo,
-    Colors.teal,
-    Colors.cyan,
-    Colors.brown,
-    Colors.grey,
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-
-    // final dependenciesScope = Dependencies.of(context);
-
-    // dependenciesScope.settingsRepository.getLanguage().then((value) {
-    //   if (value == 'ru') {
-    //     setState(() {
-    //       _selectedLanguage = 0;
-    //     });
-    //   } else if (value == 'en') {
-    //     setState(() {
-    //       _selectedLanguage = 1;
-    //     });
-    //   } else {
-    //     setState(() {
-    //       final defaultLocale = Platform.localeName;
-    //       _selectedLanguage = defaultLocale.split('_')[0] == 'ru' ? 0 : 1;
-    //     });
-    //   }
-    // });
-  }
-
-  // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoPicker.
-  // void _showDialog(Widget child) {
-  //   showCupertinoModalPopup<void>(
-  //     context: context,
-  //     builder: (BuildContext context) => Container(
-  //       height: 216,
-  //       padding: const EdgeInsets.only(top: 6.0),
-  //       // The Bottom margin is provided to align the popup above the system navigation bar.
-  //       margin: EdgeInsets.only(
-  //         bottom: MediaQuery.of(context).viewInsets.bottom,
-  //       ),
-  //       // Provide a background color for the popup.
-  //       color: CupertinoColors.systemBackground.resolveFrom(context),
-  //       // Use a SafeArea widget to avoid system overlaps.
-  //       child: SafeArea(
-  //         top: false,
-  //         child: child,
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          context.string.settings,
-        ),
-      ),
-      body: DefaultTextStyle(
-        style: TextStyle(
-          color: CupertinoColors.label.resolveFrom(context),
-          fontSize: 22.0,
-        ),
-        child: BlocProvider(
-          create: (context) => SettingsBLoC(
-            repository: Dependencies.of(context).settingsRepository,
-          )..add(
-              const SettingsEvent.read(),
-            ),
-          child: BlocBuilder<SettingsBLoC, SettingsState>(
-            builder: (context, state) {
-              final selectedColor = getColorFromString(
-                state.data?.themeColor ?? '',
-              );
-
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+    return BlocProvider(
+      create: (context) => SettingsBLoC(
+        repository: Dependencies.of(context).settingsRepository,
+      )..add(const SettingsEvent.read()),
+      child: Scaffold(
+        appBar: AppBar(title: Text(context.string.settings)),
+        body: BlocBuilder<SettingsBLoC, SettingsState>(
+          builder: (context, state) {
+            final data = state.data;
+            if (data == null) return const _SettingsSkeleton();
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+              children: [
+                const _SectionTitle('Оформление'),
+                _SettingsSurface(
                   children: [
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: <Widget>[
-                    //     Text('${context.string.language}: '),
-                    //     CupertinoButton(
-                    //       padding: EdgeInsets.zero,
-                    //       // Display a CupertinoPicker with list of fruits.
-                    //       onPressed: () => _showDialog(
-                    //         CupertinoPicker(
-                    //           magnification: 1.22,
-                    //           squeeze: 1.2,
-                    //           useMagnifier: true,
-                    //           itemExtent: _kItemExtent,
-                    //           // This sets the initial item.
-                    //           scrollController: FixedExtentScrollController(
-                    //             initialItem: _selectedLanguage,
-                    //           ),
-                    //           // This is called when selected item is changed.
-                    //           onSelectedItemChanged: (int selectedItem) async {
-                    //             setState(() {
-                    //               _selectedLanguage = selectedItem;
-                    //             });
-
-                    //             if (_selectedLanguage == 0) {
-                    //               await RepositoryProvider.of<DependenciesScope>(
-                    //                 context,
-                    //               ).settingsRepository.saveLanguage('ru');
-                    //             } else {
-                    //               await RepositoryProvider.of<DependenciesScope>(
-                    //                 context,
-                    //               ).settingsRepository.saveLanguage('en');
-                    //             }
-                    //           },
-                    //           children: List<Widget>.generate(
-                    //             _languageNames.length,
-                    //             (int index) {
-                    //               return Center(child: Text(_languageNames[index]));
-                    //             },
-                    //           ),
-                    //         ),
-                    //       ),
-                    //       // This displays the selected fruit name.
-                    //       child: Text(
-                    //         _languageNames[_selectedLanguage],
-                    //         style: const TextStyle(
-                    //           fontSize: 22.0,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-
-                    // Open ListSectionInsetExample widget
-                    // CupertinoButton(
-                    //   onPressed: () {
-                    //     Navigator.of(context).push(
-                    //       CupertinoPageRoute<void>(
-                    //         builder: (BuildContext context) {
-                    //           return const ListSectionInsetExample();
-                    //         },
-                    //       ),
-                    //     );
-                    //   },
-                    //   child: const Text('Open ListSectionInsetExample'),
-                    // ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SettingsTile(
-                          title: context.string.appVersion,
-                          description: Pubspec.version.representation,
-                        ),
-                        const SizedBox(height: 15),
-                        SettingsTile(
-                          title: context.string.licenses,
-                          description: context.string.showLicenses,
-                          onPressed: () {
-                            showLicensePage(
-                              context: context,
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 15),
-                        SettingsTile(
-                          title: context.string.cache,
-                          description: context.string.clearCache,
-                          onPressed: () async {
-                            final settingsRepository =
-                                Dependencies.of(context).settingsRepository;
-
-                            try {
-                              final isCacheEmpty =
-                                  await settingsRepository.isAppCacheEmpty();
-
-                              if (isCacheEmpty) {
-                                l.vvvv('Nothing to clear');
-
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        context.string.cacheIsEmpty,
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                return;
-                              }
-
-                              l.vvvv('Cache is not empty and may be cleared');
-                              await settingsRepository.clearAppCache();
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      context.string.cacheIsCleared,
-                                    ),
-                                  ),
-                                );
-                              }
-                            } on Exception catch (e) {
-                              l.vvvv(e);
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      context.string.errorWhileCleaningCache,
-                                    ),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                        ),
-                        child: Text(
-                          '${context.string.theme}: ',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    // horizontal list of themes
-                    Container(
-                      height: 40,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                      ),
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: colors.length,
-                        // remove shrinkWrap if there will be a lot of themes
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () async {
-                              final data = state.data;
-
-                              if (data == null) {
-                                return;
-                              }
-
-                              context.read<SettingsBLoC>().add(
-                                    SettingsEvent.update(
-                                      entity: SettingsEntity(
-                                        themeColor: getStringFromColor(
-                                          colors[index],
-                                        ),
-                                        calendarSettings: data.calendarSettings,
-                                      ),
-                                    ),
-                                  );
-                            },
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.white,
-                                border: selectedColor == colors[index]
-                                    ? Border.all(
-                                        color: Colors.blue,
-                                        width: 2,
-                                      )
-                                    : null,
-                              ),
-                              child: Center(
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.circular(10 / 1.25),
-                                    color: colors[index],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                        separatorBuilder: (context, index) {
-                          return const SizedBox(
-                            width: 10,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    // setting with cupertinoSwitch
-                    SettingsTile(
-                      title: context.string.syncWithCalendar,
-                      description: context.string.syncWithCalendarDescription,
-                      trailing: CupertinoSwitch(
-                        value: state.data?.calendarSettings
-                                .isCalendarSyncingEnabled ??
-                            false,
-                        onChanged: (value) {
-                          final data = state.data;
-
-                          if (data == null) {
-                            return;
-                          }
-
-                          context.read<SettingsBLoC>().add(
-                                SettingsEvent.update(
-                                  entity: data.copyWith.calendarSettings(
-                                    isCalendarSyncingEnabled: value,
-                                  ),
-                                ),
-                              );
-                        },
-                      ),
+                    _SettingsRow(
+                      icon: Icons.brightness_6_outlined,
+                      title: 'Тема',
+                      subtitle: _themeLabel(data.themeColor),
+                      onTap: () => _selectTheme(context, data),
                     ),
                   ],
                 ),
-              );
-            },
-          ),
+                const SizedBox(height: 26),
+                const _SectionTitle('Расписание'),
+                _SettingsSurface(
+                  children: [
+                    _SettingsRow(
+                      icon: Icons.calendar_today_outlined,
+                      title: context.string.syncWithCalendar,
+                      subtitle:
+                          'Пары появятся в календаре телефона вместе с напоминаниями',
+                      trailing: Switch.adaptive(
+                        value: data.calendarSettings.isCalendarSyncingEnabled,
+                        onChanged: (value) =>
+                            _toggleCalendar(context, data, value),
+                      ),
+                    ),
+                    _SettingsRow(
+                      icon: Icons.delete_outline,
+                      title: context.string.cache,
+                      subtitle: 'Сохранённые расписания для офлайн-доступа',
+                      onTap: () => _clearCache(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 26),
+                const _SectionTitle('О приложении'),
+                _SettingsSurface(
+                  children: [
+                    _SettingsRow(
+                      icon: Icons.info_outline,
+                      title: context.string.appVersion,
+                      trailing: Text(
+                        Pubspec.version.representation,
+                        style: TextStyle(color: context.palette.muted),
+                      ),
+                    ),
+                    _SettingsRow(
+                      icon: Icons.description_outlined,
+                      title: context.string.licenses,
+                      subtitle: context.string.showLicenses,
+                      onTap: () => showLicensePage(context: context),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
+
+  Future<void> _selectTheme(
+    BuildContext context,
+    SettingsEntity data,
+  ) async {
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                child: Text(
+                  'Тема',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              RadioGroup<String>(
+                groupValue: _normalizedTheme(data.themeColor),
+                onChanged: (value) => Navigator.pop(sheetContext, value),
+                child: Column(
+                  children: [
+                    for (final option in const [
+                      (
+                        'system',
+                        'Как в системе',
+                        Icons.brightness_auto_outlined,
+                      ),
+                      ('light', 'Светлая', Icons.light_mode_outlined),
+                      ('dark', 'Тёмная', Icons.dark_mode_outlined),
+                    ])
+                      RadioListTile<String>(
+                        value: option.$1,
+                        title: Text(option.$2),
+                        secondary: Icon(option.$3),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (selected == null || !context.mounted) return;
+    context.read<SettingsBLoC>().add(
+          SettingsEvent.update(
+            entity: data.copyWith(themeColor: selected),
+          ),
+        );
+  }
+
+  Future<void> _toggleCalendar(
+    BuildContext context,
+    SettingsEntity data,
+    bool enabled,
+  ) async {
+    if (enabled && !await requestCalendarPermission()) {
+      if (!context.mounted) return;
+      await showModalBottomSheet<void>(
+        context: context,
+        builder: (_) => const CalendarPermissionModal(),
+      );
+      return;
+    }
+    if (!context.mounted) return;
+    context.read<SettingsBLoC>().add(
+          SettingsEvent.update(
+            entity: data.copyWith.calendarSettings(
+              isCalendarSyncingEnabled: enabled,
+            ),
+          ),
+        );
+  }
+
+  Future<void> _clearCache(BuildContext context) async {
+    final repository = Dependencies.of(context).settingsRepository;
+    try {
+      final empty = await repository.isAppCacheEmpty();
+      if (!empty) await repository.clearAppCache();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(empty ? 'Кэш уже пуст' : 'Кэш очищен')),
+      );
+    } on Exception catch (error) {
+      l.e(error);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.string.errorWhileCleaningCache)),
+      );
+    }
+  }
 }
 
-class ColoredWidget extends StatefulWidget {
-  final VoidCallback? onPressed;
+String _normalizedTheme(String value) =>
+    const {'system', 'light', 'dark'}.contains(value) ? value : 'system';
 
-  const ColoredWidget({
-    super.key,
-    this.onPressed,
+String _themeLabel(String value) => switch (_normalizedTheme(value)) {
+      'light' => 'Светлая',
+      'dark' => 'Тёмная',
+      _ => 'Как в системе',
+    };
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.title);
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(left: 4, bottom: 8),
+        child: Text(
+          title.toUpperCase(),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: context.palette.muted,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.9,
+              ),
+        ),
+      );
+}
+
+class _SettingsSurface extends StatelessWidget {
+  const _SettingsSurface({required this.children});
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: context.palette.nestedSurface,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            for (var index = 0; index < children.length; index++) ...[
+              children[index],
+              if (index < children.length - 1)
+                Divider(indent: 56, color: context.palette.hairline),
+            ],
+          ],
+        ),
+      );
+}
+
+class _SettingsRow extends StatelessWidget {
+  const _SettingsRow({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
   });
 
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
   @override
-  State<ColoredWidget> createState() => _ColoredWidgetState();
+  Widget build(BuildContext context) => ListTile(
+        leading: Icon(icon, size: 22),
+        title: Text(title),
+        subtitle: subtitle == null
+            ? null
+            : Text(subtitle!, style: TextStyle(color: context.palette.muted)),
+        trailing: trailing ??
+            (onTap == null
+                ? null
+                : Icon(Icons.chevron_right, color: context.palette.muted)),
+        onTap: onTap,
+      );
 }
 
-class _ColoredWidgetState extends State<ColoredWidget> {
-  Color color = Colors.black;
+class _SettingsSkeleton extends StatelessWidget {
+  const _SettingsSkeleton();
 
   @override
-  void initState() {
-    super.initState();
-    color = _generateColor();
-  }
-
-  Color _generateColor() {
-    final random = Random();
-
-    return Color.fromARGB(
-      random.nextInt(255),
-      random.nextInt(255),
-      random.nextInt(255),
-      random.nextInt(255),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onPressed,
-      child: Container(
-        color: color,
-        height: 100,
-        width: 100,
-      ),
-    );
-  }
-}
-
-class CupertinoListSectionInsetApp extends StatelessWidget {
-  const CupertinoListSectionInsetApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const CupertinoApp(
-      home: ListSectionInsetExample(),
-    );
-  }
-}
-
-class ListSectionInsetExample extends StatefulWidget {
-  const ListSectionInsetExample({super.key});
-
-  @override
-  State<ListSectionInsetExample> createState() =>
-      _ListSectionInsetExampleState();
-}
-
-class _ListSectionInsetExampleState extends State<ListSectionInsetExample> {
-  bool _isNotificationsEnabled = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ListSectionInsetExample'),
-      ),
-      body: CupertinoListSection.insetGrouped(
-        header: const Text('My Settings'),
-        children: <CupertinoListTile>[
-          CupertinoListTile.notched(
-            title: const Text('Open pull request'),
-            leading: Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: CupertinoColors.activeGreen,
-            ),
-            trailing: const CupertinoListTileChevron(),
-            onTap: () => Navigator.of(context).push(
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return const _SecondPage(text: 'Open pull request');
-                },
-              ),
-            ),
+  Widget build(BuildContext context) => ListView.builder(
+        padding: const EdgeInsets.all(20),
+        itemCount: 6,
+        itemBuilder: (_, index) => Container(
+          height: 62,
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: context.palette.nestedSurface,
+            borderRadius: BorderRadius.circular(14),
           ),
-          CupertinoListTile.notched(
-            title: const Text('Push to master'),
-            leading: Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: CupertinoColors.systemRed,
-            ),
-            additionalInfo: const Text('Not available'),
-          ),
-          CupertinoListTile.notched(
-            title: const Text('View last commit'),
-            leading: Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: CupertinoColors.activeOrange,
-            ),
-            additionalInfo: const Text('12 days ago'),
-            trailing: const CupertinoListTileChevron(),
-            onTap: () => Navigator.of(context).push(
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return const _SecondPage(text: 'Last commit');
-                },
-              ),
-            ),
-          ),
-          CupertinoListTile.notched(
-            title: const Text('Notifications'),
-            leading: Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: CupertinoColors.activeBlue,
-            ),
-            trailing: CupertinoSwitch(
-              value: _isNotificationsEnabled,
-              onChanged: (value) {
-                setState(
-                  () {
-                    _isNotificationsEnabled = value;
-                  },
-                );
-              },
-            ),
-            onTap: () => Navigator.of(context).push(
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return const _SecondPage(text: 'Last commit');
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SecondPage extends StatelessWidget {
-  const _SecondPage({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(text),
-      ),
-    );
-  }
+        ),
+      );
 }

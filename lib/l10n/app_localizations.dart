@@ -469,6 +469,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Перейти в настройки'**
   String get goToSettings;
+
+  /// No description provided for @freeDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Free day'**
+  String get freeDay;
+
+  /// No description provided for @lessonsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no classes} one{{count} class} other{{count} classes}}'**
+  String lessonsCount(num count);
+
+  /// No description provided for @currentLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get currentLesson;
+
+  /// No description provided for @subgroupPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 subgroup · Choose yours} other{{count} subgroups · Choose yours}}'**
+  String subgroupPrompt(num count);
+
+  /// No description provided for @yourSubgroup.
+  ///
+  /// In en, this message translates to:
+  /// **'your subgroup'**
+  String get yourSubgroup;
+
+  /// No description provided for @professorMissingToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Your professor is not in today\'s schedule'**
+  String get professorMissingToday;
+
+  /// No description provided for @possibleReplacement.
+  ///
+  /// In en, this message translates to:
+  /// **'There may be a replacement — choose an option for this date.'**
+  String get possibleReplacement;
+
+  /// No description provided for @whoTeachesSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Who teaches your “{subject}” class?'**
+  String whoTeachesSubject(Object subject);
+
+  /// No description provided for @parallelSubgroupsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{This class has multiple published options. Select your professor and the app will keep the room up to date from the schedule.} other{{count} subgroups run at the same time. Select your professor and the app will keep the room up to date from the schedule.}}'**
+  String parallelSubgroupsDescription(num count);
+
+  /// No description provided for @professorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Professor not specified'**
+  String get professorUnknown;
+
+  /// No description provided for @rememberForSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember for this subject'**
+  String get rememberForSubject;
+
+  /// No description provided for @onlyOnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Only on {date}'**
+  String onlyOnDate(Object date);
+
+  /// No description provided for @onWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'On {weekday}'**
+  String onWeekdays(Object weekday);
+
+  /// No description provided for @choiceRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust rule'**
+  String get choiceRules;
+
+  /// No description provided for @hideChoiceRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide additional rules'**
+  String get hideChoiceRules;
+
+  /// No description provided for @saveSubgroup.
+  ///
+  /// In en, this message translates to:
+  /// **'This is my subgroup'**
+  String get saveSubgroup;
+
+  /// No description provided for @saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get saving;
+
+  /// No description provided for @lessonDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Class details'**
+  String get lessonDetails;
+
+  /// No description provided for @professorSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Professor schedule'**
+  String get professorSchedule;
+
+  /// No description provided for @roomMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Room map'**
+  String get roomMap;
+
+  /// No description provided for @changeProfessor.
+  ///
+  /// In en, this message translates to:
+  /// **'Change professor'**
+  String get changeProfessor;
+
+  /// No description provided for @lessonType.
+  ///
+  /// In en, this message translates to:
+  /// **'Class type: {type}'**
+  String lessonType(Object type);
 }
 
 class _AppLocalizationsDelegate

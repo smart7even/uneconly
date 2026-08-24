@@ -13,4 +13,5 @@ class Lessons extends Table {
   TextColumn get lessonType => text().nullable()();
   IntColumn get professorId => integer().nullable()();
   TextColumn get group => text().nullable()();
+  TextColumn get roomUrl => text().nullable()();
 }

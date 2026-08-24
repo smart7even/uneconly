@@ -203,4 +203,107 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goToSettings => 'Перейти в настройки';
+
+  @override
+  String get freeDay => 'Free day';
+
+  @override
+  String lessonsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes',
+      one: '$count class',
+      zero: 'no classes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get currentLesson => 'Now';
+
+  @override
+  String subgroupPrompt(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count subgroups · Choose yours',
+      one: '1 subgroup · Choose yours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get yourSubgroup => 'your subgroup';
+
+  @override
+  String get professorMissingToday =>
+      'Your professor is not in today\'s schedule';
+
+  @override
+  String get possibleReplacement =>
+      'There may be a replacement — choose an option for this date.';
+
+  @override
+  String whoTeachesSubject(Object subject) {
+    return 'Who teaches your “$subject” class?';
+  }
+
+  @override
+  String parallelSubgroupsDescription(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count subgroups run at the same time. Select your professor and the app will keep the room up to date from the schedule.',
+      one:
+          'This class has multiple published options. Select your professor and the app will keep the room up to date from the schedule.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get professorUnknown => 'Professor not specified';
+
+  @override
+  String get rememberForSubject => 'Remember for this subject';
+
+  @override
+  String onlyOnDate(Object date) {
+    return 'Only on $date';
+  }
+
+  @override
+  String onWeekdays(Object weekday) {
+    return 'On $weekday';
+  }
+
+  @override
+  String get choiceRules => 'Adjust rule';
+
+  @override
+  String get hideChoiceRules => 'Hide additional rules';
+
+  @override
+  String get saveSubgroup => 'This is my subgroup';
+
+  @override
+  String get saving => 'Saving…';
+
+  @override
+  String get lessonDetails => 'Class details';
+
+  @override
+  String get professorSchedule => 'Professor schedule';
+
+  @override
+  String get roomMap => 'Room map';
+
+  @override
+  String get changeProfessor => 'Change professor';
+
+  @override
+  String lessonType(Object type) {
+    return 'Class type: $type';
+  }
 }

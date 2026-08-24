@@ -204,4 +204,111 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get goToSettings => 'Перейти в настройки';
+
+  @override
+  String get freeDay => 'Свободный день';
+
+  @override
+  String lessonsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count пары',
+      many: '$count пар',
+      few: '$count пары',
+      one: '$count пара',
+      zero: 'нет пар',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get currentLesson => 'Сейчас';
+
+  @override
+  String subgroupPrompt(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count подгруппы · Выберите свою',
+      many: '$count подгрупп · Выберите свою',
+      few: '$count подгруппы · Выберите свою',
+      one: '1 подгруппа · Выберите свою',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get yourSubgroup => 'ваша подгруппа';
+
+  @override
+  String get professorMissingToday =>
+      'Вашего преподавателя сегодня нет в расписании';
+
+  @override
+  String get possibleReplacement =>
+      'Возможна замена — выберите вариант на этот день.';
+
+  @override
+  String whoTeachesSubject(Object subject) {
+    return 'Кто ведёт у вас «$subject»?';
+  }
+
+  @override
+  String parallelSubgroupsDescription(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count подгрупп идут одновременно. Отметьте своего преподавателя — аудиторию приложение возьмёт из расписания.',
+      one:
+          'Занятие опубликовано в нескольких вариантах. Отметьте своего преподавателя — аудиторию приложение возьмёт из расписания.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get professorUnknown => 'Преподаватель не указан';
+
+  @override
+  String get rememberForSubject => 'Запомнить для этого предмета';
+
+  @override
+  String onlyOnDate(Object date) {
+    return 'Только $date';
+  }
+
+  @override
+  String onWeekdays(Object weekday) {
+    return 'По $weekday';
+  }
+
+  @override
+  String get choiceRules => 'Настроить правило';
+
+  @override
+  String get hideChoiceRules => 'Скрыть дополнительные правила';
+
+  @override
+  String get saveSubgroup => 'Это моя подгруппа';
+
+  @override
+  String get saving => 'Сохраняем…';
+
+  @override
+  String get lessonDetails => 'О занятии';
+
+  @override
+  String get professorSchedule => 'Расписание преподавателя';
+
+  @override
+  String get roomMap => 'Схема аудитории';
+
+  @override
+  String get changeProfessor => 'Сменить преподавателя';
+
+  @override
+  String lessonType(Object type) {
+    return 'Тип занятия: $type';
+  }
 }
