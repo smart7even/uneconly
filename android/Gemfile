@@ -1,3 +1,9 @@
 source "https://rubygems.org"
 
-gem "fastlane"
+ruby ">= 3.0"
+
+# Fastlane 2.239.0 still caps rubyzip below the first patched release.
+# Remove the Git pin after a newer Fastlane gem includes upstream PR #30176.
+gem "fastlane", "~> 2.239",
+    git: "https://github.com/fastlane/fastlane.git",
+    ref: "3a4fc36716dec206b3f5441f19f0a5193733c828"
