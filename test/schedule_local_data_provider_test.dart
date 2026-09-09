@@ -215,7 +215,7 @@ void main() {
     );
   });
 
-  test('an explicitly empty server response remains a valid cache entry',
+  test('an explicitly empty server response keeps its no-schedule meaning',
       () async {
     await provider.saveSchedule(
       Schedule(
@@ -225,6 +225,30 @@ void main() {
         periodStart: DateTime(2026, 9, 14),
         periodEnd: DateTime(2026, 9, 20),
         daySchedules: const [],
+      ),
+    );
+
+    final cached = await provider.getSchedule(3, info, 2026);
+    expect(cached, isNotNull);
+    expect(cached!.schedule.daySchedules, isEmpty);
+  });
+
+  test('a published week with seven free days keeps its distinct meaning',
+      () async {
+    final periodStart = DateTime(2026, 9, 14);
+    await provider.saveSchedule(
+      Schedule(
+        week: 3,
+        info: info,
+        academicYearStart: 2026,
+        periodStart: periodStart,
+        periodEnd: DateTime(2026, 9, 20),
+        daySchedules: List.generate(
+          7,
+          (index) => DaySchedule.empty(
+            periodStart.add(Duration(days: index)),
+          ),
+        ),
       ),
     );
 

@@ -104,8 +104,9 @@ class _HomePageState extends State<HomePage> {
   /* #endregion */
 
   Future<void> onOpen() async {
-    ISettingsRepository settingsRepository =
-        Dependencies.of(context).settingsRepository;
+    ISettingsRepository settingsRepository = Dependencies.of(
+      context,
+    ).settingsRepository;
 
     final group = await settingsRepository.getGroup();
 
@@ -117,20 +118,15 @@ class _HomePageState extends State<HomePage> {
       Octopus.of(context).setState((state) {
         return state
           ..removeWhere((node) => true)
-          ..add(
-            Routes.select.node(),
-          );
+          ..add(Routes.select.node());
       });
     } else {
       if (Platform.isAndroid || Platform.isIOS) {
-        HomeWidget.saveWidgetData<int>(
-          'groupId',
-          group.id,
-        ).then((value) {
-          HomeWidget.updateWidget(
-            name: 'UWidget',
-            iOSName: 'UWidget',
-          );
+        Future.wait([
+          HomeWidget.saveWidgetData<int>('groupId', group.id),
+          HomeWidget.saveWidgetData<String>('groupName', group.name),
+        ]).then((_) {
+          HomeWidget.updateWidget(name: 'UWidget', iOSName: 'UWidget');
         });
       }
 
@@ -159,9 +155,7 @@ class _HomePageState extends State<HomePage> {
     if (currentMyGroup == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -172,10 +166,7 @@ class _HomePageState extends State<HomePage> {
               currentIndex: _tab.index,
               onTap: _onItemTapped,
               items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                ),
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
                 // BottomNavigationBarItem(
                 //   icon: Icon(Icons.today),
                 //   label: 'Daily',
@@ -201,12 +192,8 @@ class _HomePageState extends State<HomePage> {
             isHomePage: true,
           ),
           Scaffold(
-            appBar: AppBar(
-              title: const Text('Vacancies'),
-            ),
-            body: const Center(
-              child: Text('Vacancies'),
-            ),
+            appBar: AppBar(title: const Text('Vacancies')),
+            body: const Center(child: Text('Vacancies')),
           ),
         ],
       ),

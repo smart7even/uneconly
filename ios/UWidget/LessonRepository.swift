@@ -1,54 +1,79 @@
-//
-//  LessonRepository.swift
-//  Runner
-//
-//  Created by Oleg on 12.01.2024.
-//
-
 import Foundation
 
-protocol ILessonRepository {
-    func fetchData(groupId: Int, completion: @escaping (Lesson?) -> Void)
+enum WidgetDataSource {
+    case remote
+    case cache
+    case unavailable
 }
 
-class LessonRepository : ILessonRepository {
-    let remoteDataProvider: DataProvider
-    let localDataProvider: ILocalLessonDataProvider
-    
-    init(remoteDataProvider: DataProvider, localDataProvider: ILocalLessonDataProvider) {
+struct WidgetLessonResult {
+    let lessons: [Lesson]
+    let updatedAt: Date?
+    let source: WidgetDataSource
+}
+
+protocol ILessonRepository {
+    func fetchData(
+        groupId: Int,
+        from dayStart: Date,
+        completion: @escaping (WidgetLessonResult) -> Void
+    )
+}
+
+final class LessonRepository: ILessonRepository {
+    private let remoteDataProvider: DataProvider
+    private let localDataProvider: ILocalLessonDataProvider
+
+    init(
+        remoteDataProvider: DataProvider,
+        localDataProvider: ILocalLessonDataProvider
+    ) {
         self.remoteDataProvider = remoteDataProvider
         self.localDataProvider = localDataProvider
     }
-    
-    func fetchData(groupId: Int, completion: @escaping (Lesson?) -> Void) {
-        self.remoteDataProvider.fetchData(groupId: groupId) { lessons in
-            if (lessons == nil) {
-                let lessonsRecord = self.localDataProvider.fetchData(groupId: groupId)
-                
-                if (lessonsRecord == nil) {
-                    completion(nil)
-                    return
-                }
-                
-                let lessons = lessonsRecord?.lessons
-                
-                if (lessons == nil || lessons?.isEmpty ?? true) {
-                    completion(nil)
-                    return
-                }
-                
-                completion(lessons?.first)
-                return
-            }
-            
-            if let lessons = lessons {
-                let lessonsRecord = LessonsRecord(
-                    lessons: lessons, savedDate: Date(), groupId: groupId
+
+    func fetchData(
+        groupId: Int,
+        from dayStart: Date,
+        completion: @escaping (WidgetLessonResult) -> Void
+    ) {
+        remoteDataProvider.fetchData(groupId: groupId, from: dayStart) { result in
+            switch result {
+            case .success(let lessons):
+                let normalizedLessons = normalizedWidgetLessons(lessons)
+                let savedDate = Date()
+                self.localDataProvider.saveData(
+                    LessonsRecord(
+                        lessons: normalizedLessons,
+                        savedDate: savedDate,
+                        groupId: groupId
+                    )
                 )
-                
-                self.localDataProvider.saveData(lessonsRecord: lessonsRecord)
-                
-                completion(lessons.first)
+                completion(
+                    WidgetLessonResult(
+                        lessons: normalizedLessons,
+                        updatedAt: savedDate,
+                        source: .remote
+                    )
+                )
+            case .failure:
+                if let cached = self.localDataProvider.fetchData(groupId: groupId) {
+                    completion(
+                        WidgetLessonResult(
+                            lessons: normalizedWidgetLessons(cached.lessons),
+                            updatedAt: cached.savedDate,
+                            source: .cache
+                        )
+                    )
+                } else {
+                    completion(
+                        WidgetLessonResult(
+                            lessons: [],
+                            updatedAt: nil,
+                            source: .unavailable
+                        )
+                    )
+                }
             }
         }
     }

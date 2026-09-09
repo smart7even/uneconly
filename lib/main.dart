@@ -29,14 +29,17 @@ void main() async {
       () async {
         // Splash screen
         final initializationProgress =
-            ValueNotifier<({int progress, String message})>(
-          (progress: 0, message: ''),
-        );
+            ValueNotifier<({int progress, String message})>((
+              progress: 0,
+              message: '',
+            ));
         $initializeApp(
           onLoggingRepositoryInitialized: (initializedLoggingRepository) =>
               loggingRepository = initializedLoggingRepository,
-          onProgress: (progress, message) => initializationProgress.value =
-              (progress: progress, message: message),
+          onProgress: (progress, message) => initializationProgress.value = (
+            progress: progress,
+            message: message,
+          ),
           onSuccess: (dependencies) => runApp(
             InheritedDependencies(
               dependencies: dependencies,
@@ -72,9 +75,7 @@ String _timeFormat(DateTime time) =>
     '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
 
 class MyApp extends StatefulWidget {
-  const MyApp({
-    super.key,
-  });
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -85,10 +86,11 @@ class _MyAppState extends State<MyApp> {
   late final Octopus router;
 
   late String locale;
-  late String theme;
+  late AppThemePreference theme;
 
   late StreamSubscription<String> _languageChangedSubscription;
   late StreamSubscription<String> _themeChangedSubscription;
+  StreamSubscription<Uri?>? _widgetClickedSubscription;
 
   @override
   void initState() {
@@ -109,57 +111,47 @@ class _MyAppState extends State<MyApp> {
     final defaultLocale = Platform.localeName;
     locale = defaultLocale.split('_')[0];
 
-    dependencies.settingsRepository.getLanguage().then(
-      (value) {
-        if (value != null) {
-          setState(() {
-            locale = value;
-          });
-        }
-      },
-    );
+    dependencies.settingsRepository.getLanguage().then((value) {
+      if (value != null) {
+        setState(() {
+          locale = value;
+        });
+      }
+    });
 
     _languageChangedSubscription = dependencies.settingsRepository
         .getLanguageChangedStream()
         .listen((newLanguage) {
-      setState(() {
-        locale = newLanguage;
-      });
-    });
-
-    const defaultTheme = 'system';
-    theme = defaultTheme;
-
-    dependencies.settingsRepository.getTheme().then(
-      (value) {
-        if (value != null) {
           setState(() {
-            theme = value;
+            locale = newLanguage;
           });
-        }
-      },
-    );
+        });
+
+    theme = AppThemePreference.university;
+
+    dependencies.settingsRepository.getTheme().then((value) {
+      if (value != null) {
+        setState(() {
+          theme = AppThemePreference.parse(value);
+        });
+      }
+    });
 
     _themeChangedSubscription = dependencies.settingsRepository
         .getThemeChangedStream()
         .listen((newTheme) {
-      setState(() {
-        theme = newTheme;
-      });
-    });
+          setState(() {
+            theme = AppThemePreference.parse(newTheme);
+          });
+        });
 
     // Create router.
     router = Octopus(
       routes: Routes.values,
       defaultRoute: Routes.home,
-      guards: <IOctopusGuard>[
-        ScheduleGuard(),
-      ],
-      onError: (error, stackTrace) => log(
-        error.toString(),
-        error: error,
-        stackTrace: stackTrace,
-      ),
+      guards: <IOctopusGuard>[ScheduleGuard()],
+      onError: (error, stackTrace) =>
+          log(error.toString(), error: error, stackTrace: stackTrace),
       observers: [
         AppNavigatorObserver(
           analyticsRepository: dependencies.analyticsRepository,
@@ -169,12 +161,31 @@ class _MyAppState extends State<MyApp> {
         HeroController(),
       ], */
     );
+
+    if (Platform.isAndroid || Platform.isIOS) {
+      _widgetClickedSubscription = HomeWidget.widgetClicked.listen(
+        _openScheduleFromWidget,
+      );
+      HomeWidget.initiallyLaunchedFromHomeWidget()
+          .then(_openScheduleFromWidget)
+          .ignore();
+    }
+  }
+
+  void _openScheduleFromWidget(Uri? uri) {
+    if (uri?.queryParameters.containsKey('homeWidget') != true) return;
+    router.setState((state) {
+      return state
+        ..removeWhere((_) => true)
+        ..add(Routes.home.node());
+    });
   }
 
   @override
   void dispose() {
     _languageChangedSubscription.cancel();
     _themeChangedSubscription.cancel();
+    _widgetClickedSubscription?.cancel();
     super.dispose();
   }
 
@@ -185,9 +196,9 @@ class _MyAppState extends State<MyApp> {
       locale: const Locale('ru'), // Locale(locale),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: themeModeFromSetting(theme),
+      theme: AppTheme.light(theme.accent),
+      darkTheme: AppTheme.dark(theme.accent),
+      themeMode: theme.mode,
       scrollBehavior: AppScrollBehavior(),
       routerConfig: router.config,
       builder: (context, child) {

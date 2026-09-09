@@ -1,100 +1,89 @@
-//
-//  LessonDataProvider.swift
-//  Runner
-//
-//  Created by Oleg on 20.08.2023.
-//
-
 import Foundation
 
-enum DateError: String, Error {
-    case invalidDate
-}
+private let widgetAppGroup = "group.roadmapik.test"
 
 struct LessonResponse: Codable {
     let lessons: [Lesson]
 }
 
 protocol DataProvider {
-    func fetchData(groupId: Int, completion: @escaping ([Lesson]?) -> Void)
-    // Add any other methods or properties that the data provider should have.
+    func fetchData(
+        groupId: Int,
+        from dayStart: Date,
+        completion: @escaping (Result<[Lesson], Error>) -> Void
+    )
 }
 
-class ServerDataProvider: DataProvider {
-    let baseURL: String
-    
+enum WidgetNetworkError: Error {
+    case invalidURL
+    case invalidResponse
+}
+
+final class ServerDataProvider: DataProvider {
+    private let baseURL: String
+    private let session: URLSession
+
     init(baseURL: String) {
         self.baseURL = baseURL
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 8
+        configuration.timeoutIntervalForResource = 10
+        configuration.waitsForConnectivity = false
+        session = URLSession(configuration: configuration)
     }
 
-    func fetchData(groupId: Int, completion: @escaping ([Lesson]?) -> Void) {
-        // Create a URL object
-        guard let url = URL(string: "\(baseURL)/group/\(groupId)/lessons/next") else {
-            print("Invalid URL")
-            completion(nil)
+    func fetchData(
+        groupId: Int,
+        from dayStart: Date,
+        completion: @escaping (Result<[Lesson], Error>) -> Void
+    ) {
+        guard var components = URLComponents(
+            string: "\(baseURL)/group/\(groupId)/lessons/next"
+        ) else {
+            completion(.failure(WidgetNetworkError.invalidURL))
             return
         }
 
-        // Create a URLSession data task
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            // Handle data, errors, etc.
-            // For example, you can decode the data into a Lesson object and pass it to the completion handler.
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = TimeZone(identifier: "Europe/Moscow")
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        components.queryItems = [
+            URLQueryItem(name: "after_date", value: formatter.string(from: dayStart))
+        ]
 
-            if let error = error {
-                print("Error fetching data: \(error)")
-                completion(nil)
+        guard let url = components.url else {
+            completion(.failure(WidgetNetworkError.invalidURL))
+            return
+        }
+
+        session.dataTask(with: url) { data, response, error in
+            if let error {
+                completion(.failure(error))
+                return
+            }
+            guard
+                let httpResponse = response as? HTTPURLResponse,
+                httpResponse.statusCode == 200,
+                let data
+            else {
+                completion(.failure(WidgetNetworkError.invalidResponse))
                 return
             }
 
-            if let data = data {
-                do {
-                    let formatter = DateFormatter()
-                    formatter.locale = Locale(identifier: "en_US_POSIX")
-                    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-                    formatter.timeZone = TimeZone(secondsFromGMT: 3600 * 3)
-                    
-                    if let stringContent = String(data: data, encoding: .utf8) {
-                            print(stringContent)
-                        } else {
-                            print("Failed to convert data to string.")
-                        }
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .custom({ (decoder) -> Date in
-                        let container = try decoder.singleValueContainer()
-                        let dateStr = try container.decode(String.self)
-
-                        if let date = formatter.date(from: dateStr) {
-                            return date
-                        }
-                        
-                        throw DateError.invalidDate
-                    })
-                    let lessonResponse = try decoder.decode(LessonResponse.self, from: data)
-                    
-                    completion(lessonResponse.lessons)
-                } catch {
-                    print("Decoding error: \(error)")
-                    completion(nil)
-                }
-            } else {
-                print("Invalid data")
-                completion(nil)
+            do {
+                let response = try WidgetDateCoding.decoder().decode(
+                    LessonResponse.self,
+                    from: data
+                )
+                completion(.success(response.lessons.sorted { $0.start < $1.start }))
+            } catch {
+                completion(.failure(error))
             }
-        }
-
-        // Start the task
-        task.resume()
-    }
-
-    // Implement any other methods from the DataProvider protocol.
-}
-
-extension FileManager {
-    static func documentsDirectory() -> URL {
-        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        }.resume()
     }
 }
-
 
 struct LessonsRecord: Codable {
     let lessons: [Lesson]
@@ -104,39 +93,37 @@ struct LessonsRecord: Codable {
 
 protocol ILocalLessonDataProvider {
     func fetchData(groupId: Int) -> LessonsRecord?
-    func saveData(lessonsRecord: LessonsRecord)
+    func saveData(_ record: LessonsRecord)
 }
 
-class LocalLessonDataProvider: ILocalLessonDataProvider {
+final class LocalLessonDataProvider: ILocalLessonDataProvider {
+    private let defaults = UserDefaults(suiteName: widgetAppGroup)
+
     func fetchData(groupId: Int) -> LessonsRecord? {
-        let url = getUrl(groupId: groupId)
-        
+        guard let data = defaults?.data(forKey: key(groupId: groupId)) else {
+            return nil
+        }
         do {
-            let data = try Data(contentsOf: url)
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             return try decoder.decode(LessonsRecord.self, from: data)
         } catch {
-            print("Error loading lessons from LocalLessonDataProvider: \(error)")
             return nil
         }
     }
-    
-    func saveData(lessonsRecord: LessonsRecord) {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        
+
+    func saveData(_ record: LessonsRecord) {
         do {
-            let data = try encoder.encode(lessonsRecord)
-            let url = getUrl(groupId: lessonsRecord.groupId)
-            try data.write(to: url)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            defaults?.set(try encoder.encode(record), forKey: key(groupId: record.groupId))
         } catch {
-            print("Error saving lessons to LocalLessonDataProvider: \(error)")
+            // The widget remains useful with the in-memory response even if a
+            // cache write fails; WidgetKit will request another timeline later.
         }
     }
-    
-    func getUrl(groupId: Int) -> URL {
-        return FileManager.documentsDirectory().appendingPathComponent("lessons_\(groupId)")
+
+    private func key(groupId: Int) -> String {
+        "widgetLessons.v2.\(groupId)"
     }
 }
-

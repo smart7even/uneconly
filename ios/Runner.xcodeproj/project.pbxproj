@@ -24,6 +24,9 @@
 		7CBA2AE52A92A04300F8DB4E /* LessonDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBA2AE42A92A04300F8DB4E /* LessonDataProvider.swift */; };
 		7CBA2AE62A92A04300F8DB4E /* LessonDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CBA2AE42A92A04300F8DB4E /* LessonDataProvider.swift */; };
 		7CDA8E692DAB1F7E00B26FAC /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 7CDA8E682DAB1F7E00B26FAC /* InfoPlist.xcstrings */; };
+		A11CE0012DAA000100000001 /* Montserrat-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A11CE0012DAA000100000011 /* Montserrat-VariableFont_wght.ttf */; };
+		A11CE0012DAA000100000002 /* JetBrainsMono-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A11CE0012DAA000100000012 /* JetBrainsMono-VariableFont_wght.ttf */; };
+		A11CE0012DAA000100000003 /* ScheduleWidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11CE0012DAA000100000015 /* ScheduleWidgetViews.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
@@ -96,6 +99,11 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A9C2A7BEFF9A571408BB053D /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		B630AA0B7629E0911B1F13C6 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A11CE0012DAA000100000011 /* Montserrat-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-VariableFont_wght.ttf"; sourceTree = "<group>"; };
+		A11CE0012DAA000100000012 /* JetBrainsMono-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMono-VariableFont_wght.ttf"; sourceTree = "<group>"; };
+		A11CE0012DAA000100000013 /* Montserrat-OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Montserrat-OFL.txt"; sourceTree = "<group>"; };
+		A11CE0012DAA000100000014 /* JetBrainsMono-OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "JetBrainsMono-OFL.txt"; sourceTree = "<group>"; };
+		A11CE0012DAA000100000015 /* ScheduleWidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleWidgetViews.swift; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -151,8 +159,21 @@
 				7CBA2AE12A929F8700F8DB4E /* Lesson.swift */,
 				7CBA2AE42A92A04300F8DB4E /* LessonDataProvider.swift */,
 				7C85D8AF2B51D8EB002E371C /* LessonRepository.swift */,
+				A11CE0012DAA000100000015 /* ScheduleWidgetViews.swift */,
+				A11CE0012DAA000100000021 /* Fonts */,
 			);
 			path = UWidget;
+			sourceTree = "<group>";
+		};
+		A11CE0012DAA000100000021 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				A11CE0012DAA000100000011 /* Montserrat-VariableFont_wght.ttf */,
+				A11CE0012DAA000100000012 /* JetBrainsMono-VariableFont_wght.ttf */,
+				A11CE0012DAA000100000013 /* Montserrat-OFL.txt */,
+				A11CE0012DAA000100000014 /* JetBrainsMono-OFL.txt */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
@@ -302,6 +323,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				7CBA2AD52A9284E900F8DB4E /* Assets.xcassets in Resources */,
+				A11CE0012DAA000100000001 /* Montserrat-VariableFont_wght.ttf in Resources */,
+				A11CE0012DAA000100000002 /* JetBrainsMono-VariableFont_wght.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -402,6 +425,7 @@
 				7CBA2AD12A9284E800F8DB4E /* UWidgetBundle.swift in Sources */,
 				7CBA2AE32A92A00700F8DB4E /* Lesson.swift in Sources */,
 				7CBA2AD32A9284E800F8DB4E /* UWidget.swift in Sources */,
+				A11CE0012DAA000100000003 /* ScheduleWidgetViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -538,20 +562,20 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = UWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 58;
 				DEVELOPMENT_TEAM = XQZ47WXYMB;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = UWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = UWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roadmapik.uneconly.UWidget;
@@ -578,20 +602,20 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = UWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 58;
 				DEVELOPMENT_TEAM = XQZ47WXYMB;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = UWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = UWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roadmapik.uneconly.UWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -615,20 +639,20 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = UWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 58;
 				DEVELOPMENT_TEAM = XQZ47WXYMB;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = UWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = UWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roadmapik.uneconly.UWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -19,7 +19,7 @@ class MyDatabase extends _$MyDatabase {
   // you should bump this number whenever you change or add a table definition.
   // Migrations are covered later in the documentation.
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration {
@@ -66,6 +66,15 @@ class MyDatabase extends _$MyDatabase {
           // safe migration, but mark them as legacy through the column's
           // default value so they are not trusted by the reader.
           await m.addColumn(schedulePeriods, schedulePeriods.cacheVersion);
+        }
+
+        if (from >= 7 && from < 9) {
+          // A period with no lesson rows can mean either an unpublished week
+          // (`daySchedules == []`) or a published week made entirely of free
+          // days. Persist the original shape instead of guessing during reads.
+          // Legacy empty rows remain the safer unpublished state until their
+          // next network refresh; rows with lessons are still reconstructed.
+          await m.addColumn(schedulePeriods, schedulePeriods.hasScheduleDays);
         }
       },
     );

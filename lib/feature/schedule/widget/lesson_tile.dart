@@ -35,9 +35,9 @@ class LessonTile extends StatefulWidget {
 
 class _LessonTileState extends State<LessonTile> {
   LessonChoiceResolution? get _resolution => widget.choiceRepository.resolve(
-        info: widget.scheduleInfo,
-        lesson: widget.cluster.lesson,
-      );
+    info: widget.scheduleInfo,
+    lesson: widget.cluster.lesson,
+  );
 
   Lesson? get _selectedLesson {
     if (!widget.cluster.hasAlternatives) return widget.cluster.lesson;
@@ -65,8 +65,9 @@ class _LessonTileState extends State<LessonTile> {
         scheduleInfo: widget.scheduleInfo,
         repository: widget.choiceRepository,
         resolution: _resolution,
-        initialScope:
-            replacement ? LessonChoiceScope.date : LessonChoiceScope.subject,
+        initialScope: replacement
+            ? LessonChoiceScope.date
+            : LessonChoiceScope.subject,
         isReplacement: replacement,
       ),
     );
@@ -110,7 +111,8 @@ class _LessonTileState extends State<LessonTile> {
       group: (_) => true,
       professor: (_) => false,
     );
-    final canOpenProfessor = isGroupSchedule &&
+    final canOpenProfessor =
+        isGroupSchedule &&
         lesson.professor != null &&
         lesson.professorId != null;
     final canOpenMap =
@@ -148,9 +150,9 @@ class _LessonTileState extends State<LessonTile> {
             Text(
               lessonDisplayName(lesson),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: context.palette.ink,
-                    fontWeight: FontWeight.w700,
-                  ),
+                color: context.palette.ink,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
@@ -170,9 +172,9 @@ class _LessonTileState extends State<LessonTile> {
               const SizedBox(height: 4),
               Text(
                 location,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: context.palette.muted,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: context.palette.muted),
               ),
             ],
             if (canOpenProfessor || canOpenMap || canChange) ...[
@@ -223,7 +225,8 @@ class _LessonTileState extends State<LessonTile> {
       removeMapCaption: !widget.appConfig.roomMapCaptionEnabled,
     );
     final resolution = _resolution;
-    final savedChoiceMissing = widget.cluster.hasAlternatives &&
+    final savedChoiceMissing =
+        widget.cluster.hasAlternatives &&
         resolution != null &&
         selected == null;
     final isGroupSchedule = widget.scheduleInfo.map(
@@ -231,20 +234,22 @@ class _LessonTileState extends State<LessonTile> {
       professor: (_) => false,
     );
     final sameDay = DateUtils.isSameDay(widget.currentTime, lesson.day);
-    final isCurrent = sameDay &&
+    final isCurrent =
+        sameDay &&
         widget.currentTime.isAfter(lesson.start) &&
         widget.currentTime.isBefore(lesson.end);
     final isPast = sameDay && widget.currentTime.isAfter(lesson.end);
-    final canOpenDetails = selected != null &&
+    final canOpenDetails =
+        selected != null &&
         ((isGroupSchedule && lesson.professorId != null) ||
             (widget.appConfig.roomMapButtonEnabled && lesson.roomUrl != null) ||
             widget.cluster.hasAlternatives);
     final VoidCallback? onTap =
         widget.cluster.hasAlternatives && selected == null
-            ? () => _showChoiceSheet(replacement: savedChoiceMissing)
-            : canOpenDetails
-                ? () => _showLessonDetails(lesson)
-                : null;
+        ? () => _showChoiceSheet(replacement: savedChoiceMissing)
+        : canOpenDetails
+        ? () => _showLessonDetails(lesson)
+        : null;
     final professor = lesson.professor;
     final group = lesson.group;
     final metadata = [
@@ -258,7 +263,7 @@ class _LessonTileState extends State<LessonTile> {
       if (widget.cluster.hasAlternatives && selected == null)
         '${widget.cluster.alternatives.length} подгрупп, подгруппа не выбрана, выбрать'
       else ...[
-        if (professor != null) professor,
+        ?professor,
         if (location.isNotEmpty) location,
         if (selected != null && widget.cluster.hasAlternatives)
           context.string.yourSubgroup,
@@ -410,9 +415,9 @@ class _InlinePrompt extends StatelessWidget {
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: warning ? context.palette.accent : context.palette.ink,
-            fontWeight: FontWeight.w600,
-          ),
+        color: warning ? context.palette.accent : context.palette.ink,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 }
@@ -430,11 +435,11 @@ class _ImportantTypeLabel extends StatelessWidget {
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Colors.white,
-              fontSize: 9.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.6,
-            ),
+          color: Colors.white,
+          fontSize: 9.5,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.6,
+        ),
       ),
     );
   }
@@ -458,10 +463,7 @@ class _DetailAction extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: context.palette.muted),
       title: Text(label),
-      trailing: Icon(
-        Icons.chevron_right,
-        color: context.palette.muted,
-      ),
+      trailing: Icon(Icons.chevron_right, color: context.palette.muted),
       onTap: onTap,
     );
   }
@@ -552,9 +554,9 @@ class _LessonChoiceSheetState extends State<_LessonChoiceSheet> {
                     lessonDisplayName(lesson).toLowerCase(),
                   ),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: context.palette.ink,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    color: context.palette.ink,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -562,8 +564,8 @@ class _LessonChoiceSheetState extends State<_LessonChoiceSheet> {
                     widget.alternatives.length,
                   ),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: context.palette.muted,
-                      ),
+                    color: context.palette.muted,
+                  ),
                 ),
               ],
             ),
@@ -576,7 +578,7 @@ class _LessonChoiceSheetState extends State<_LessonChoiceSheet> {
               child: ListView.separated(
                 controller: scrollController,
                 itemCount: widget.alternatives.length,
-                separatorBuilder: (_, __) =>
+                separatorBuilder: (_, _) =>
                     const Divider(height: 1, indent: 56),
                 itemBuilder: (context, index) {
                   final alternative = widget.alternatives[index];
@@ -693,18 +695,20 @@ String _lessonTypeSuffix(String? type) {
 }
 
 String _roomLabel(String location) {
-  final match = RegExp(r'^(.+?\s+ауд\.)', caseSensitive: false)
-      .firstMatch(location.trim());
+  final match = RegExp(
+    r'^(.+?\s+ауд\.)',
+    caseSensitive: false,
+  ).firstMatch(location.trim());
   return match?.group(1) ?? location.trim();
 }
 
 String _weekdayRuleLabel(int weekday) => switch (weekday) {
-      DateTime.monday => 'понедельникам',
-      DateTime.tuesday => 'вторникам',
-      DateTime.wednesday => 'средам',
-      DateTime.thursday => 'четвергам',
-      DateTime.friday => 'пятницам',
-      DateTime.saturday => 'субботам',
-      DateTime.sunday => 'воскресеньям',
-      _ => 'этому дню недели',
-    };
+  DateTime.monday => 'понедельникам',
+  DateTime.tuesday => 'вторникам',
+  DateTime.wednesday => 'средам',
+  DateTime.thursday => 'четвергам',
+  DateTime.friday => 'пятницам',
+  DateTime.saturday => 'субботам',
+  DateTime.sunday => 'воскресеньям',
+  _ => 'этому дню недели',
+};

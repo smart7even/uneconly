@@ -34,12 +34,14 @@ void main() {
     String periodStart = '2026-09-07',
     String periodEnd = '2026-09-13',
     List<Map<String, dynamic>>? lessons,
+    bool? hasScheduleDays,
   }) =>
       {
         'week': 2,
         'academic_year_start': 2026,
         'period_start': periodStart,
         'period_end': periodEnd,
+        'has_schedule_days': ?hasScheduleDays,
         'lessons': lessons ?? [lesson()],
       };
 
@@ -89,6 +91,30 @@ void main() {
       provider.fetch(info: groupInfo, week: 2),
       throwsA(isA<FormatException>()),
     );
+  });
+
+  test('preserves a published week made entirely of free days', () async {
+    final provider = ScheduleNetworkDataProvider(
+      dio: _dioRespondingWith(
+        payload(lessons: [], hasScheduleDays: true),
+        [],
+      ),
+    );
+
+    final schedule = await provider.fetch(info: groupInfo, week: 2);
+
+    expect(schedule.daySchedules, hasLength(7));
+    expect(schedule.daySchedules.every((day) => day.lessons.isEmpty), isTrue);
+  });
+
+  test('keeps an old-backend empty response as unpublished', () async {
+    final provider = ScheduleNetworkDataProvider(
+      dio: _dioRespondingWith(payload(lessons: []), []),
+    );
+
+    final schedule = await provider.fetch(info: groupInfo, week: 2);
+
+    expect(schedule.daySchedules, isEmpty);
   });
 }
 

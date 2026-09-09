@@ -11,15 +11,12 @@ part 'group_bloc.g.dart';
 @freezed
 abstract class GroupEvent with _$GroupEvent {
   const factory GroupEvent.intiial() = _InitialGroupEvent;
-  const factory GroupEvent.facultySelected({
-    required final Faculty? faculty,
-  }) = _FacultySelectedGroupEvent;
-  const factory GroupEvent.courseSelected({
-    required final int? course,
-  }) = _CourseSelectedGroupEvent;
-  const factory GroupEvent.searchTextChanged({
-    required final String newText,
-  }) = _SearchTextChangedGroupEvent;
+  const factory GroupEvent.facultySelected({required final Faculty? faculty}) =
+      _FacultySelectedGroupEvent;
+  const factory GroupEvent.courseSelected({required final int? course}) =
+      _CourseSelectedGroupEvent;
+  const factory GroupEvent.searchTextChanged({required final String newText}) =
+      _SearchTextChangedGroupEvent;
 
   const GroupEvent._();
 
@@ -93,67 +90,56 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   final IGroupRepository _groupRepository;
 
   GroupBloc({required IGroupRepository groupRepository})
-      : _groupRepository = groupRepository,
-        super(
-          const GroupState.idle(
-            groups: [],
-            faculties: [],
-          ),
-        ) {
-    on<GroupEvent>(
-      (event, emit) async {
-        await event.map(
-          intiial: (e) async {
-            await _mapInitialToState(e, emit);
-          },
-          facultySelected: (e) async {
-            await _mapFacultySelectedToState(e, emit);
-          },
-          courseSelected: (e) async {
-            await _mapCourseSelectedToState(e, emit);
-          },
-          searchTextChanged: (e) async {
-            await _mapSearchTextChanged(e, emit);
-          },
-        );
-      },
-    );
+    : _groupRepository = groupRepository,
+      super(const GroupState.idle(groups: [], faculties: [])) {
+    on<GroupEvent>((event, emit) async {
+      await event.map(
+        intiial: (e) async {
+          await _mapInitialToState(e, emit);
+        },
+        facultySelected: (e) async {
+          await _mapFacultySelectedToState(e, emit);
+        },
+        courseSelected: (e) async {
+          await _mapCourseSelectedToState(e, emit);
+        },
+        searchTextChanged: (e) async {
+          await _mapSearchTextChanged(e, emit);
+        },
+      );
+    });
   }
 
   Future<void> _mapInitialToState(
     _InitialGroupEvent event,
     Emitter<GroupState> emit,
   ) async {
-    emit(GroupState.processing(
-      groups: state.groups,
-      faculties: state.faculties,
-      selectedFacultyId: state.selectedFacultyId,
-      selectedCourse: state.selectedCourse,
-      searchText: state.searchText,
-    ));
-    try {
-      final faculties = await _groupRepository.fetchAllFaculties();
-      final groups = await _groupRepository.fetchAll();
-      emit(GroupState.successful(
-        groups: groups,
-        faculties: faculties,
+    emit(
+      GroupState.processing(
+        groups: state.groups,
+        faculties: state.faculties,
         selectedFacultyId: state.selectedFacultyId,
         selectedCourse: state.selectedCourse,
         searchText: state.searchText,
-      ));
-    } catch (e) {
+      ),
+    );
+    try {
+      final (faculties, groups) = await (
+        _groupRepository.fetchAllFaculties(),
+        _groupRepository.fetchAll(),
+      ).wait;
       emit(
-        GroupState.error(
-          groups: state.groups,
-          faculties: state.faculties,
+        GroupState.successful(
+          groups: groups,
+          faculties: faculties,
           selectedFacultyId: state.selectedFacultyId,
           selectedCourse: state.selectedCourse,
           searchText: state.searchText,
         ),
       );
-    } finally {
+    } catch (e) {
       emit(
-        GroupState.idle(
+        GroupState.error(
           groups: state.groups,
           faculties: state.faculties,
           selectedFacultyId: state.selectedFacultyId,

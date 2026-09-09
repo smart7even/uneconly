@@ -10,6 +10,8 @@ class SchedulePeriods extends Table {
   IntColumn get academicYearStart => integer()();
   DateTimeColumn get periodStart => dateTime()();
   DateTimeColumn get periodEnd => dateTime()();
+  BoolColumn get hasScheduleDays =>
+      boolean().withDefault(const Constant(false))();
   DateTimeColumn get updatedAt => dateTime()();
 
   @override

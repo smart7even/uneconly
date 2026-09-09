@@ -62,6 +62,14 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
           .map<Lesson>((lesson) => Lesson.fromJson(lesson))
           .toList();
 
+      final hasScheduleDaysValue = response.data['has_schedule_days'];
+      if (hasScheduleDaysValue != null && hasScheduleDaysValue is! bool) {
+        throw const FormatException(
+          'Schedule publication metadata must be a boolean',
+        );
+      }
+      final hasScheduleDays = hasScheduleDaysValue == true;
+
       int responseWeek = response.data['week'];
 
       DateTime? responsePeriodStart;
@@ -99,7 +107,16 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
           academicYearStart: response.data['academic_year_start'] as int?,
         );
         return Schedule(
-          daySchedules: [],
+          daySchedules: hasScheduleDays
+              ? [
+                  for (var index = 0;
+                      index <= periodEnd.difference(periodStart).inDays;
+                      index++)
+                    DaySchedule.empty(
+                      periodStart.add(Duration(days: index)),
+                    ),
+                ]
+              : [],
           week: responseWeek,
           info: info,
           academicYearStart: response.data['academic_year_start'] as int? ??

@@ -11,10 +11,7 @@ abstract class IScheduleRepository {
   /// Callers may stop waiting when the visible week changes, but an already
   /// started invocation is deliberately allowed to finish so its response is
   /// still useful during a later offline/cache-first visit.
-  Future<Schedule> fetch({
-    required ScheduleInfo info,
-    required int week,
-  });
+  Future<Schedule> fetch({required ScheduleInfo info, required int week});
   Future<ScheduleCacheEntry?> getLocalSchedule({
     required ScheduleInfo info,
     required int week,
@@ -32,10 +29,10 @@ class ScheduleRepository implements IScheduleRepository {
     required final IScheduleLocalDataProvider localDataProvider,
     required final IScheduleCalendarDataProvider calendarDataProvider,
     required final ISettingsLocalDataProvider settingsLocalDataProvider,
-  })  : _networkDataProvider = networkDataProvider,
-        _localDataProvider = localDataProvider,
-        _calendarDataProvider = calendarDataProvider,
-        _settingsLocalDataProvider = settingsLocalDataProvider;
+  }) : _networkDataProvider = networkDataProvider,
+       _localDataProvider = localDataProvider,
+       _calendarDataProvider = calendarDataProvider,
+       _settingsLocalDataProvider = settingsLocalDataProvider;
 
   final IScheduleNetworkDataProvider _networkDataProvider;
   final IScheduleLocalDataProvider _localDataProvider;
@@ -79,8 +76,8 @@ class ScheduleRepository implements IScheduleRepository {
       return schedule;
     }
 
-    final isSystemCalendarSyncingEnabled =
-        await _settingsLocalDataProvider.isSystemCalendarSyncingEnabled();
+    final isSystemCalendarSyncingEnabled = await _settingsLocalDataProvider
+        .isSystemCalendarSyncingEnabled();
 
     final userGroup = await _settingsLocalDataProvider.getGroup();
 
@@ -115,7 +112,7 @@ class ScheduleRepository implements IScheduleRepository {
         ? persistIfLatest()
         : previousWrite.then(
             (_) => persistIfLatest(),
-            onError: (_, __) => persistIfLatest(),
+            onError: (_, _) => persistIfLatest(),
           );
     _cacheWriteChains[cacheKey] = currentWrite;
 
@@ -132,11 +129,7 @@ class ScheduleRepository implements IScheduleRepository {
     required int week,
     int? academicYearStart,
   }) {
-    return _localDataProvider.getSchedule(
-      week,
-      info,
-      academicYearStart,
-    );
+    return _localDataProvider.getSchedule(week, info, academicYearStart);
   }
 
   @override

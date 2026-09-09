@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:l/l.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uneconly/common/analytics/analytics_repository.dart';
 import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/model/dependencies.dart';
+import 'package:uneconly/common/network/network_policy.dart';
 import 'package:uneconly/common/push/push_notification_service.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/initialization/data/platform/platform_initialization.dart';
@@ -48,15 +48,14 @@ Future<Dependencies> $initializeDependencies({
   return dependencies;
 }
 
-typedef _InitializationStep = FutureOr<void> Function(
-  Dependencies dependencies,
-);
+typedef _InitializationStep =
+    FutureOr<void> Function(Dependencies dependencies);
 
 Map<String, _InitializationStep> _getInitializationSteps({
   required ILoggingRepository loggingRepository,
 }) {
-  final Map<String, _InitializationStep> initializationSteps =
-      <String, _InitializationStep>{
+  final Map<String, _InitializationStep>
+  initializationSteps = <String, _InitializationStep>{
     'Platform pre-initialization': (_) => $platformInitialization(),
     'Provide logging pepository': (dependencies) =>
         dependencies.loggingRepository = loggingRepository,
@@ -87,11 +86,8 @@ Map<String, _InitializationStep> _getInitializationSteps({
         dependencies.settingsRepository = SettingsRepository(
           localDataProvider: dependencies.settingsLocalDataProvider,
         ),
-    'Initialize dio': (dependencies) async => dependencies.dio = Dio(
-          BaseOptions(
-            baseUrl: serverAddress,
-          ),
-        ),
+    'Initialize dio': (dependencies) async =>
+        dependencies.dio = createApiClient(baseUrl: serverAddress),
     'Initialize asset network data provider': (dependencies) async =>
         dependencies.assetNetworkDataProvider = AssetNetworkDataProvider(
           dio: dependencies.dio,

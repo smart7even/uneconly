@@ -21,16 +21,14 @@ abstract class ISettingsRepository {
   Future<void> clearAppCache();
   Future<bool> isAppCacheEmpty();
   Future<CalendarSettingsEntity> getCalendarSettings();
-  Future<void> saveCalendarSettings(
-    CalendarSettingsEntity calendarSettings,
-  );
+  Future<void> saveCalendarSettings(CalendarSettingsEntity calendarSettings);
 }
 
 class SettingsRepository implements ISettingsRepository {
   final ISettingsLocalDataProvider _localDataProvider;
 
   SettingsRepository({required ISettingsLocalDataProvider localDataProvider})
-      : _localDataProvider = localDataProvider;
+    : _localDataProvider = localDataProvider;
 
   final StreamController<String> _languageChangedController =
       StreamController<String>.broadcast();
@@ -46,14 +44,9 @@ class SettingsRepository implements ISettingsRepository {
   @override
   Future<void> saveGroup(Group group) async {
     if (Platform.isAndroid || Platform.isIOS) {
-      await HomeWidget.saveWidgetData<int>(
-        'groupId',
-        group.id,
-      );
-      HomeWidget.updateWidget(
-        name: 'UWidget',
-        iOSName: 'UWidget',
-      );
+      await HomeWidget.saveWidgetData<int>('groupId', group.id);
+      await HomeWidget.saveWidgetData<String>('groupName', group.name);
+      HomeWidget.updateWidget(name: 'UWidget', iOSName: 'UWidget');
     }
 
     await _localDataProvider.saveGroup(group);
@@ -117,8 +110,8 @@ class SettingsRepository implements ISettingsRepository {
 
   @override
   Future<CalendarSettingsEntity> getCalendarSettings() async {
-    final isCalendarSyncingEnabled =
-        await _localDataProvider.isSystemCalendarSyncingEnabled();
+    final isCalendarSyncingEnabled = await _localDataProvider
+        .isSystemCalendarSyncingEnabled();
 
     return CalendarSettingsEntity(
       isCalendarSyncingEnabled: isCalendarSyncingEnabled,

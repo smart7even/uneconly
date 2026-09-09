@@ -183,26 +183,32 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
                 element.day.isBefore(endOfWeekDateTime)))
         .toList();
 
-    final days = [
-      for (int i = 0;
-          i <=
-              getDate(periodEnd)
-                  .difference(getDate(startOfWeekDateTime))
-                  .inDays;
-          i++)
-        startOfWeekDateTime.add(Duration(days: i)),
-    ];
-    List<DaySchedule> daySchedules = [];
-
-    for (var day in days) {
-      daySchedules.add(
+    // The network provider uses an empty day list as the explicit
+    // "schedule is not published for this week" sentinel. A separate persisted
+    // flag preserves the equally valid case where a published period contains
+    // seven confirmed free days and therefore also has no lesson rows.
+    // `domainLessons.isNotEmpty` keeps pre-v9 caches with real lessons usable.
+    final hasScheduleDays =
+        cachedPeriod.hasScheduleDays || domainLessons.isNotEmpty;
+    final days = hasScheduleDays
+        ? [
+            for (int i = 0;
+                i <=
+                    getDate(periodEnd)
+                        .difference(getDate(startOfWeekDateTime))
+                        .inDays;
+                i++)
+              startOfWeekDateTime.add(Duration(days: i)),
+          ]
+        : const <DateTime>[];
+    final daySchedules = [
+      for (final day in days)
         DaySchedule(
           day: day,
           lessons:
               domainLessons.where((element) => element.day == day).toList(),
         ),
-      );
-    }
+    ];
 
     return ScheduleCacheEntry(
       schedule: Schedule(
@@ -276,6 +282,7 @@ class ScheduleLocalDataProvider implements IScheduleLocalDataProvider {
               academicYearStart: schedule.academicYearStart,
               periodStart: periodStart,
               periodEnd: periodEnd,
+              hasScheduleDays: Value(schedule.daySchedules.isNotEmpty),
               updatedAt: currentDateTime,
             ),
           );

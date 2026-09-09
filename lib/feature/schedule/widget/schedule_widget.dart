@@ -158,12 +158,14 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
                     ),
                   ),
                   const SizedBox(width: 14),
-                  Text(
-                    emptyRunEnd > dayIndex
-                        ? 'Свободные дни'
-                        : context.string.freeDay,
-                    style: TextStyle(
-                      color: context.palette.muted,
+                  Expanded(
+                    child: Text(
+                      emptyRunEnd > dayIndex
+                          ? 'Свободные дни'
+                          : context.string.freeDay,
+                      style: TextStyle(
+                        color: context.palette.muted,
+                      ),
                     ),
                   ),
                 ],

@@ -18,10 +18,7 @@ class SettingsTile extends StatelessWidget {
     this.description,
     this.trailing,
     this.onPressed,
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: 10,
-      vertical: 5,
-    ),
+    this.padding = const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     this.titleStyle = const TextStyle(
       fontWeight: FontWeight.w500,
       fontSize: 18,
@@ -62,10 +59,7 @@ class SettingsTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 4,
                     children: [
-                      Text(
-                        title,
-                        style: titleStyle,
-                      ),
+                      Text(title, style: titleStyle),
                       if (description != null)
                         Text(
                           description,
@@ -77,7 +71,7 @@ class SettingsTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (trailing != null) trailing,
+                ?trailing,
               ],
             ),
           ),

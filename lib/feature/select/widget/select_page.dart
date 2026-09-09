@@ -31,10 +31,7 @@ class SelectPage extends StatefulWidget {
   final SelectPageMode mode;
 
   /// {@macro select_page}
-  const SelectPage({
-    super.key,
-    required this.mode,
-  });
+  const SelectPage({super.key, required this.mode});
 
   @override
   State<SelectPage> createState() => _SelectPageState();
@@ -66,16 +63,14 @@ class _SelectPageState extends State<SelectPage> {
     super.didChangeDependencies();
     // The configuration of InheritedWidgets has changed
     // Also called after initState but before build
-    Dependencies.of(context).settingsRepository.getFavoriteGroups().then(
-      (value) {
-        setState(
-          () {
-            _favoriteGroups.clear();
-            _favoriteGroups.addAll(value);
-          },
-        );
-      },
-    );
+    Dependencies.of(context).settingsRepository.getFavoriteGroups().then((
+      value,
+    ) {
+      setState(() {
+        _favoriteGroups.clear();
+        _favoriteGroups.addAll(value);
+      });
+    });
   }
 
   @override
@@ -88,21 +83,19 @@ class _SelectPageState extends State<SelectPage> {
 
   Future<void> onPressed(BuildContext context, Group group) async {
     if (widget.mode == SelectPageMode.view) {
-      Octopus.of(context).setState(
-        (state) {
-          return state
-            ..removeByName(Routes.select.name)
-            ..add(
-              Routes.schedule.node(
-                arguments: {
-                  'groupId': group.id.toString(),
-                  'groupName': group.name,
-                  'isViewMode': true.toString(),
-                },
-              ),
-            );
-        },
-      );
+      Octopus.of(context).setState((state) {
+        return state
+          ..removeByName(Routes.select.name)
+          ..add(
+            Routes.schedule.node(
+              arguments: {
+                'groupId': group.id.toString(),
+                'groupName': group.name,
+                'isViewMode': true.toString(),
+              },
+            ),
+          );
+      });
 
       return;
     } else if (widget.mode == SelectPageMode.favorite) {
@@ -116,15 +109,11 @@ class _SelectPageState extends State<SelectPage> {
     await settingsRepository.saveGroup(group);
 
     if (context.mounted) {
-      Octopus.of(context).setState(
-        (state) {
-          return state
-            ..removeWhere((node) => true)
-            ..add(
-              Routes.loading.node(),
-            );
-        },
-      );
+      Octopus.of(context).setState((state) {
+        return state
+          ..removeWhere((node) => true)
+          ..add(Routes.loading.node());
+      });
     }
   }
 
@@ -175,18 +164,12 @@ class _SelectPageState extends State<SelectPage> {
       context: context,
       barrierColor: Colors.transparent,
       builder: (context) {
-        return SelectFacultyPage(
-          faculties: state.faculties,
-        );
+        return SelectFacultyPage(faculties: state.faculties);
       },
     );
 
     if (result is Faculty) {
-      bloc.add(
-        GroupEvent.facultySelected(
-          faculty: result,
-        ),
-      );
+      bloc.add(GroupEvent.facultySelected(faculty: result));
     }
   }
 
@@ -200,18 +183,12 @@ class _SelectPageState extends State<SelectPage> {
       context: context,
       barrierColor: Colors.transparent,
       builder: (context) {
-        return const SelectCoursePage(
-          courses: [1, 2, 3, 4, 5],
-        );
+        return const SelectCoursePage(courses: [1, 2, 3, 4, 5]);
       },
     );
 
     if (result is int) {
-      bloc.add(
-        GroupEvent.courseSelected(
-          course: result,
-        ),
-      );
+      bloc.add(GroupEvent.courseSelected(course: result));
     }
   }
 
@@ -228,9 +205,7 @@ class _SelectPageState extends State<SelectPage> {
             ),
           ),
         );
-        bloc.add(
-          const GroupEvent.intiial(),
-        );
+        bloc.add(const GroupEvent.intiial());
 
         return bloc;
       },
@@ -250,17 +225,13 @@ class _SelectPageState extends State<SelectPage> {
 
           if (selectedFaculty != null) {
             selectedGroups = selectedGroups
-                .where(
-                  (group) => group.facultyId == selectedFaculty.id,
-                )
+                .where((group) => group.facultyId == selectedFaculty.id)
                 .toList();
           }
 
           if (selectedCourse != null) {
             selectedGroups = selectedGroups
-                .where(
-                  (group) => group.course == selectedCourse,
-                )
+                .where((group) => group.course == selectedCourse)
                 .toList();
           }
 
@@ -280,9 +251,7 @@ class _SelectPageState extends State<SelectPage> {
           }
 
           return Scaffold(
-            appBar: AppBar(
-              title: Text(context.string.selectGroup),
-            ),
+            appBar: AppBar(title: Text(context.string.selectGroup)),
             body: Column(
               children: [
                 Padding(
@@ -301,10 +270,10 @@ class _SelectPageState extends State<SelectPage> {
                                   onPressed: () {
                                     _searchController.clear();
                                     context.read<GroupBloc>().add(
-                                          const GroupEvent.searchTextChanged(
-                                            newText: '',
-                                          ),
-                                        );
+                                      const GroupEvent.searchTextChanged(
+                                        newText: '',
+                                      ),
+                                    );
                                     setState(() {});
                                   },
                                   icon: const Icon(Icons.close),
@@ -313,8 +282,8 @@ class _SelectPageState extends State<SelectPage> {
                         onChanged: (value) {
                           setState(() {});
                           context.read<GroupBloc>().add(
-                                GroupEvent.searchTextChanged(newText: value),
-                              );
+                            GroupEvent.searchTextChanged(newText: value),
+                          );
                         },
                       ),
                       const SizedBox(height: 10),
@@ -355,10 +324,47 @@ class _SelectPageState extends State<SelectPage> {
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       itemCount: 7,
-                      itemBuilder: (_, __) => Container(
+                      itemBuilder: (_, _) => Container(
                         height: 58,
                         margin: const EdgeInsets.only(bottom: 1),
                         color: context.palette.nestedSurface,
+                      ),
+                    ),
+                  ),
+                  error: (_) => Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.cloud_off_outlined,
+                              size: 44,
+                              color: context.palette.muted,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Не удалось загрузить список групп',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Проверьте соединение и попробуйте ещё раз.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: context.palette.muted),
+                            ),
+                            const SizedBox(height: 20),
+                            ElevatedButton.icon(
+                              onPressed: () => context.read<GroupBloc>().add(
+                                const GroupEvent.intiial(),
+                              ),
+                              icon: const Icon(Icons.refresh),
+                              label: Text(context.string.tryAgain),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -367,7 +373,7 @@ class _SelectPageState extends State<SelectPage> {
                       child: ListView.separated(
                         padding: const EdgeInsets.only(bottom: 24),
                         itemCount: selectedGroups.length,
-                        separatorBuilder: (_, __) => Divider(
+                        separatorBuilder: (_, _) => Divider(
                           indent: 20,
                           color: context.palette.hairline,
                         ),
@@ -387,7 +393,8 @@ class _SelectPageState extends State<SelectPage> {
                               _groupSubtitle(group, state.faculties),
                               style: TextStyle(color: context.palette.muted),
                             ),
-                            trailing: widget.mode == SelectPageMode.view ||
+                            trailing:
+                                widget.mode == SelectPageMode.view ||
                                     widget.mode == SelectPageMode.favorite
                                 ? IconButton(
                                     onPressed: () async {
@@ -400,17 +407,14 @@ class _SelectPageState extends State<SelectPage> {
                                         ? context.string.removeFromFavorites
                                         : context.string.addToFavorites,
                                     icon: isFavorite
-                                        ? Icon(Icons.star,
-                                            color: context.palette.accent)
-                                        : const Icon(
-                                            Icons.star_outline,
-                                          ),
+                                        ? Icon(
+                                            Icons.star,
+                                            color: context.palette.accent,
+                                          )
+                                        : const Icon(Icons.star_outline),
                                   )
                                 : null,
-                            onTap: () => onPressed(
-                              context,
-                              group,
-                            ),
+                            onTap: () => onPressed(context, group),
                           );
                         },
                       ),

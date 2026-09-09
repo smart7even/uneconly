@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:l/l.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
+import 'package:uneconly/common/network/network_policy.dart';
 
 abstract interface class IPushNotificationService {
   Future<void> activate();
@@ -45,11 +46,8 @@ class AppMetricaPushSdk implements IPushSdk {
   Future<void> activate() => AppMetricaPush.activate();
 
   @override
-  Future<void> requestIosPermission() => AppMetricaPush.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+  Future<void> requestIosPermission() =>
+      AppMetricaPush.requestPermission(alert: true, badge: true, sound: true);
 }
 
 class MethodChannelAndroidNotificationPermissionRequester
@@ -73,11 +71,13 @@ class AppMetricaPushNotificationService implements IPushNotificationService {
     IAndroidNotificationPermissionRequester androidPermissionRequester =
         const MethodChannelAndroidNotificationPermissionRequester(),
     PushPlatform? platform,
-  })  : _preferences = preferences,
-        _loggingRepository = loggingRepository,
-        _pushSdk = pushSdk,
-        _androidPermissionRequester = androidPermissionRequester,
-        _platform = platform ?? _currentPlatform();
+    Duration activationTimeout = auxiliarySdkTimeout,
+  }) : _preferences = preferences,
+       _loggingRepository = loggingRepository,
+       _pushSdk = pushSdk,
+       _androidPermissionRequester = androidPermissionRequester,
+       _platform = platform ?? _currentPlatform(),
+       _activationTimeout = activationTimeout;
 
   static const permissionPromptShownKey =
       'push_notification_permission_prompt_shown_v1';
@@ -87,6 +87,7 @@ class AppMetricaPushNotificationService implements IPushNotificationService {
   final IPushSdk _pushSdk;
   final IAndroidNotificationPermissionRequester _androidPermissionRequester;
   final PushPlatform _platform;
+  final Duration _activationTimeout;
 
   StreamSubscription<Map<String, String?>>? _tokenSubscription;
   StreamSubscription<void>? _pushClickSubscription;
@@ -97,22 +98,18 @@ class AppMetricaPushNotificationService implements IPushNotificationService {
     if (_platform == PushPlatform.unsupported || _isActivated) return;
 
     try {
-      _tokenSubscription = _pushSdk.tokenStream.listen(
-        (tokens) {
-          final registeredProviderCount =
-              tokens.values.where((token) => token?.isNotEmpty ?? false).length;
-          l.v6(
-            'Push token updated for $registeredProviderCount provider(s)',
-          );
-        },
-        onError: _logStreamError,
-      );
+      _tokenSubscription = _pushSdk.tokenStream.listen((tokens) {
+        final registeredProviderCount = tokens.values
+            .where((token) => token?.isNotEmpty ?? false)
+            .length;
+        l.v6('Push token updated for $registeredProviderCount provider(s)');
+      }, onError: _logStreamError);
       _pushClickSubscription = _pushSdk.pushClickStream.listen(
         (_) => l.v6('Push notification opened'),
         onError: _logStreamError,
       );
 
-      await _pushSdk.activate();
+      await _pushSdk.activate().timeout(_activationTimeout);
       _isActivated = true;
     } on Object catch (error, stackTrace) {
       await _cancelSubscriptions();

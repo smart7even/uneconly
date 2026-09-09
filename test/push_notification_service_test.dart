@@ -23,32 +23,34 @@ void main() {
     await pushSdk.dispose();
   });
 
-  test('activates and asks for Android notification permission only once',
-      () async {
-    final service = AppMetricaPushNotificationService(
-      preferences: preferences,
-      loggingRepository: loggingRepository,
-      pushSdk: pushSdk,
-      androidPermissionRequester: androidPermissionRequester,
-      platform: PushPlatform.android,
-    );
+  test(
+    'activates and asks for Android notification permission only once',
+    () async {
+      final service = AppMetricaPushNotificationService(
+        preferences: preferences,
+        loggingRepository: loggingRepository,
+        pushSdk: pushSdk,
+        androidPermissionRequester: androidPermissionRequester,
+        platform: PushPlatform.android,
+      );
 
-    await service.activate();
-    await service.requestPermissionIfNeeded();
-    await service.requestPermissionIfNeeded();
+      await service.activate();
+      await service.requestPermissionIfNeeded();
+      await service.requestPermissionIfNeeded();
 
-    expect(pushSdk.activateCalls, 1);
-    expect(pushSdk.iosPermissionCalls, 0);
-    expect(androidPermissionRequester.calls, 1);
-    expect(
-      preferences.getBool(
-        AppMetricaPushNotificationService.permissionPromptShownKey,
-      ),
-      isTrue,
-    );
+      expect(pushSdk.activateCalls, 1);
+      expect(pushSdk.iosPermissionCalls, 0);
+      expect(androidPermissionRequester.calls, 1);
+      expect(
+        preferences.getBool(
+          AppMetricaPushNotificationService.permissionPromptShownKey,
+        ),
+        isTrue,
+      );
 
-    await service.dispose();
-  });
+      await service.dispose();
+    },
+  );
 
   test('uses the SDK permission request on iOS', () async {
     final service = AppMetricaPushNotificationService(
@@ -93,6 +95,28 @@ void main() {
     await service.dispose();
   });
 
+  test(
+    'a push SDK that never completes is bounded during app initialization',
+    () async {
+      pushSdk.neverCompleteActivation = true;
+      final service = AppMetricaPushNotificationService(
+        preferences: preferences,
+        loggingRepository: loggingRepository,
+        pushSdk: pushSdk,
+        androidPermissionRequester: androidPermissionRequester,
+        platform: PushPlatform.ios,
+        activationTimeout: const Duration(milliseconds: 20),
+      );
+
+      final stopwatch = Stopwatch()..start();
+      await service.activate();
+
+      expect(stopwatch.elapsed, lessThan(const Duration(seconds: 1)));
+      expect(loggingRepository.errors.single, isA<TimeoutException>());
+      await service.dispose();
+    },
+  );
+
   test('unsupported platforms do not activate or request permission', () async {
     final service = AppMetricaPushNotificationService(
       preferences: preferences,
@@ -118,6 +142,7 @@ class _FakePushSdk implements IPushSdk {
   int activateCalls = 0;
   int iosPermissionCalls = 0;
   Object? activationError;
+  bool neverCompleteActivation = false;
 
   @override
   Stream<void> get pushClickStream => _pushClicks.stream;
@@ -129,6 +154,7 @@ class _FakePushSdk implements IPushSdk {
   Future<void> activate() async {
     activateCalls++;
     if (activationError case final error?) throw error;
+    if (neverCompleteActivation) await Completer<void>().future;
   }
 
   @override
