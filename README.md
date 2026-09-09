@@ -65,5 +65,6 @@ open coverage/html/index.html
 
 # Operations
 
+- [Release process and core quality gate](docs/RELEASE_PROCESS.md)
 - [TestFlight deployment](ios/fastlane/TESTFLIGHT.md)
 - [Push notification verification](docs/PUSH_NOTIFICATIONS.md)

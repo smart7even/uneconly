@@ -53,9 +53,7 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
     if (currentSchedule == null) {
       slivers.add(
         SliverToBoxAdapter(
-          child: ListTile(
-            title: Text('${context.string.loadingSchedule}...'),
-          ),
+          child: ListTile(title: Text('${context.string.loadingSchedule}...')),
         ),
       );
 
@@ -103,9 +101,7 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
               padding: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(
-                    color: context.palette.hairline,
-                  ),
+                  bottom: BorderSide(color: context.palette.hairline),
                 ),
               ),
               child: Row(
@@ -152,9 +148,7 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
                     width: 54,
                     child: Text(
                       '—',
-                      style: TextStyle(
-                        color: context.palette.hairline,
-                      ),
+                      style: TextStyle(color: context.palette.hairline),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -163,9 +157,7 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
                       emptyRunEnd > dayIndex
                           ? 'Свободные дни'
                           : context.string.freeDay,
-                      style: TextStyle(
-                        color: context.palette.muted,
-                      ),
+                      style: TextStyle(color: context.palette.muted),
                     ),
                   ),
                 ],
@@ -177,9 +169,12 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
         final choiceRepository = LessonChoiceRepository(
           Dependencies.of(context).sharedPreferences,
         );
-        slivers.add(SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
+        slivers.add(
+          SliverList(
+            delegate: SliverChildBuilderDelegate((
+              BuildContext context,
+              int index,
+            ) {
               final cluster = clusters[index];
 
               return Column(
@@ -201,10 +196,9 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
                     ),
                 ],
               );
-            },
-            childCount: clusters.length,
+            }, childCount: clusters.length),
           ),
-        ));
+        );
       }
 
       // Check that day is the last day before new year
@@ -274,7 +268,8 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
     slivers.add(
       SliverToBoxAdapter(
         child: SizedBox(
-          height: MediaQuery.of(context).padding.bottom +
+          height:
+              MediaQuery.of(context).padding.bottom +
               scheduleRefreshOverlayClearance,
         ),
       ),
@@ -292,13 +287,12 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
     }
 
     if (currentSchedule.daySchedules.isEmpty) {
-      final dateFormat = DateFormat(
-        'dd MMMM yyyy',
-      );
+      final dateFormat = DateFormat('dd MMMM yyyy');
       final weekStart = dateFormat.format(currentSchedule.periodStart);
       final weekEnd = dateFormat.format(currentSchedule.periodEnd);
 
       return Padding(
+        key: const ValueKey('schedule-unpublished'),
         padding: const EdgeInsets.fromLTRB(
           28,
           28,
@@ -310,8 +304,11 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(Icons.event_busy_outlined,
-                  size: 46, color: context.palette.muted),
+              Icon(
+                Icons.event_busy_outlined,
+                size: 46,
+                color: context.palette.muted,
+              ),
               const SizedBox(height: 16),
               Text(
                 context.string.noSchedule,
@@ -341,6 +338,7 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
     }
 
     return CustomScrollView(
+      key: const ValueKey('schedule-content'),
       slivers: _buildSchedule(context),
     );
   }
@@ -398,16 +396,16 @@ class _ScheduleActionSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: context.palette.nestedSurface,
-        borderRadius: BorderRadius.circular(16),
-        child: ListTile(
-          leading: Icon(icon),
-          title: Text(title),
-          subtitle: Text(subtitle),
-          trailing: Icon(Icons.chevron_right, color: context.palette.muted),
-          onTap: onTap,
-        ),
-      );
+    color: context.palette.nestedSurface,
+    borderRadius: BorderRadius.circular(16),
+    child: ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: Icon(Icons.chevron_right, color: context.palette.muted),
+      onTap: onTap,
+    ),
+  );
 }
 
 class _WeekNavigation extends StatelessWidget {
@@ -463,17 +461,18 @@ class _ScheduleSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListView.builder(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-        itemCount: 8,
-        itemBuilder: (_, index) => Container(
-          height: index % 3 == 0 ? 24 : 68,
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: context.palette.nestedSurface,
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
+    key: const ValueKey('schedule-loading'),
+    padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+    itemCount: 8,
+    itemBuilder: (_, index) => Container(
+      height: index % 3 == 0 ? 24 : 68,
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: context.palette.nestedSurface,
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+  );
 }
 
 String _daySummary(BuildContext context, List<LessonCluster> clusters) {

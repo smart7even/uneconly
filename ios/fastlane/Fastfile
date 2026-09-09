@@ -1,5 +1,7 @@
 require "dotenv"
+require "json"
 require "shellwords"
+require "time"
 
 LOCAL_APP_STORE_ENV = File.expand_path("~/.config/uneconly/app-store-connect.env")
 Dotenv.load(LOCAL_APP_STORE_ENV) if File.file?(LOCAL_APP_STORE_ENV)
@@ -43,6 +45,61 @@ platform :ios do
 
   private_lane :app_store_api_key do
     app_store_connect_api_key(**app_store_api_key_options)
+  end
+
+  private_lane :verify_core_release_gate do |options|
+    evidence_path = File.join(PROJECT_ROOT, ".dart_tool/release_gate.json")
+    UI.user_error!(
+      "Core release gate evidence is missing. Run make core-release-gate first."
+    ) unless File.file?(evidence_path)
+
+    evidence = JSON.parse(File.read(evidence_path))
+    expected_version = options[:app_version].to_s
+    expected_build = options[:build_number].to_s
+    unless evidence["version"].to_s == expected_version &&
+           evidence["buildNumber"].to_s == expected_build
+      UI.user_error!(
+        "Core release gate targets #{evidence['version']} (#{evidence['buildNumber']}), " \
+        "not #{expected_version} (#{expected_build})."
+      )
+    end
+
+    current_commit = sh("git", "-C", PROJECT_ROOT, "rev-parse", "HEAD", log: false).strip
+    unless evidence["gitCommit"] == current_commit
+      UI.user_error!("Core release gate was run for a different Git commit.")
+    end
+
+    completed_at = Time.iso8601(evidence.fetch("completedAtUtc"))
+    if Time.now.utc - completed_at > 48 * 60 * 60
+      UI.user_error!("Core release gate evidence is older than 48 hours.")
+    end
+
+    required_checks = %w[
+      code_generation
+      localization_generation
+      generated_version
+      static_analysis
+      flutter_tests
+      android_release_apk
+      android_core_smoke
+      ios_core_smoke
+    ]
+    passed_checks = evidence.fetch("checks", []).filter_map do |check|
+      check["name"] if check["status"] == "passed"
+    end
+    missing_checks = required_checks - passed_checks
+    unless missing_checks.empty?
+      UI.user_error!("Core release gate is incomplete: #{missing_checks.join(', ')}")
+    end
+
+    devices = evidence.fetch("devices", {})
+    if devices["android"].to_s.empty? || devices["ios"].to_s.empty?
+      UI.user_error!("Core release gate must cover both Android and iOS.")
+    end
+
+    UI.success("Verified core release gate for #{expected_version}(#{expected_build})")
+  rescue JSON::ParserError, KeyError, ArgumentError => error
+    UI.user_error!("Core release gate evidence is invalid: #{error.message}")
   end
 
   private_lane :xcode_api_key_arguments do
@@ -305,6 +362,7 @@ platform :ios do
   lane :submit_app_store_release do |options|
     app_version = options[:app_version] || "2.0.0"
     build_number = options[:build_number] || "59"
+    verify_core_release_gate(app_version: app_version, build_number: build_number)
     api_key = app_store_api_key
 
     copy_live_review_information_to_edit_version(app_version: app_version)
