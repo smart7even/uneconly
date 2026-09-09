@@ -192,6 +192,36 @@ platform :ios do
     UI.success("Selected processed build #{app_version}(#{build_number})")
   end
 
+  private_lane :complete_age_rating_declaration do
+    app = Spaceship::ConnectAPI::App.find("com.roadmapik.uneconly")
+    UI.user_error!("App not found in App Store Connect") unless app
+
+    app_info = app.fetch_edit_app_info || app.fetch_latest_app_info
+    UI.user_error!("Editable App Information was not found") unless app_info
+
+    declaration = app_info.fetch_age_rating_declaration
+    UI.user_error!("Age rating declaration was not found") unless declaration
+
+    # App Store Connect's 2026 questionnaire requires these newer attributes
+    # even when the previously saved declaration has no applicable content.
+    declaration.update(
+      attributes: {
+        "guns_or_other_weapons" => "NONE",
+        "user_generated_content" => false,
+        "health_or_wellness_topics" => false,
+        "advertising" => false,
+        "loot_box" => false,
+        "parental_controls" => false,
+        "age_assurance" => false,
+        "messaging_and_chat" => false,
+        "social_media" => false,
+        "social_media_age_restricted" => false,
+      },
+    )
+
+    UI.success("Completed the required age-rating questionnaire fields")
+  end
+
   private_lane :build_beta_ipa do |options|
     flutter_command = ["flutter", "build", "ios", "--config-only", "--release"]
     flutter_command += ["--build-name", options[:build_name]] unless options[:build_name].to_s.empty?
@@ -278,6 +308,7 @@ platform :ios do
     api_key = app_store_api_key
 
     copy_live_review_information_to_edit_version(app_version: app_version)
+    complete_age_rating_declaration
 
     upload_to_app_store(
       api_key: api_key,
