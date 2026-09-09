@@ -1,0 +1,22 @@
+{
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "uneconly-ci"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "android_client_info": {
+          "package_name": "com.roadmapik.uneconly"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "uneconly-ci-placeholder-not-a-real-key"
+        }
+      ]
+    }
+  ],
+  "configuration_version": "1"
+}

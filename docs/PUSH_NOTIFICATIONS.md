@@ -12,6 +12,11 @@ storage or injected by CI before a release build. Do not print its contents in
 CI logs. A clean checkout without that file is suitable for source review and
 Flutter tests but is not a production-ready Android push build.
 
+The GitHub Actions compile check supplies a tracked synthetic client
+configuration for the release variant. It contains no production identifiers
+and cannot receive push notifications. The workflow does not publish that APK;
+any distributable Android build must still use the real ignored configuration.
+
 iOS signing and APNs/App Store Connect credentials are likewise machine-local
 or service-managed and must not be added to the repository. See the separate
 TestFlight deployment guide for the local Fastlane setup.
