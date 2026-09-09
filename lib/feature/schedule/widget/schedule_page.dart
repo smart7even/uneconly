@@ -22,10 +22,12 @@ import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
 import 'package:uneconly/feature/schedule/model/app_config.dart';
+import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
 import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_actions_popup.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_drawer.dart';
+import 'package:uneconly/feature/schedule/widget/schedule_refresh_overlay.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
@@ -62,7 +64,8 @@ class _SchedulePageState extends State<SchedulePage>
 
   late final ScheduleBLoC scheduleBLoC;
   late final ScheduleNetworkDataProvider scheduleNetworkDataProvider;
-  DateTime? _basePeriodStart;
+  late final IScheduleRepository scheduleRepository;
+  int? _academicYearStart;
   AppConfig _appConfig = const AppConfig.safeDefaults();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -82,6 +85,7 @@ class _SchedulePageState extends State<SchedulePage>
     log(Octopus.of(context).state.uri.toString());
 
     scheduleBLoC = _initBloc(context);
+    unawaited(_bootstrapSchedule());
     unawaited(_refreshAppConfig());
 
     WidgetsBinding.instance.addObserver(this);
@@ -160,23 +164,19 @@ class _SchedulePageState extends State<SchedulePage>
     return getStartOfStudyWeek(_getCurrentWeek(), currentTime);
   }
 
-  DateTime? _periodStartForWeek(int week) {
-    final baseWeek = scheduleBLoC.state.currentWeek;
-    final basePeriodStart = _basePeriodStart;
-    if (baseWeek == null || basePeriodStart == null) {
-      return null;
-    }
-    return basePeriodStart.add(Duration(days: (week - baseWeek) * 7));
-  }
-
-  Future<void> _loadRecommendedSchedule({bool refresh = false}) async {
+  Future<void> _loadRecommendedSchedule({
+    bool refresh = false,
+    Schedule? alreadyRefreshing,
+  }) async {
     int recommendedWeek;
     DateTime recommendedPeriodStart;
+    int recommendedAcademicYearStart;
 
     try {
       final context = await scheduleNetworkDataProvider.fetchContext();
       recommendedWeek = context.recommended.week;
       recommendedPeriodStart = context.recommended.periodStart;
+      recommendedAcademicYearStart = context.recommended.academicYearStart;
     } on Object catch (error, stackTrace) {
       // An older backend does not have /schedule/context. Retain the released
       // app's local calculation as a compatibility fallback.
@@ -184,6 +184,10 @@ class _SchedulePageState extends State<SchedulePage>
           error: error, stackTrace: stackTrace);
       recommendedWeek = _getCurrentWeek();
       recommendedPeriodStart = _getCurrentPeriodStart();
+      recommendedAcademicYearStart = getAcademicYearStartForPeriod(
+        recommendedPeriodStart,
+        recommendedPeriodStart.add(const Duration(days: 6)),
+      );
     }
 
     if (!mounted) {
@@ -197,14 +201,14 @@ class _SchedulePageState extends State<SchedulePage>
             recommendedWeek != state.currentWeek);
 
     if (shouldRebase) {
-      _basePeriodStart = recommendedPeriodStart;
+      _academicYearStart = recommendedAcademicYearStart;
       if (controller.hasClients) {
         controller.jumpToPage(initialPageIndex);
       }
       scheduleBLoC.add(
         ScheduleEvent.fetch(
           week: recommendedWeek,
-          periodStart: recommendedPeriodStart,
+          academicYearStart: recommendedAcademicYearStart,
           setAsCurrent: true,
           info: widget.scheduleInfo,
         ),
@@ -212,12 +216,55 @@ class _SchedulePageState extends State<SchedulePage>
       return;
     }
 
+    if (alreadyRefreshing != null &&
+        recommendedWeek == alreadyRefreshing.week &&
+        recommendedAcademicYearStart == alreadyRefreshing.academicYearStart) {
+      return;
+    }
+
+    _academicYearStart ??= recommendedAcademicYearStart;
     final selectedWeek = state.selectedWeek ?? recommendedWeek;
     scheduleBLoC.add(
       ScheduleEvent.fetch(
         week: selectedWeek,
-        periodStart: _periodStartForWeek(selectedWeek),
+        academicYearStart: _academicYearStart,
         info: widget.scheduleInfo,
+      ),
+    );
+  }
+
+  Future<void> _bootstrapSchedule() async {
+    final cached = await scheduleRepository.getClosestLocalSchedule(
+      info: widget.scheduleInfo,
+      date: DateTime.now(),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    Schedule? alreadyRefreshing;
+    if (cached != null && scheduleBLoC.state.currentWeek == null) {
+      final schedule = cached.schedule;
+      alreadyRefreshing = schedule;
+      _academicYearStart = schedule.academicYearStart;
+      scheduleBLoC.add(
+        ScheduleEvent.fetch(
+          week: schedule.week,
+          academicYearStart: schedule.academicYearStart,
+          setAsCurrent: true,
+          info: widget.scheduleInfo,
+        ),
+      );
+    }
+
+    // The server may recommend a newly published academic week that differs
+    // from the nearest local period. Refresh that decision in the background;
+    // cached content remains usable while this request is slow or unavailable.
+    unawaited(
+      _loadRecommendedSchedule(
+        refresh: true,
+        alreadyRefreshing: alreadyRefreshing,
       ),
     );
   }
@@ -256,7 +303,7 @@ class _SchedulePageState extends State<SchedulePage>
       ),
     );
 
-    IScheduleRepository repository = ScheduleRepository(
+    scheduleRepository = ScheduleRepository(
       networkDataProvider: scheduleNetworkDataProvider,
       localDataProvider: localDataProvider,
       calendarDataProvider: calendarDataProvider,
@@ -273,14 +320,12 @@ class _SchedulePageState extends State<SchedulePage>
     );
 
     var bloc = ScheduleBLoC(
-      repository: repository,
+      repository: scheduleRepository,
       groupRepository: groupRepository,
       lessonChoiceRepository: LessonChoiceRepository(
         dependenciesScope.sharedPreferences,
       ),
     );
-
-    unawaited(_loadRecommendedSchedule());
 
     return bloc;
   }
@@ -294,9 +339,7 @@ class _SchedulePageState extends State<SchedulePage>
         ScheduleEvent.changeGroup(
           week: scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
           info: widget.scheduleInfo,
-          periodStart: _periodStartForWeek(
-            scheduleBLoC.state.selectedWeek ?? _getCurrentWeek(),
-          ),
+          academicYearStart: _academicYearStart,
         ),
       );
 
@@ -321,11 +364,19 @@ class _SchedulePageState extends State<SchedulePage>
       return;
     }
 
-    int newWeek = week + newIndex - initialPageIndex;
+    final newWeek = scheduleWeekForPageIndex(
+      pageIndex: newIndex,
+      basePageIndex: initialPageIndex,
+      baseWeek: week,
+    );
 
     if (!isValidScheduleWeek(newWeek)) {
       final selectedWeek = scheduleBLoC.state.selectedWeek ?? week;
-      final selectedIndex = initialPageIndex + selectedWeek - week;
+      final selectedIndex = pageIndexForScheduleWeek(
+        week: selectedWeek,
+        basePageIndex: initialPageIndex,
+        baseWeek: week,
+      );
       if (controller.hasClients) {
         unawaited(
           controller.animateToPage(
@@ -340,13 +391,13 @@ class _SchedulePageState extends State<SchedulePage>
 
     unawaited(_refreshAppConfig());
 
-    context.read<ScheduleBLoC>().add(
-          ScheduleEvent.fetch(
-            info: widget.scheduleInfo,
-            week: newWeek,
-            periodStart: _periodStartForWeek(newWeek),
-          ),
-        );
+    scheduleBLoC.add(
+      ScheduleEvent.fetch(
+        info: widget.scheduleInfo,
+        week: newWeek,
+        academicYearStart: _academicYearStart,
+      ),
+    );
 
     context.octopus.setArguments(
       (args) {
@@ -386,46 +437,52 @@ class _SchedulePageState extends State<SchedulePage>
 
   void onNextWeek(BuildContext context) {
     final currentPage = controller.page;
-    final week = scheduleBLoC.state.currentWeek;
-    final selectedWeek = scheduleBLoC.state.selectedWeek;
+    final baseWeek = scheduleBLoC.state.currentWeek;
 
-    if (currentPage == null ||
-        selectedWeek == null ||
-        selectedWeek >= maxScheduleWeek) {
+    if (currentPage == null || baseWeek == null) {
       return;
     }
 
-    final newPage = currentPage + 1;
+    final newPage = currentPage.round() + 1;
+    final newWeek = scheduleWeekForPageIndex(
+      pageIndex: newPage,
+      basePageIndex: initialPageIndex,
+      baseWeek: baseWeek,
+    );
+    if (!isValidScheduleWeek(newWeek)) {
+      return;
+    }
 
     controller.animateToPage(
-      newPage.round(),
+      newPage,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeIn,
     );
-
-    onPageChanged(context, newPage.round(), week);
   }
 
   void onPreviousWeek(BuildContext context) {
     final currentPage = controller.page;
-    final week = scheduleBLoC.state.currentWeek;
-    final selectedWeek = scheduleBLoC.state.selectedWeek;
+    final baseWeek = scheduleBLoC.state.currentWeek;
 
-    if (currentPage == null ||
-        selectedWeek == null ||
-        selectedWeek <= minScheduleWeek) {
+    if (currentPage == null || baseWeek == null) {
       return;
     }
 
-    final newPage = currentPage - 1;
+    final newPage = currentPage.round() - 1;
+    final newWeek = scheduleWeekForPageIndex(
+      pageIndex: newPage,
+      basePageIndex: initialPageIndex,
+      baseWeek: baseWeek,
+    );
+    if (!isValidScheduleWeek(newWeek)) {
+      return;
+    }
 
     controller.animateToPage(
-      newPage.round(),
+      newPage,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeIn,
     );
-
-    onPageChanged(context, newPage.round(), week);
   }
 
   Future<void> onFavoritePressed(
@@ -555,6 +612,7 @@ class _SchedulePageState extends State<SchedulePage>
     int? selectedWeek = state.selectedWeek;
     Map<int, ScheduleDetails> data = state.data;
     String message = state.message;
+    final selectedDetails = selectedWeek == null ? null : data[selectedWeek];
 
     if (week == 0) {
       return Scaffold(
@@ -677,58 +735,81 @@ class _SchedulePageState extends State<SchedulePage>
             _OfflineBanner(
                 onRetry: () => _loadRecommendedSchedule(refresh: true)),
           Expanded(
-            child: PageView.builder(
-              controller: controller,
-              scrollDirection: Axis.horizontal,
-              physics: _WeekPageScrollPhysics(
-                canGoPrevious:
-                    selectedWeek == null || selectedWeek > minScheduleWeek,
-                canGoNext:
-                    selectedWeek == null || selectedWeek < maxScheduleWeek,
-              ),
-              onPageChanged: (int newIndex) =>
-                  onPageChanged(context, newIndex, week),
-              itemBuilder: (context, index) {
-                int? currentWeek;
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: PageView.builder(
+                    key: const ValueKey('schedule-week-page-view'),
+                    controller: controller,
+                    scrollDirection: Axis.horizontal,
+                    physics: week == null
+                        ? const PageScrollPhysics()
+                        : WeekPageScrollPhysics(
+                            minPageIndex: pageIndexForScheduleWeek(
+                              week: minScheduleWeek,
+                              basePageIndex: initialPageIndex,
+                              baseWeek: week,
+                            ),
+                            maxPageIndex: pageIndexForScheduleWeek(
+                              week: maxScheduleWeek,
+                              basePageIndex: initialPageIndex,
+                              baseWeek: week,
+                            ),
+                          ),
+                    onPageChanged: (int newIndex) =>
+                        onPageChanged(context, newIndex, week),
+                    itemBuilder: (context, index) {
+                      int? currentWeek;
 
-                if (week != null) {
-                  currentWeek = week + index - initialPageIndex;
-                }
+                      if (week != null) {
+                        currentWeek = scheduleWeekForPageIndex(
+                          pageIndex: index,
+                          basePageIndex: initialPageIndex,
+                          baseWeek: week,
+                        );
+                      }
 
-                if (currentWeek == null) {
-                  return ScheduleWidget(
-                    schedule: null,
-                    onNextWeek: () => onNextWeek(context),
-                    onPreviousWeek: () => onPreviousWeek(context),
-                    showCalendarBlock: widget.isHomePage,
-                    onUpdate: () => onUpdate(
-                      context,
-                      state,
-                    ),
-                    appConfig: _appConfig,
-                  );
-                }
+                      if (currentWeek == null) {
+                        return ScheduleWidget(
+                          schedule: null,
+                          onNextWeek: () => onNextWeek(context),
+                          onPreviousWeek: () => onPreviousWeek(context),
+                          showCalendarBlock: widget.isHomePage,
+                          onUpdate: () => onUpdate(
+                            context,
+                            state,
+                          ),
+                          appConfig: _appConfig,
+                        );
+                      }
 
-                if (currentWeek < minScheduleWeek) {
-                  return const SizedBox();
-                }
+                      if (currentWeek < minScheduleWeek) {
+                        return const SizedBox();
+                      }
 
-                if (currentWeek > maxScheduleWeek) {
-                  return const SizedBox();
-                }
+                      if (currentWeek > maxScheduleWeek) {
+                        return const SizedBox();
+                      }
 
-                return ScheduleWidget(
-                  schedule: data[currentWeek]?.schedule,
-                  onNextWeek: () => onNextWeek(context),
-                  onPreviousWeek: () => onPreviousWeek(context),
-                  showCalendarBlock: widget.isHomePage,
-                  onUpdate: () => onUpdate(
-                    context,
-                    state,
+                      return ScheduleWidget(
+                        schedule: data[currentWeek]?.schedule,
+                        onNextWeek: () => onNextWeek(context),
+                        onPreviousWeek: () => onPreviousWeek(context),
+                        showCalendarBlock: widget.isHomePage,
+                        onUpdate: () => onUpdate(
+                          context,
+                          state,
+                        ),
+                        appConfig: _appConfig,
+                      );
+                    },
                   ),
-                  appConfig: _appConfig,
-                );
-              },
+                ),
+                ScheduleRefreshOverlay(
+                  isVisible: state.isProcessing && selectedDetails != null,
+                  details: selectedDetails,
+                ),
+              ],
             ),
           ),
         ],
@@ -857,32 +938,35 @@ class _OfflineBanner extends StatelessWidget {
   }
 }
 
-class _WeekPageScrollPhysics extends PageScrollPhysics {
-  const _WeekPageScrollPhysics({
-    required this.canGoPrevious,
-    required this.canGoNext,
+class WeekPageScrollPhysics extends PageScrollPhysics {
+  const WeekPageScrollPhysics({
+    required this.minPageIndex,
+    required this.maxPageIndex,
     super.parent,
   });
 
-  final bool canGoPrevious;
-  final bool canGoNext;
+  final int minPageIndex;
+  final int maxPageIndex;
 
   @override
   double applyBoundaryConditions(ScrollMetrics position, double value) {
-    if (!canGoPrevious && value < position.pixels) {
-      return value - position.pixels;
+    final minPixels = minPageIndex * position.viewportDimension;
+    final maxPixels = maxPageIndex * position.viewportDimension;
+
+    if (value < minPixels) {
+      return value - minPixels;
     }
-    if (!canGoNext && value > position.pixels) {
-      return value - position.pixels;
+    if (value > maxPixels) {
+      return value - maxPixels;
     }
     return super.applyBoundaryConditions(position, value);
   }
 
   @override
-  _WeekPageScrollPhysics applyTo(ScrollPhysics? ancestor) =>
-      _WeekPageScrollPhysics(
-        canGoPrevious: canGoPrevious,
-        canGoNext: canGoNext,
+  WeekPageScrollPhysics applyTo(ScrollPhysics? ancestor) =>
+      WeekPageScrollPhysics(
+        minPageIndex: minPageIndex,
+        maxPageIndex: maxPageIndex,
         parent: buildParent(ancestor),
       );
 }

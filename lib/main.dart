@@ -95,6 +95,10 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     final dependencies = Dependencies.of(context);
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      dependencies.pushNotificationService.requestPermissionIfNeeded().ignore();
+    });
+
     if (Platform.isAndroid || Platform.isIOS) {
       HomeWidget.setAppGroupId('group.roadmapik.test');
     }

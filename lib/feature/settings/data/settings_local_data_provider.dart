@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:drift/drift.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uneconly/common/database/database.dart';
+import 'package:uneconly/common/database/tables/schedule_periods.dart';
 import 'package:uneconly/feature/select/model/group.dart';
 
 abstract class ISettingsLocalDataProvider {
@@ -160,15 +160,20 @@ class SettingsLocalDataProvider implements ISettingsLocalDataProvider {
 
   @override
   Future<void> clearAppCache() async {
-    await _database.lessons.deleteAll();
+    await _database.transaction(() async {
+      await _database.delete(_database.lessons).go();
+      await _database.delete(_database.schedulePeriods).go();
+    });
   }
 
   @override
   Future<bool> isAppCacheEmpty() async {
-    final lessonsCount = await _database.lessons.count().getSingle();
-    final isLessonsEmpty = lessonsCount == 0;
-
-    return isLessonsEmpty;
+    final currentPeriods = await (_database.select(_database.schedulePeriods)
+          ..where(
+            (period) => period.cacheVersion.equals(currentScheduleCacheVersion),
+          ))
+        .get();
+    return currentPeriods.isEmpty;
   }
 
   @override

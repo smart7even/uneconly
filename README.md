@@ -63,3 +63,7 @@ Open test coverage report
 open coverage/html/index.html
 ```
 
+# Operations
+
+- [TestFlight deployment](ios/fastlane/TESTFLIGHT.md)
+- [Push notification verification](docs/PUSH_NOTIFICATIONS.md)

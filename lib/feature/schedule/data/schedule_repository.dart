@@ -6,14 +6,23 @@ import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
 
 abstract class IScheduleRepository {
+  /// Fetches fresh data and persists it before completing.
+  ///
+  /// Callers may stop waiting when the visible week changes, but an already
+  /// started invocation is deliberately allowed to finish so its response is
+  /// still useful during a later offline/cache-first visit.
   Future<Schedule> fetch({
     required ScheduleInfo info,
     required int week,
   });
-  Future<Schedule?> getLocalSchedule({
+  Future<ScheduleCacheEntry?> getLocalSchedule({
     required ScheduleInfo info,
     required int week,
-    DateTime? periodStart,
+    int? academicYearStart,
+  });
+  Future<ScheduleCacheEntry?> getClosestLocalSchedule({
+    required ScheduleInfo info,
+    required DateTime date,
   });
 }
 
@@ -32,17 +41,43 @@ class ScheduleRepository implements IScheduleRepository {
   final IScheduleLocalDataProvider _localDataProvider;
   final IScheduleCalendarDataProvider _calendarDataProvider;
   final ISettingsLocalDataProvider _settingsLocalDataProvider;
+  final Map<({String scope, int week}), int> _startedFetchRevisions = {};
+  final Map<({String scope, int week}), int> _completedFetchRevisions = {};
+  final Map<({String scope, int week}), Future<void>> _cacheWriteChains = {};
 
   @override
   Future<Schedule> fetch({
     required ScheduleInfo info,
     required int week,
   }) async {
+    final cacheKey = (scope: scheduleCacheScope(info), week: week);
+    final revision = (_startedFetchRevisions[cacheKey] ?? 0) + 1;
+    _startedFetchRevisions[cacheKey] = revision;
+
     Schedule schedule = await _networkDataProvider.fetch(
       info: info,
       week: week,
     );
-    await _localDataProvider.saveSchedule(schedule);
+
+    // A newer request for this exact schedule may already have completed.
+    // Returning this response is harmless because the BLoC also guards UI
+    // publication, but persisting it would roll the cache back. Merely starting
+    // a newer request is not enough to discard this useful response: that
+    // request may hang or fail. Different weeks/scopes have independent keys.
+    if ((_completedFetchRevisions[cacheKey] ?? 0) > revision) {
+      return schedule;
+    }
+    _completedFetchRevisions[cacheKey] = revision;
+
+    await _persistLatestResponse(
+      cacheKey: cacheKey,
+      revision: revision,
+      schedule: schedule,
+    );
+
+    if (_completedFetchRevisions[cacheKey] != revision) {
+      return schedule;
+    }
 
     final isSystemCalendarSyncingEnabled =
         await _settingsLocalDataProvider.isSystemCalendarSyncingEnabled();
@@ -61,16 +96,54 @@ class ScheduleRepository implements IScheduleRepository {
     return schedule;
   }
 
+  Future<void> _persistLatestResponse({
+    required ({String scope, int week}) cacheKey,
+    required int revision,
+    required Schedule schedule,
+  }) {
+    final previousWrite = _cacheWriteChains[cacheKey];
+
+    Future<void> persistIfLatest() async {
+      if (_completedFetchRevisions[cacheKey] != revision) {
+        return;
+      }
+      await _localDataProvider.saveSchedule(schedule);
+    }
+
+    late final Future<void> currentWrite;
+    currentWrite = previousWrite == null
+        ? persistIfLatest()
+        : previousWrite.then(
+            (_) => persistIfLatest(),
+            onError: (_, __) => persistIfLatest(),
+          );
+    _cacheWriteChains[cacheKey] = currentWrite;
+
+    return currentWrite.whenComplete(() {
+      if (identical(_cacheWriteChains[cacheKey], currentWrite)) {
+        _cacheWriteChains.remove(cacheKey);
+      }
+    });
+  }
+
   @override
-  Future<Schedule?> getLocalSchedule({
+  Future<ScheduleCacheEntry?> getLocalSchedule({
     required ScheduleInfo info,
     required int week,
-    DateTime? periodStart,
+    int? academicYearStart,
   }) {
     return _localDataProvider.getSchedule(
       week,
       info,
-      periodStart,
+      academicYearStart,
     );
+  }
+
+  @override
+  Future<ScheduleCacheEntry?> getClosestLocalSchedule({
+    required ScheduleInfo info,
+    required DateTime date,
+  }) {
+    return _localDataProvider.getClosestSchedule(date, info);
   }
 }

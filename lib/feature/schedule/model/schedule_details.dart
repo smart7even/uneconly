@@ -7,5 +7,8 @@ class ScheduleDetails {
   ScheduleDetails({
     required this.schedule,
     required this.isLocal,
+    this.updatedAt,
   });
+
+  final DateTime? updatedAt;
 }

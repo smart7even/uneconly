@@ -7,6 +7,7 @@ import 'package:uneconly/common/analytics/analytics_repository.dart';
 import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/model/dependencies.dart';
+import 'package:uneconly/common/push/push_notification_service.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/initialization/data/platform/platform_initialization.dart';
 import 'package:uneconly/feature/schedule/data/day_schedule_repository.dart';
@@ -68,6 +69,13 @@ Map<String, _InitializationStep> _getInitializationSteps({
         ),
     'Initialize shared preferences': (dependencies) async =>
         dependencies.sharedPreferences = await SharedPreferences.getInstance(),
+    'Initialize push notifications': (dependencies) async {
+      dependencies.pushNotificationService = AppMetricaPushNotificationService(
+        preferences: dependencies.sharedPreferences,
+        loggingRepository: dependencies.loggingRepository,
+      );
+      await dependencies.pushNotificationService.activate();
+    },
     'Initialize database': (dependencies) async =>
         dependencies.database = MyDatabase(),
     'Initialize settings local data provider': (dependencies) async =>

@@ -61,7 +61,7 @@ Future<void> $resetApp(Dependencies dependencies) async {
 /// Disposes the app and releases all resources.
 @visibleForTesting
 Future<void> $disposeApp(Dependencies dependencies) async {
-  return;
+  await dependencies.pushNotificationService.dispose();
 }
 
 Future<void> _catchExceptions(ILoggingRepository loggingRepository) async {

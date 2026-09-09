@@ -14,10 +14,12 @@ class MyDatabase extends _$MyDatabase {
   // we tell the database where to store the data with this constructor
   MyDatabase() : super(_openConnection());
 
+  MyDatabase.forTesting(super.executor);
+
   // you should bump this number whenever you change or add a table definition.
   // Migrations are covered later in the documentation.
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration {
@@ -56,6 +58,14 @@ class MyDatabase extends _$MyDatabase {
 
         if (from < 7) {
           await m.createTable(schedulePeriods);
+        }
+
+        if (from >= 7 && from < 8) {
+          // Existing schedule rows may have been produced by the old
+          // fixed-seven-day replacement logic. Keep them physically for a
+          // safe migration, but mark them as legacy through the column's
+          // default value so they are not trusted by the reader.
+          await m.addColumn(schedulePeriods, schedulePeriods.cacheVersion);
         }
       },
     );

@@ -56,4 +56,8 @@ coverage
 
 env.json
 
+# Provision locally or from CI secrets for Firebase/AppMetrica Push builds.
+# Never commit the real Firebase client configuration.
+/android/app/google-services.json
+
 .cxx

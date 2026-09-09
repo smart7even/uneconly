@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:l/l.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
+import 'package:uneconly/common/utils/schedule_week_utils.dart';
 import 'package:uneconly/feature/schedule/model/day_schedule.dart';
 import 'package:uneconly/feature/schedule/model/app_config.dart';
 import 'package:uneconly/feature/schedule/model/lesson.dart';
@@ -67,12 +68,18 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
       DateTime? responsePeriodEnd;
       final periodStartValue = response.data['period_start'];
       final periodEndValue = response.data['period_end'];
+      if ((periodStartValue is String) != (periodEndValue is String)) {
+        throw const FormatException(
+          'Schedule period metadata must contain both boundaries',
+        );
+      }
       if (periodStartValue is String && periodEndValue is String) {
-        responsePeriodStart = DateTime.parse(periodStartValue);
-        responsePeriodEnd = DateTime.parse(periodEndValue);
+        responsePeriodStart = getDate(DateTime.parse(periodStartValue));
+        responsePeriodEnd = getDate(DateTime.parse(periodEndValue));
       }
 
-      if (week != null && week != responseWeek) {
+      if (!isValidScheduleWeek(responseWeek) ||
+          (week != null && week != responseWeek)) {
         throw Exception('Weeks do not match');
       }
 
@@ -84,6 +91,13 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
         final periodStart = responsePeriodStart ?? fallbackStart;
         final periodEnd =
             responsePeriodEnd ?? periodStart.add(const Duration(days: 6));
+        _validateSchedulePayload(
+          lessons: lessons,
+          week: responseWeek,
+          periodStart: getDate(periodStart),
+          periodEnd: getDate(periodEnd),
+          academicYearStart: response.data['academic_year_start'] as int?,
+        );
         return Schedule(
           daySchedules: [],
           week: responseWeek,
@@ -96,13 +110,21 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
       }
 
       final periodStart =
-          responsePeriodStart ?? getWeekStart(lessons.first.day);
+          responsePeriodStart ?? getDate(getWeekStart(lessons.first.day));
       final periodEnd =
           responsePeriodEnd ?? periodStart.add(const Duration(days: 6));
 
+      _validateSchedulePayload(
+        lessons: lessons,
+        week: responseWeek,
+        periodStart: periodStart,
+        periodEnd: periodEnd,
+        academicYearStart: response.data['academic_year_start'] as int?,
+      );
+
       var lessonsByDay = <DateTime, List<Lesson>>{};
       for (var lesson in lessons) {
-        var day = lesson.day;
+        var day = getDate(lesson.day);
         if (lessonsByDay.containsKey(day)) {
           lessonsByDay[day]!.add(lesson);
         } else {
@@ -133,6 +155,46 @@ class ScheduleNetworkDataProvider implements IScheduleNetworkDataProvider {
     } on Object catch (e, stackTrace) {
       l.e('An error occured in ScheduleNetworkDataProvider', stackTrace);
       rethrow;
+    }
+  }
+
+  void _validateSchedulePayload({
+    required List<Lesson> lessons,
+    required int week,
+    required DateTime periodStart,
+    required DateTime periodEnd,
+    required int? academicYearStart,
+  }) {
+    final dayCount = periodEnd.difference(periodStart).inDays + 1;
+    final expectedPeriodStart = academicYearStart == null
+        ? null
+        : schedulePeriodStartForWeek(
+            week: week,
+            academicYearStart: academicYearStart,
+          );
+    final expectedPeriodEnd = academicYearStart == null
+        ? null
+        : schedulePeriodEndForWeek(
+            week: week,
+            academicYearStart: academicYearStart,
+          );
+    if (dayCount < 1 ||
+        dayCount > 7 ||
+        (expectedPeriodStart != null && periodStart != expectedPeriodStart) ||
+        (expectedPeriodEnd != null && periodEnd != expectedPeriodEnd)) {
+      throw const FormatException('Invalid schedule period metadata');
+    }
+
+    for (final lesson in lessons) {
+      final lessonDay = getDate(lesson.day);
+      if (lessonDay.isBefore(periodStart) ||
+          lessonDay.isAfter(periodEnd) ||
+          getDate(lesson.start) != lessonDay ||
+          getDate(lesson.end) != lessonDay) {
+        throw const FormatException(
+          'A schedule lesson is outside its canonical period or day',
+        );
+      }
     }
   }
 }

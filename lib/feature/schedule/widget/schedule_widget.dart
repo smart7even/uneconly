@@ -15,6 +15,7 @@ import 'package:uneconly/feature/schedule/model/app_config.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 import 'package:uneconly/feature/schedule/widget/lesson_tile.dart';
+import 'package:uneconly/feature/schedule/widget/schedule_refresh_overlay.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget_content.dart';
 
 /// {@template schedule_widget}
@@ -271,7 +272,8 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
     slivers.add(
       SliverToBoxAdapter(
         child: SizedBox(
-          height: MediaQuery.of(context).padding.bottom,
+          height: MediaQuery.of(context).padding.bottom +
+              scheduleRefreshOverlayClearance,
         ),
       ),
     );
@@ -295,7 +297,12 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
       final weekEnd = dateFormat.format(currentSchedule.periodEnd);
 
       return Padding(
-        padding: const EdgeInsets.all(28),
+        padding: const EdgeInsets.fromLTRB(
+          28,
+          28,
+          28,
+          28 + scheduleRefreshOverlayClearance,
+        ),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -414,9 +421,20 @@ class _WeekNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final previous = schedule.periodStart.subtract(const Duration(days: 7));
-    final next = schedule.periodStart.add(const Duration(days: 7));
+    final previous = schedule.week > minScheduleWeek
+        ? schedulePeriodStartForWeek(
+            week: schedule.week - 1,
+            academicYearStart: schedule.academicYearStart,
+          )
+        : schedule.periodStart;
+    final next = schedule.week < maxScheduleWeek
+        ? schedulePeriodStartForWeek(
+            week: schedule.week + 1,
+            academicYearStart: schedule.academicYearStart,
+          )
+        : schedule.periodStart;
     return Row(
+      key: const ValueKey('week-navigation'),
       children: [
         Expanded(
           child: OutlinedButton.icon(

@@ -36,3 +36,9 @@ Runner/GeneratedPluginRegistrant.*
 Runner.ipa
 Runner.app.*.zip
 report.xml
+
+# App Store Connect credentials must never be stored in the repository.
+fastlane/AuthKey_*.p8
+fastlane/*.p8
+fastlane/.env
+fastlane/.env.*

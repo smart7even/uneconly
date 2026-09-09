@@ -1,27 +1,175 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
+require "dotenv"
+require "shellwords"
 
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
+LOCAL_APP_STORE_ENV = File.expand_path("~/.config/uneconly/app-store-connect.env")
+Dotenv.load(LOCAL_APP_STORE_ENV) if File.file?(LOCAL_APP_STORE_ENV)
+ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] ||= "60"
+ENV["FASTLANE_XCODEBUILD_SETTINGS_RETRIES"] ||= "2"
 
 default_platform(:ios)
 
+PROJECT_ROOT = File.expand_path("../..", __dir__)
+DEFAULT_IPA_DIRECTORY = File.join(PROJECT_ROOT, "build/ios/ipa")
+
 platform :ios do
-  desc "Push a new beta build to TestFlight"
-  lane :beta do
-    build_app(
-      skip_build_archive: true,
-      archive_path: "../build/ios/archive/Runner.xcarchive",
+  private_lane :app_store_api_key_options do
+    key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"]
+    key_path = ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+    issuer_id = ENV["APP_STORE_CONNECT_API_ISSUER_ID"]
+
+    missing = []
+    missing << "APP_STORE_CONNECT_API_KEY_ID" if key_id.to_s.empty?
+    missing << "APP_STORE_CONNECT_API_KEY_PATH" if key_path.to_s.empty?
+
+    unless missing.empty?
+      UI.user_error!(
+        "Missing #{missing.join(', ')}. See ios/fastlane/TESTFLIGHT.md for setup instructions."
+      )
+    end
+
+    expanded_key_path = File.expand_path(key_path)
+    UI.user_error!("App Store Connect API key not found: #{expanded_key_path}") unless File.file?(expanded_key_path)
+
+    key_options = {
+      key_id: key_id,
+      key_filepath: expanded_key_path,
+      duration: 1_200,
+      in_house: false,
+    }
+    key_options[:issuer_id] = issuer_id unless issuer_id.to_s.empty?
+
+    key_options
+  end
+
+  private_lane :app_store_api_key do
+    app_store_connect_api_key(**app_store_api_key_options)
+  end
+
+  private_lane :xcode_api_key_arguments do
+    key_options = app_store_api_key_options
+    issuer_id = key_options[:issuer_id]
+
+    if issuer_id.to_s.empty?
+      UI.user_error!("APP_STORE_CONNECT_API_ISSUER_ID is required to automate Xcode signing with a team key")
+    end
+
+    Shellwords.join(
+      [
+        "-allowProvisioningUpdates",
+        "-authenticationKeyPath",
+        key_options[:key_filepath],
+        "-authenticationKeyID",
+        key_options[:key_id],
+        "-authenticationKeyIssuerID",
+        issuer_id,
+      ]
     )
-    upload_to_testflight
+  end
+
+  private_lane :flutter_version_xcode_arguments do
+    generated_config = File.join(PROJECT_ROOT, "ios/Flutter/Generated.xcconfig")
+    UI.user_error!("Flutter build configuration not found: #{generated_config}") unless File.file?(generated_config)
+
+    settings = File.readlines(generated_config, chomp: true).filter_map do |line|
+      key, value = line.split("=", 2)
+      [key, value] if ["FLUTTER_BUILD_NAME", "FLUTTER_BUILD_NUMBER"].include?(key)
+    end.to_h
+
+    build_name = settings["FLUTTER_BUILD_NAME"]
+    build_number = settings["FLUTTER_BUILD_NUMBER"]
+    UI.user_error!("FLUTTER_BUILD_NAME is missing from #{generated_config}") if build_name.to_s.empty?
+    UI.user_error!("FLUTTER_BUILD_NUMBER is missing from #{generated_config}") if build_number.to_s.empty?
+
+    # Apply the Flutter version to every target, including the widget extension.
+    # App Store Connect rejects archives whose extension build number differs
+    # from the containing app's build number.
+    Shellwords.join(
+      [
+        "MARKETING_VERSION=#{build_name}",
+        "CURRENT_PROJECT_VERSION=#{build_number}",
+      ]
+    )
+  end
+
+  private_lane :resolve_ipa do |options|
+    requested_path = options[:ipa] || ENV["IOS_IPA_PATH"]
+
+    unless requested_path.to_s.empty?
+      ipa_path = File.expand_path(requested_path, PROJECT_ROOT)
+      UI.user_error!("IPA not found: #{ipa_path}") unless File.file?(ipa_path)
+      next ipa_path
+    end
+
+    candidates = Dir[File.join(DEFAULT_IPA_DIRECTORY, "*.ipa")]
+    UI.user_error!("No IPA found in #{DEFAULT_IPA_DIRECTORY}. Run the beta lane or pass ipa:/absolute/path.ipa") if candidates.empty?
+    UI.user_error!("Multiple IPAs found in #{DEFAULT_IPA_DIRECTORY}; pass ipa:/absolute/path.ipa") if candidates.length > 1
+
+    candidates.first
+  end
+
+  private_lane :upload_beta_build do |options|
+    api_key = app_store_api_key
+    ipa_path = resolve_ipa(ipa: options[:ipa])
+
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: ipa_path,
+      skip_submission: true,
+      skip_waiting_for_build_processing: true,
+      submit_beta_review: false,
+      notify_external_testers: false,
+    )
+  end
+
+  private_lane :build_beta_ipa do |options|
+    flutter_command = ["flutter", "build", "ios", "--config-only", "--release"]
+    flutter_command += ["--build-name", options[:build_name]] unless options[:build_name].to_s.empty?
+    flutter_command += ["--build-number", options[:build_number]] unless options[:build_number].to_s.empty?
+
+    Dir.chdir(PROJECT_ROOT) do
+      sh(*flutter_command)
+    end
+
+    build_arguments = [xcode_api_key_arguments, flutter_version_xcode_arguments].join(" ")
+
+    build_app(
+      workspace: File.join(PROJECT_ROOT, "ios/Runner.xcworkspace"),
+      scheme: "Runner",
+      configuration: "Release",
+      archive_path: File.join(PROJECT_ROOT, "build/ios/archive/Runner.xcarchive"),
+      output_directory: DEFAULT_IPA_DIRECTORY,
+      output_name: "uneconly.ipa",
+      export_method: "app-store",
+      export_options: {
+        method: "app-store",
+        signingStyle: "automatic",
+        teamID: "XQZ47WXYMB",
+        manageAppVersionAndBuildNumber: false,
+      },
+      skip_package_dependencies_resolution: true,
+      # gym also reuses xcargs during export, so passing the same values via
+      # export_xcargs would duplicate xcodebuild's authentication flags.
+      xcargs: build_arguments,
+    )
+  end
+
+  desc "Build a signed App Store Connect IPA without uploading it"
+  lane :build_beta do |options|
+    build_beta_ipa(options)
+  end
+
+  desc "Build a release IPA and upload it to App Store Connect for TestFlight"
+  lane :beta do |options|
+    upload_beta_build(ipa: build_beta_ipa(options))
+  end
+
+  desc "Upload an existing IPA to App Store Connect for TestFlight"
+  lane :upload_beta do |options|
+    upload_beta_build(ipa: options[:ipa])
+  end
+
+  desc "Verify App Store Connect API access without uploading anything"
+  lane :verify_app_store_connection do
+    latest_testflight_build_number(api_key: app_store_api_key)
   end
 end
