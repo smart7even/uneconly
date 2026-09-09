@@ -47,6 +47,22 @@ Upload an existing IPA to App Store Connect for TestFlight
 
 Verify App Store Connect API access without uploading anything
 
+### ios prepare_app_store_release
+
+```sh
+[bundle exec] fastlane ios prepare_app_store_release
+```
+
+Create or update App Store version 2.0.0, metadata, screenshots, and build selection
+
+### ios submit_app_store_release
+
+```sh
+[bundle exec] fastlane ios submit_app_store_release
+```
+
+Submit the prepared App Store version for review and release automatically after approval
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

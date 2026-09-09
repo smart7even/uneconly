@@ -121,6 +121,77 @@ platform :ios do
     )
   end
 
+  private_lane :copy_live_review_information_to_edit_version do |options|
+    app = Spaceship::ConnectAPI::App.find("com.roadmapik.uneconly")
+    UI.user_error!("App not found in App Store Connect") unless app
+
+    live_version = app
+      .get_app_store_versions(filter: { platform: "IOS" })
+      .select { |version| version.app_store_state == "READY_FOR_SALE" }
+      .max_by { |version| Gem::Version.new(version.version_string) }
+    UI.user_error!("No live iOS version found to copy review contact details from") unless live_version
+
+    edit_version = app.get_edit_app_store_version(platform: "IOS")
+    expected_version = options[:app_version].to_s
+    unless edit_version&.version_string == expected_version
+      UI.user_error!("Editable iOS version #{expected_version} was not found")
+    end
+
+    source = live_version.fetch_app_store_review_detail
+    UI.user_error!("The live version has no App Review contact details") unless source
+
+    attributes = {
+      "contact_first_name" => source.contact_first_name,
+      "contact_last_name" => source.contact_last_name,
+      "contact_phone" => source.contact_phone,
+      "contact_email" => source.contact_email,
+      "demo_account_required" => false,
+      "demo_account_name" => "",
+      "demo_account_password" => "",
+      "notes" => "No account is required. On first launch, select any group (for example, БИ-2604) to view its schedule. The Home Screen widget can be added from the system widget gallery after a group has been selected.",
+    }
+
+    target = begin
+      edit_version.fetch_app_store_review_detail
+    rescue
+      nil
+    end
+
+    if target
+      target.update(attributes: attributes)
+    else
+      edit_version.create_app_store_review_detail(attributes: attributes)
+    end
+
+    UI.success("Copied App Review contact details without storing them in the repository")
+  end
+
+  private_lane :select_processed_app_store_build do |options|
+    app = Spaceship::ConnectAPI::App.find("com.roadmapik.uneconly")
+    UI.user_error!("App not found in App Store Connect") unless app
+
+    edit_version = app.get_edit_app_store_version(platform: "IOS")
+    app_version = options[:app_version].to_s
+    build_number = options[:build_number].to_s
+    unless edit_version&.version_string == app_version
+      UI.user_error!("Editable iOS version #{app_version} was not found")
+    end
+
+    build = Spaceship::ConnectAPI::Build.all(
+      app_id: app.id,
+      version: app_version,
+      build_number: build_number,
+      platform: "IOS",
+    ).first
+    UI.user_error!("Build #{app_version}(#{build_number}) was not found") unless build
+    unless build.processing_state == "VALID"
+      UI.user_error!("Build #{app_version}(#{build_number}) is #{build.processing_state}, not VALID")
+    end
+
+    edit_version.select_build(build_id: build.id)
+    UI.success("Selected processed build #{app_version}(#{build_number})")
+  end
+
   private_lane :build_beta_ipa do |options|
     flutter_command = ["flutter", "build", "ios", "--config-only", "--release"]
     flutter_command += ["--build-name", options[:build_name]] unless options[:build_name].to_s.empty?
@@ -171,5 +242,60 @@ platform :ios do
   desc "Verify App Store Connect API access without uploading anything"
   lane :verify_app_store_connection do
     latest_testflight_build_number(api_key: app_store_api_key)
+  end
+
+  desc "Create or update App Store version 2.0.0, metadata, screenshots, and build selection"
+  lane :prepare_app_store_release do |options|
+    app_version = options[:app_version] || "2.0.0"
+    build_number = options[:build_number] || "59"
+    api_key = app_store_api_key
+
+    upload_to_app_store(
+      api_key: api_key,
+      app_identifier: "com.roadmapik.uneconly",
+      app_version: app_version,
+      build_number: build_number,
+      platform: "ios",
+      metadata_path: File.join(PROJECT_ROOT, "ios/fastlane/metadata"),
+      screenshots_path: File.join(PROJECT_ROOT, "ios/fastlane/screenshots"),
+      skip_binary_upload: true,
+      overwrite_screenshots: true,
+      submit_for_review: false,
+      automatic_release: true,
+      force: true,
+      run_precheck_before_submit: false,
+      precheck_include_in_app_purchases: false,
+    )
+
+    copy_live_review_information_to_edit_version(app_version: app_version)
+    select_processed_app_store_build(app_version: app_version, build_number: build_number)
+  end
+
+  desc "Submit the prepared App Store version for review and release automatically after approval"
+  lane :submit_app_store_release do |options|
+    app_version = options[:app_version] || "2.0.0"
+    build_number = options[:build_number] || "59"
+    api_key = app_store_api_key
+
+    copy_live_review_information_to_edit_version(app_version: app_version)
+
+    upload_to_app_store(
+      api_key: api_key,
+      app_identifier: "com.roadmapik.uneconly",
+      app_version: app_version,
+      build_number: build_number,
+      platform: "ios",
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: true,
+      automatic_release: true,
+      force: true,
+      run_precheck_before_submit: true,
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        export_compliance_uses_encryption: false,
+      },
+    )
   end
 end

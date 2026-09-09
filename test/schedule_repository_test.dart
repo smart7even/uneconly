@@ -19,13 +19,13 @@ void main() {
   );
 
   Schedule schedule(int week, DateTime start) => Schedule(
-        week: week,
-        info: info,
-        daySchedules: const [],
-        academicYearStart: 2026,
-        periodStart: start,
-        periodEnd: start.add(const Duration(days: 6)),
-      );
+    week: week,
+    info: info,
+    daySchedules: const [],
+    academicYearStart: 2026,
+    periodStart: start,
+    periodEnd: start.add(const Duration(days: 6)),
+  );
 
   late _ControllableNetwork network;
   late _RecordingLocal local;
@@ -42,84 +42,119 @@ void main() {
     );
   });
 
-  test('an older same-week response cannot overwrite a newer completed one',
-      () async {
-    final older = repository.fetch(info: info, week: 2);
-    final newer = repository.fetch(info: info, week: 2);
-    await network.waitForRequests(2);
+  test(
+    'an older same-week response cannot overwrite a newer completed one',
+    () async {
+      final older = repository.fetch(info: info, week: 2);
+      final newer = repository.fetch(info: info, week: 2);
+      await network.waitForRequests(2);
 
-    network.complete(1, schedule(2, DateTime(2026, 9, 7)));
-    await newer;
-    network.complete(0, schedule(2, DateTime(2026, 9, 8)));
-    await older;
+      network.complete(1, schedule(2, DateTime(2026, 9, 7)));
+      await newer;
+      network.complete(0, schedule(2, DateTime(2026, 9, 8)));
+      await older;
 
-    expect(local.saved, hasLength(1));
-    expect(local.saved.single.periodStart, DateTime(2026, 9, 7));
-  });
+      expect(local.saved, hasLength(1));
+      expect(local.saved.single.periodStart, DateTime(2026, 9, 7));
+    },
+  );
 
-  test('a hanging or failed newer request does not discard an older success',
-      () async {
-    final older = repository.fetch(info: info, week: 2);
-    final newer = repository.fetch(info: info, week: 2);
-    await network.waitForRequests(2);
+  test(
+    'a hanging or failed newer request does not discard an older success',
+    () async {
+      final older = repository.fetch(info: info, week: 2);
+      final newer = repository.fetch(info: info, week: 2);
+      await network.waitForRequests(2);
 
-    network.fail(1, StateError('offline'));
-    await expectLater(newer, throwsStateError);
-    network.complete(0, schedule(2, DateTime(2026, 9, 7)));
-    await older;
+      network.fail(1, StateError('offline'));
+      await expectLater(newer, throwsStateError);
+      network.complete(0, schedule(2, DateTime(2026, 9, 7)));
+      await older;
 
-    expect(local.saved, hasLength(1));
-    expect(local.saved.single.week, 2);
-  });
+      expect(local.saved, hasLength(1));
+      expect(local.saved.single.week, 2);
+    },
+  );
 
-  test('requests for different weeks keep independent cache revisions',
-      () async {
-    final week1 = repository.fetch(info: info, week: 1);
-    final week2 = repository.fetch(info: info, week: 2);
-    await network.waitForRequests(2);
+  test(
+    'requests for different weeks keep independent cache revisions',
+    () async {
+      final week1 = repository.fetch(info: info, week: 1);
+      final week2 = repository.fetch(info: info, week: 2);
+      await network.waitForRequests(2);
 
-    network.complete(1, schedule(2, DateTime(2026, 9, 7)));
-    network.complete(0, schedule(1, DateTime(2026, 9, 1)));
-    await Future.wait([week1, week2]);
+      network.complete(1, schedule(2, DateTime(2026, 9, 7)));
+      network.complete(0, schedule(1, DateTime(2026, 9, 1)));
+      await Future.wait([week1, week2]);
 
-    expect(local.saved.map((schedule) => schedule.week), containsAll([1, 2]));
-  });
+      expect(local.saved.map((schedule) => schedule.week), containsAll([1, 2]));
+    },
+  );
 
-  test('cache revision key ignores display-name changes for the same group',
-      () async {
-    const incompleteInfo = ScheduleInfo.group(
-      shortGroupInfo: ShortGroupInfo(groupId: 2602, groupName: null),
+  test(
+    'cache revision key ignores display-name changes for the same group',
+    () async {
+      const incompleteInfo = ScheduleInfo.group(
+        shortGroupInfo: ShortGroupInfo(groupId: 2602, groupName: null),
+      );
+      final older = repository.fetch(info: incompleteInfo, week: 2);
+      final newer = repository.fetch(info: info, week: 2);
+      await network.waitForRequests(2);
+
+      network.complete(1, schedule(2, DateTime(2026, 9, 7)));
+      await newer;
+      network.complete(0, schedule(2, DateTime(2026, 9, 8)));
+      await older;
+
+      expect(local.saved, hasLength(1));
+      expect(local.saved.single.periodStart, DateTime(2026, 9, 7));
+    },
+  );
+
+  test(
+    'serialized writes leave the newest same-week response in cache',
+    () async {
+      local.blockFirstSave = true;
+      final older = repository.fetch(info: info, week: 2);
+      await network.waitForRequests(1);
+      network.complete(0, schedule(2, DateTime(2026, 9, 8)));
+      await local.firstSaveStarted.future;
+
+      final newer = repository.fetch(info: info, week: 2);
+      await network.waitForRequests(2);
+      network.complete(1, schedule(2, DateTime(2026, 9, 7)));
+
+      local.releaseFirstSave.complete();
+      await Future.wait([older, newer]);
+
+      expect(local.saved, hasLength(2));
+      expect(local.saved.last.periodStart, DateTime(2026, 9, 7));
+    },
+  );
+
+  test('calendar sync does not delay a successful schedule fetch', () async {
+    final calendar = _BlockingCalendar();
+    final syncingRepository = ScheduleRepository(
+      networkDataProvider: network,
+      localDataProvider: local,
+      calendarDataProvider: calendar,
+      settingsLocalDataProvider: _SettingsWithCalendarSync(),
     );
-    final older = repository.fetch(info: incompleteInfo, week: 2);
-    final newer = repository.fetch(info: info, week: 2);
-    await network.waitForRequests(2);
 
-    network.complete(1, schedule(2, DateTime(2026, 9, 7)));
-    await newer;
-    network.complete(0, schedule(2, DateTime(2026, 9, 8)));
-    await older;
-
-    expect(local.saved, hasLength(1));
-    expect(local.saved.single.periodStart, DateTime(2026, 9, 7));
-  });
-
-  test('serialized writes leave the newest same-week response in cache',
-      () async {
-    local.blockFirstSave = true;
-    final older = repository.fetch(info: info, week: 2);
+    final fetch = syncingRepository.fetch(info: info, week: 2);
     await network.waitForRequests(1);
-    network.complete(0, schedule(2, DateTime(2026, 9, 8)));
-    await local.firstSaveStarted.future;
+    network.complete(0, schedule(2, DateTime(2026, 9, 7)));
 
-    final newer = repository.fetch(info: info, week: 2);
-    await network.waitForRequests(2);
-    network.complete(1, schedule(2, DateTime(2026, 9, 7)));
+    await expectLater(
+      fetch.timeout(const Duration(milliseconds: 500)),
+      completion(isA<Schedule>()),
+    );
+    await calendar.started.future;
+    expect(calendar.completed, isFalse);
 
-    local.releaseFirstSave.complete();
-    await Future.wait([older, newer]);
-
-    expect(local.saved, hasLength(2));
-    expect(local.saved.last.periodStart, DateTime(2026, 9, 7));
+    calendar.release.complete();
+    await calendar.finished.future;
+    expect(calendar.completed, isTrue);
   });
 }
 
@@ -171,21 +206,34 @@ class _RecordingLocal implements IScheduleLocalDataProvider {
   Future<ScheduleCacheEntry?> getClosestSchedule(
     DateTime date,
     ScheduleInfo info,
-  ) async =>
-      null;
+  ) async => null;
 
   @override
   Future<ScheduleCacheEntry?> getSchedule(
     int week,
     ScheduleInfo info,
     int? academicYearStart,
-  ) async =>
-      null;
+  ) async => null;
 }
 
 class _UnusedCalendar implements IScheduleCalendarDataProvider {
   @override
   Future<void> saveSchedule(Schedule schedule) => throw UnimplementedError();
+}
+
+class _BlockingCalendar implements IScheduleCalendarDataProvider {
+  final started = Completer<void>();
+  final release = Completer<void>();
+  final finished = Completer<void>();
+  bool completed = false;
+
+  @override
+  Future<void> saveSchedule(Schedule schedule) async {
+    started.complete();
+    await release.future;
+    completed = true;
+    finished.complete();
+  }
 }
 
 class _SettingsWithoutCalendarSync implements ISettingsLocalDataProvider {
@@ -194,6 +242,18 @@ class _SettingsWithoutCalendarSync implements ISettingsLocalDataProvider {
 
   @override
   Future<bool> isSystemCalendarSyncingEnabled() async => false;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _SettingsWithCalendarSync implements ISettingsLocalDataProvider {
+  @override
+  Future<Group?> getGroup() async =>
+      const Group(facultyId: 1, name: 'БИ-2602', id: 2602, course: 1);
+
+  @override
+  Future<bool> isSystemCalendarSyncingEnabled() async => true;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

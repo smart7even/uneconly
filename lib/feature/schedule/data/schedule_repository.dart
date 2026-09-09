@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:l/l.dart';
 import 'package:uneconly/feature/schedule/data/schedule_calendar_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
@@ -41,6 +44,7 @@ class ScheduleRepository implements IScheduleRepository {
   final Map<({String scope, int week}), int> _startedFetchRevisions = {};
   final Map<({String scope, int week}), int> _completedFetchRevisions = {};
   final Map<({String scope, int week}), Future<void>> _cacheWriteChains = {};
+  Future<void> _calendarSyncQueue = Future<void>.value();
 
   @override
   Future<Schedule> fetch({
@@ -87,10 +91,22 @@ class ScheduleRepository implements IScheduleRepository {
     );
 
     if (isSystemCalendarSyncingEnabled && isUserGroup) {
-      await _calendarDataProvider.saveSchedule(schedule);
+      _enqueueCalendarSync(schedule);
     }
 
     return schedule;
+  }
+
+  void _enqueueCalendarSync(Schedule schedule) {
+    final sync = _calendarSyncQueue.then<void>((_) async {
+      try {
+        await _calendarDataProvider.saveSchedule(schedule);
+      } on Object catch (error, stackTrace) {
+        l.e('Calendar sync failed: $error', stackTrace);
+      }
+    });
+    _calendarSyncQueue = sync;
+    unawaited(sync);
   }
 
   Future<void> _persistLatestResponse({
