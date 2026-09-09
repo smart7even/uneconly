@@ -165,7 +165,13 @@ Future<void> _waitForSchedule(
                 .isNotEmpty),
     timeout: timeout,
   );
-  expect(find.byKey(const ValueKey('schedule-week-page-view')), findsOneWidget);
+  // During an iOS pop transition Flutter can briefly retain both route trees;
+  // returning from settings can also leave the drawer above the schedule.
+  // The schedule must exist, while exact route-tree cardinality is transient.
+  expect(
+    find.byKey(const ValueKey('schedule-week-page-view')),
+    findsAtLeastNWidgets(1),
+  );
 }
 
 String _weekSubtitle(WidgetTester tester, {required String groupName}) {
