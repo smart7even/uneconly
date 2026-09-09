@@ -291,7 +291,11 @@ platform :ios do
       submit_for_review: true,
       automatic_release: true,
       force: true,
-      run_precheck_before_submit: true,
+      # Fastlane 2.239 forwards both the API key object and its key path to
+      # Precheck, which rejects that otherwise valid combination as conflicting.
+      # The lane's release-card verification is performed separately before
+      # submission, so keep Deliver's duplicate Precheck disabled here.
+      run_precheck_before_submit: false,
       precheck_include_in_app_purchases: false,
       submission_information: {
         export_compliance_uses_encryption: false,
