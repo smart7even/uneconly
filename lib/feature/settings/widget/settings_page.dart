@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:l/l.dart';
@@ -66,6 +68,13 @@ class SettingsPage extends StatelessWidget {
                 const _SectionTitle('О приложении'),
                 _SettingsSurface(
                   children: [
+                    _SettingsRow(
+                      icon: Icons.star_outline,
+                      title: 'Оценить и написать отзыв',
+                      subtitle:
+                          'Откроется страница отзыва в магазине приложений',
+                      onTap: () => unawaited(_openStoreReview(context)),
+                    ),
                     _SettingsRow(
                       icon: Icons.info_outline,
                       title: context.string.appVersion,
@@ -217,6 +226,16 @@ class SettingsPage extends StatelessWidget {
         SnackBar(content: Text(context.string.errorWhileCleaningCache)),
       );
     }
+  }
+
+  Future<void> _openStoreReview(BuildContext context) async {
+    final opened = await Dependencies.of(
+      context,
+    ).appReviewService.openStoreReview();
+    if (opened || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Не удалось открыть магазин приложений')),
+    );
   }
 }
 

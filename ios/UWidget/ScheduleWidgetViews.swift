@@ -71,6 +71,12 @@ struct DesignSmallScheduleView: View {
                             .font(designSans(10, "Medium"))
                             .foregroundStyle(designBody)
                             .lineLimit(1)
+                        Spacer(minLength: 3)
+                        Text(designCompactMetadata(following))
+                            .font(designMono(9, "Medium"))
+                            .foregroundStyle(designCompactTypeIsImportant(following) ? designInk : designMuted)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
                     }
                     .padding(.top, 7)
                 }
@@ -246,6 +252,72 @@ struct DesignLargeScheduleView: View {
     }
 }
 
+struct DesignAccessoryCircularView: View {
+    let entry: ScheduleEntry
+
+    var body: some View {
+        if let lesson = designPrimaryLesson(entry) {
+            if designIsCurrent(lesson, at: entry.date) {
+                VStack(spacing: 0) {
+                    Text("ИДЁТ")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text(designTime(lesson.end))
+                        .font(.system(size: 9, weight: .medium).monospacedDigit())
+                }
+            } else {
+                let minutes = max(1, Int(ceil(lesson.start.timeIntervalSince(entry.date) / 60)))
+                Gauge(value: min(Double(minutes), 60), in: 0 ... 60) {
+                    EmptyView()
+                } currentValueLabel: {
+                    VStack(spacing: -2) {
+                        Text("\(minutes)")
+                            .font(.system(size: 17, weight: .semibold).monospacedDigit())
+                        Text("МИН")
+                            .font(.system(size: 8, weight: .medium))
+                    }
+                }
+                .gaugeStyle(.accessoryCircularCapacity)
+            }
+        } else {
+            Image(systemName: "calendar.badge.exclamationmark")
+        }
+    }
+}
+
+struct DesignAccessoryRectangularView: View {
+    let entry: ScheduleEntry
+
+    var body: some View {
+        if let lesson = designPrimaryLesson(entry) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(designTime(lesson.start)) · \(designRoom(lesson.location)) АУД.")
+                    .font(.system(size: 10, weight: .medium).monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                Text(lesson.displayName)
+                    .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(2)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            Text("Ближайших занятий нет")
+                .font(.system(size: 12, weight: .medium))
+        }
+    }
+}
+
+struct DesignAccessoryInlineView: View {
+    let entry: ScheduleEntry
+
+    var body: some View {
+        if let lesson = designPrimaryLesson(entry) {
+            Text("\(designTime(lesson.start)) \(lesson.displayName) · \(designRoom(lesson.location))")
+        } else {
+            Text("Ближайших занятий нет")
+        }
+    }
+}
+
 private struct DesignTodayStatus: View {
     let hadLessons: Bool
     let remainingCount: Int
@@ -338,10 +410,18 @@ private struct DesignCompactLessonRow: View {
                     .foregroundStyle(designInk)
                     .lineLimit(1)
                 Spacer(minLength: 2)
-                Text(designIsCurrent(lesson, at: now) ? "ИДЁТ" : designRoom(lesson.location))
+                Text(
+                    designIsCurrent(lesson, at: now)
+                        ? designCompactCurrentMetadata(lesson)
+                        : designCompactMetadata(lesson)
+                )
                     .font(designMono(designIsCurrent(lesson, at: now) ? 9 : 10, "Medium"))
                     .tracking(designIsCurrent(lesson, at: now) ? 0.7 : 0)
-                    .foregroundStyle(designIsCurrent(lesson, at: now) ? designTeal : designMuted)
+                    .foregroundStyle(
+                        designIsCurrent(lesson, at: now)
+                            ? designTeal
+                            : designCompactTypeIsImportant(lesson) ? designInk : designMuted
+                    )
                     .lineLimit(1)
                     .fixedSize(horizontal: true, vertical: false)
             }
@@ -543,12 +623,53 @@ private func designSmallMetadata(_ lesson: Lesson) -> String {
 }
 
 private func designLessonMetadata(_ lesson: Lesson, includeProfessor: Bool) -> String {
-    var values: [String?] = [lesson.lessonType, designCompactLocation(lesson.location)]
+    var values: [String?] = [lesson.lessonType]
     if includeProfessor { values.append(designProfessor(lesson.professor)) }
+    values.append(designCompactLocation(lesson.location))
     return values.compactMap { value in
         guard let value, !value.isEmpty else { return nil }
         return value
     }.joined(separator: " · ")
+}
+
+private func designPrimaryLesson(_ entry: ScheduleEntry) -> Lesson? {
+    let calendar = Calendar.autoupdatingCurrent
+    let today = entry.lessons.filter { calendar.isDate($0.start, inSameDayAs: entry.date) }
+    return today.first { designIsCurrent($0, at: entry.date) }
+        ?? entry.lessons.first { $0.start > entry.date }
+}
+
+private func designCompactMetadata(_ lesson: Lesson) -> String {
+    let type = designLessonTypeAbbreviation(lesson.lessonType)
+    let room = designRoom(lesson.location)
+    return [type, room].filter { !$0.isEmpty }.joined(separator: " · ")
+}
+
+private func designCompactCurrentMetadata(_ lesson: Lesson) -> String {
+    [designLessonTypeAbbreviation(lesson.lessonType), "ИДЁТ"]
+        .filter { !$0.isEmpty }
+        .joined(separator: " · ")
+}
+
+private func designCompactTypeIsImportant(_ lesson: Lesson) -> Bool {
+    let value = lesson.lessonType?.lowercased() ?? ""
+    return value.contains("экзамен")
+        || value.contains("зачет")
+        || value.contains("зачёт")
+        || value.contains("пересдач")
+}
+
+private func designLessonTypeAbbreviation(_ value: String?) -> String {
+    let normalized = value?.lowercased() ?? ""
+    if normalized.contains("экзамен") { return "ЭКЗ" }
+    if normalized.contains("зачет") || normalized.contains("зачёт") { return "ЗАЧ" }
+    if normalized.contains("пересдач") { return "ПЕР" }
+    if normalized.contains("лекц") { return "лек" }
+    if normalized.contains("практ") { return "пр" }
+    if normalized.contains("лаборатор") { return "лаб" }
+    if normalized.contains("семинар") { return "сем" }
+    if normalized.contains("консультац") { return "конс" }
+    return ""
 }
 
 private func designStatus(for lesson: Lesson, at date: Date) -> String {

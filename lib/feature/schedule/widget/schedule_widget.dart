@@ -96,9 +96,9 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
       slivers.add(
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Container(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(color: context.palette.hairline),
@@ -110,14 +110,16 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
                   Expanded(
                     child: Text(
                       sectionTitle,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14.5,
                         height: 1.2,
                         color: difference == 0
                             ? context.palette.accent
+                            : difference < 0
+                            ? context.palette.muted
                             : context.palette.ink,
                       ),
                     ),
@@ -477,9 +479,7 @@ class _ScheduleSkeleton extends StatelessWidget {
 
 String _daySummary(BuildContext context, List<LessonCluster> clusters) {
   if (clusters.isEmpty) return context.string.lessonsCount(0);
-  final first = clusters.first.lesson;
   final last = clusters.last.lesson;
   return '${context.string.lessonsCount(clusters.length)} · '
-      '${DateFormat('HH:mm').format(first.start)}–'
-      '${DateFormat('HH:mm').format(last.end)}';
+      'до ${DateFormat('HH:mm').format(last.end)}';
 }

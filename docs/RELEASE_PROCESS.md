@@ -14,7 +14,7 @@ Run the two tracks from separate terminals:
 ```sh
 cd ios
 PATH="/opt/homebrew/opt/ruby/bin:$PATH" bundle exec fastlane ios beta \
-  build_name:2.0.0 build_number:60
+  build_name:2.0.1 build_number:60
 ```
 
 ```sh
@@ -35,9 +35,9 @@ After App Store Connect reports the TestFlight build as `VALID`:
 ```sh
 cd ios
 PATH="/opt/homebrew/opt/ruby/bin:$PATH" bundle exec fastlane ios prepare_app_store_release \
-  app_version:2.0.0 build_number:60
+  app_version:2.0.1 build_number:60
 PATH="/opt/homebrew/opt/ruby/bin:$PATH" bundle exec fastlane ios submit_app_store_release \
-  app_version:2.0.0 build_number:60
+  app_version:2.0.1 build_number:60
 ```
 
 ## Core scenarios

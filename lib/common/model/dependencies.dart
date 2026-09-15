@@ -5,6 +5,7 @@ import 'package:uneconly/common/analytics/analytics_repository.dart';
 import 'package:uneconly/common/database/database.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/push/push_notification_service.dart';
+import 'package:uneconly/common/review/app_review_service.dart';
 import 'package:uneconly/feature/initialization/widget/inherited_dependencies.dart';
 import 'package:uneconly/feature/schedule/data/day_schedule_repository.dart';
 import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
@@ -17,6 +18,7 @@ class Dependencies {
 
   late final ILoggingRepository loggingRepository;
   late final IPushNotificationService pushNotificationService;
+  late final AppReviewService appReviewService;
   late final IAnalyticsRepository analyticsRepository;
   late final SharedPreferences sharedPreferences;
   late final ISettingsLocalDataProvider settingsLocalDataProvider;

@@ -236,14 +236,10 @@ class _LessonTileState extends State<LessonTile> {
     final sameDay = DateUtils.isSameDay(widget.currentTime, lesson.day);
     final isCurrent =
         sameDay &&
-        widget.currentTime.isAfter(lesson.start) &&
+        !widget.currentTime.isBefore(lesson.start) &&
         widget.currentTime.isBefore(lesson.end);
-    final isPast = sameDay && widget.currentTime.isAfter(lesson.end);
-    final canOpenDetails =
-        selected != null &&
-        ((isGroupSchedule && lesson.professorId != null) ||
-            (widget.appConfig.roomMapButtonEnabled && lesson.roomUrl != null) ||
-            widget.cluster.hasAlternatives);
+    final isPast = widget.currentTime.isAfter(lesson.end);
+    final canOpenDetails = selected != null;
     final VoidCallback? onTap =
         widget.cluster.hasAlternatives && selected == null
         ? () => _showChoiceSheet(replacement: savedChoiceMissing)
@@ -252,7 +248,11 @@ class _LessonTileState extends State<LessonTile> {
         : null;
     final professor = lesson.professor;
     final group = lesson.group;
+    final lessonType = lesson.lessonType;
+    final isImportantType = _isImportantType(lessonType);
     final metadata = [
+      if (!isImportantType && lessonType != null && lessonType.isNotEmpty)
+        lessonType,
       if (isGroupSchedule && professor != null) compactPersonName(professor),
       if (location.isNotEmpty) location,
       if (!isGroupSchedule && group != null && group.isNotEmpty) group,
@@ -260,6 +260,7 @@ class _LessonTileState extends State<LessonTile> {
     final semanticLabel = [
       '${DateFormat('HH:mm').format(lesson.start)}–${DateFormat('HH:mm').format(lesson.end)}',
       lessonDisplayName(lesson),
+      if (lessonType != null && lessonType.isNotEmpty) lessonType,
       if (widget.cluster.hasAlternatives && selected == null)
         '${widget.cluster.alternatives.length} подгрупп, подгруппа не выбрана, выбрать'
       else ...[
@@ -277,65 +278,83 @@ class _LessonTileState extends State<LessonTile> {
       label: semanticLabel,
       child: ExcludeSemantics(
         child: AnimatedOpacity(
-          opacity: 1,
+          opacity: isPast ? 0.55 : 1,
           duration: const Duration(milliseconds: 180),
           child: Material(
             color: isCurrent ? palette.currentSurface : Colors.transparent,
             child: InkWell(
               onTap: onTap,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 14, 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      width: 54,
+                      width: 56,
                       child: Text(
                         '${DateFormat('HH:mm').format(lesson.start)}\n'
                         '${DateFormat('HH:mm').format(lesson.end)}',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          height: 1.45,
-                          color: isPast
-                              ? palette.muted.withValues(alpha: 0.65)
-                              : palette.muted,
-                          fontWeight: FontWeight.w600,
+                          height: 1.5,
+                          fontSize: 14,
+                          color: isCurrent ? palette.accent : palette.muted,
+                          fontWeight: FontWeight.w500,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: Text(
-                                  lessonDisplayName(lesson),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(text: lessonDisplayName(lesson)),
+                                      if (isImportantType)
+                                        WidgetSpan(
+                                          alignment:
+                                              PlaceholderAlignment.middle,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              left: 7,
+                                            ),
+                                            child: _ImportantTypeLabel(
+                                              label: lesson.lessonType!
+                                                  .toUpperCase(),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                   style: theme.textTheme.titleMedium?.copyWith(
-                                    height: 1.2,
+                                    height: 1.3,
+                                    fontSize: 16.5,
                                     color: palette.ink,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                              if (_isImportantType(lesson.lessonType)) ...[
+                              if (isCurrent) ...[
                                 const SizedBox(width: 7),
-                                _ImportantTypeLabel(
-                                  label: lesson.lessonType!.toUpperCase(),
-                                ),
-                              ] else if (isCurrent) ...[
-                                const SizedBox(width: 7),
-                                Text(
-                                  context.string.currentLesson.toUpperCase(),
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: palette.accent,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.7,
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text(
+                                    context.string.currentLesson.toUpperCase(),
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: palette.accent,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.7,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -361,8 +380,11 @@ class _LessonTileState extends State<LessonTile> {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                height: 1.35,
-                                color: palette.muted,
+                                height: 1.45,
+                                fontSize: 13.5,
+                                color: isCurrent
+                                    ? palette.ink.withValues(alpha: 0.85)
+                                    : palette.muted,
                               ),
                             ),
                           if (selected != null &&
@@ -380,17 +402,6 @@ class _LessonTileState extends State<LessonTile> {
                         ],
                       ),
                     ),
-                    if (onTap != null) ...[
-                      const SizedBox(width: 4),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 18),
-                        child: Icon(
-                          Icons.chevron_right,
-                          size: 20,
-                          color: palette.muted,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -430,8 +441,9 @@ class _ImportantTypeLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: ValueKey('lesson-type-$label'),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      color: context.palette.danger,
+      color: const Color(0xFF2E3132),
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -686,7 +698,8 @@ bool _isImportantType(String? type) {
   final normalized = type?.toLowerCase() ?? '';
   return normalized.contains('экзамен') ||
       normalized.contains('зачет') ||
-      normalized.contains('зачёт');
+      normalized.contains('зачёт') ||
+      normalized.contains('пересдач');
 }
 
 String _lessonTypeSuffix(String? type) {

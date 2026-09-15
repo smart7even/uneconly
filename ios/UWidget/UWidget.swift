@@ -206,8 +206,16 @@ struct UWidgetEntryView: View {
                 switch family {
                 case .systemSmall:
                     DesignSmallScheduleView(entry: entry)
+                case .systemMedium:
+                    DesignMediumScheduleView(entry: entry)
                 case .systemLarge:
                     DesignLargeScheduleView(entry: entry)
+                case .accessoryCircular:
+                    DesignAccessoryCircularView(entry: entry)
+                case .accessoryRectangular:
+                    DesignAccessoryRectangularView(entry: entry)
+                case .accessoryInline:
+                    DesignAccessoryInlineView(entry: entry)
                 default:
                     DesignMediumScheduleView(entry: entry)
                 }
@@ -574,7 +582,14 @@ struct UWidget: Widget {
         }
         .configurationDisplayName("Расписание Uneconly")
         .description("Текущая пара, расписание на сегодня и завтра.")
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .supportedFamilies([
+            .systemSmall,
+            .systemMedium,
+            .systemLarge,
+            .accessoryCircular,
+            .accessoryRectangular,
+            .accessoryInline,
+        ])
         .contentMarginsDisabled()
     }
 }

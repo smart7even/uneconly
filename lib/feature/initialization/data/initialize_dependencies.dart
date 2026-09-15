@@ -8,6 +8,7 @@ import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/network/network_policy.dart';
 import 'package:uneconly/common/push/push_notification_service.dart';
+import 'package:uneconly/common/review/app_review_service.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/initialization/data/platform/platform_initialization.dart';
 import 'package:uneconly/feature/schedule/data/day_schedule_repository.dart';
@@ -68,6 +69,11 @@ Map<String, _InitializationStep> _getInitializationSteps({
         ),
     'Initialize shared preferences': (dependencies) async =>
         dependencies.sharedPreferences = await SharedPreferences.getInstance(),
+    'Initialize app review service': (dependencies) async =>
+        dependencies.appReviewService = AppReviewService(
+          preferences: dependencies.sharedPreferences,
+          loggingRepository: dependencies.loggingRepository,
+        ),
     'Initialize push notifications': (dependencies) async {
       dependencies.pushNotificationService = AppMetricaPushNotificationService(
         preferences: dependencies.sharedPreferences,
