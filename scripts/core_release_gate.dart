@@ -36,6 +36,9 @@ Future<void> main(List<String> arguments) async {
   final commit = (await _capture('git', ['rev-parse', 'HEAD'])).trim();
   final checks = <Map<String, Object?>>[];
 
+  _verifyIosDeploymentTargets();
+  checks.add({'name': 'ios_minimum_version', 'status': 'passed'});
+
   await _check(checks, 'code_generation', 'make', ['generate']);
   await _check(checks, 'localization_generation', 'make', ['intl']);
 
@@ -101,6 +104,36 @@ Future<void> main(List<String> arguments) async {
 
   stdout.writeln('\nCore release gate passed for $version ($buildNumber).');
   stdout.writeln('Evidence: ${evidenceFile.absolute.path}');
+}
+
+void _verifyIosDeploymentTargets() {
+  const minimumMajorVersion = 15;
+  final project = File(
+    'ios/Runner.xcodeproj/project.pbxproj',
+  ).readAsStringSync();
+  final targets =
+      RegExp(
+        r'IPHONEOS_DEPLOYMENT_TARGET\s*=\s*([0-9]+)(?:\.([0-9]+))?;',
+      ).allMatches(project).map((match) {
+        final major = int.parse(match.group(1)!);
+        final minor = int.parse(match.group(2) ?? '0');
+        return (major: major, minor: minor);
+      }).toList();
+
+  if (targets.isEmpty ||
+      targets.any((target) => target.major < minimumMajorVersion)) {
+    throw StateError(
+      'Every iOS deployment target must be iOS $minimumMajorVersion.0 or later.',
+    );
+  }
+
+  final podfile = File('ios/Podfile').readAsStringSync();
+  if (!RegExp(
+    r'''^platform\s+:ios,\s*['"]15(?:\.0)?['"]\s*$''',
+    multiLine: true,
+  ).hasMatch(podfile)) {
+    throw StateError('ios/Podfile must declare platform iOS 15.0.');
+  }
 }
 
 Future<void> _check(

@@ -75,6 +75,7 @@ platform :ios do
     end
 
     required_checks = %w[
+      ios_minimum_version
       code_generation
       localization_generation
       generated_version

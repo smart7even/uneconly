@@ -14,7 +14,7 @@ Run the two tracks from separate terminals:
 ```sh
 cd ios
 PATH="/opt/homebrew/opt/ruby/bin:$PATH" bundle exec fastlane ios beta \
-  build_name:2.0.1 build_number:60
+  build_name:2.0.1 build_number:61
 ```
 
 ```sh
@@ -24,7 +24,8 @@ make core-release-gate \
 ```
 
 The gate regenerates sources and localization, checks the in-app version,
-runs static analysis and every Flutter test, builds the Android release APK,
+enforces iOS 15.0 as the minimum deployment target, runs static analysis and
+every Flutter test, builds the Android release APK,
 and executes the same real-user smoke journey on Android and iOS. Successful
 completion writes ignored, machine-local evidence to
 `.dart_tool/release_gate.json`. The App Store submission lane rejects missing,
@@ -35,9 +36,9 @@ After App Store Connect reports the TestFlight build as `VALID`:
 ```sh
 cd ios
 PATH="/opt/homebrew/opt/ruby/bin:$PATH" bundle exec fastlane ios prepare_app_store_release \
-  app_version:2.0.1 build_number:60
+  app_version:2.0.1 build_number:61
 PATH="/opt/homebrew/opt/ruby/bin:$PATH" bundle exec fastlane ios submit_app_store_release \
-  app_version:2.0.1 build_number:60
+  app_version:2.0.1 build_number:61
 ```
 
 ## Core scenarios
