@@ -1,37 +1,263 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
+require "dotenv"
+require "digest"
+require "json"
+require "rexml/document"
+require "time"
+require "zip"
 
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
+LOCAL_GOOGLE_PLAY_ENV = File.expand_path("~/.config/uneconly/google-play.env")
+Dotenv.load(LOCAL_GOOGLE_PLAY_ENV) if File.file?(LOCAL_GOOGLE_PLAY_ENV)
+
+PROJECT_ROOT = File.expand_path("../..", __dir__)
+PACKAGE_NAME = "com.roadmapik.uneconly"
+DEFAULT_AAB_PATH = File.join(PROJECT_ROOT, "build/app/outputs/bundle/release/app-release.aab")
 
 default_platform(:android)
 
 platform :android do
-  desc "Runs all the tests"
-  lane :test do
-    gradle(task: "test")
+  private_lane :google_play_json_key do
+    key_path = ENV["GOOGLE_PLAY_JSON_KEY"]
+    UI.user_error!(
+      "GOOGLE_PLAY_JSON_KEY is missing. See android/fastlane/README.md for setup instructions."
+    ) if key_path.to_s.empty?
+
+    expanded_path = File.expand_path(key_path)
+    UI.user_error!("Google Play service-account key was not found") unless File.file?(expanded_path)
+
+    expanded_path
   end
 
-  desc "Submit a new Beta Build to Crashlytics Beta"
-  lane :beta do
-    gradle(task: "clean assembleRelease")
-    crashlytics
-  
-    # sh "your_script.sh"
-    # You can also use other beta testing services here
+  private_lane :verify_core_release_gate do |options|
+    evidence_path = File.join(PROJECT_ROOT, ".dart_tool/release_gate.json")
+    UI.user_error!(
+      "Core release gate evidence is missing. Run make core-release-gate first."
+    ) unless File.file?(evidence_path)
+
+    evidence = JSON.parse(File.read(evidence_path))
+    expected_version = options[:app_version].to_s
+    expected_build = options[:build_number].to_s
+    unless evidence["version"].to_s == expected_version &&
+           evidence["buildNumber"].to_s == expected_build
+      UI.user_error!(
+        "Core release gate targets #{evidence['version']} (#{evidence['buildNumber']}), " \
+        "not #{expected_version} (#{expected_build})."
+      )
+    end
+
+    current_commit = sh("git", "-C", PROJECT_ROOT, "rev-parse", "HEAD", log: false).strip
+    UI.user_error!("Core release gate was run for a different Git commit.") unless evidence["gitCommit"] == current_commit
+    tracked_changes = sh(
+      "git",
+      "-C",
+      PROJECT_ROOT,
+      "status",
+      "--porcelain",
+      "--untracked-files=no",
+      log: false,
+    ).strip
+    UI.user_error!("Tracked files changed after the core release gate") unless tracked_changes.empty?
+
+    completed_at = Time.iso8601(evidence.fetch("completedAtUtc"))
+    UI.user_error!("Core release gate evidence is older than 48 hours.") if Time.now.utc - completed_at > 48 * 60 * 60
+
+    required_checks = %w[
+      ios_minimum_version
+      code_generation
+      localization_generation
+      generated_version
+      static_analysis
+      flutter_tests
+      android_release_apk
+      android_core_smoke
+      ios_core_smoke
+    ]
+    passed_checks = evidence.fetch("checks", []).filter_map do |check|
+      check["name"] if check["status"] == "passed"
+    end
+    missing_checks = required_checks - passed_checks
+    UI.user_error!("Core release gate is incomplete: #{missing_checks.join(', ')}") unless missing_checks.empty?
+
+    devices = evidence.fetch("devices", {})
+    if devices["android"].to_s.empty? || devices["ios"].to_s.empty?
+      UI.user_error!("Core release gate must cover both Android and iOS.")
+    end
+
+    UI.success("Verified core release gate for #{expected_version}(#{expected_build})")
+  rescue JSON::ParserError, KeyError, ArgumentError => error
+    UI.user_error!("Core release gate evidence is invalid: #{error.message}")
   end
 
-  desc "Deploy a new version to the Google Play"
-  lane :deploy do
-    upload_to_play_store(aab: "../build/app/outputs/bundle/release/app-release.aab")
+  private_lane :build_release_aab do |options|
+    signing_properties = File.join(PROJECT_ROOT, "android/key.properties")
+    UI.user_error!(
+      "Android release signing is not configured. Provision android/key.properties locally."
+    ) unless File.file?(signing_properties)
+
+    command = [
+      "flutter",
+      "build",
+      "appbundle",
+      "--release",
+      "--build-name",
+      options[:app_version].to_s,
+      "--build-number",
+      options[:build_number].to_s,
+    ]
+    Dir.chdir(PROJECT_ROOT) { sh(*command) }
+
+    UI.user_error!("Release AAB was not created") unless File.file?(DEFAULT_AAB_PATH)
+    DEFAULT_AAB_PATH
+  end
+
+  private_lane :verify_release_aab do |options|
+    aab_path = File.expand_path(options[:aab].to_s)
+    UI.user_error!("AAB was not found: #{aab_path}") unless File.file?(aab_path)
+
+    # Android upload certificates are normally self-signed, so jarsigner's
+    # strict PKIX-chain mode is not applicable. This still verifies every
+    # signed entry and the archive's cryptographic integrity.
+    sh("jarsigner", "-verify", aab_path)
+
+    packaged_manifest_path = File.join(
+      PROJECT_ROOT,
+      "build/app/intermediates/packaged_manifests/release/" \
+      "processReleaseManifestForPackage/AndroidManifest.xml",
+    )
+    proto_resources_path = File.join(
+      PROJECT_ROOT,
+      "build/app/intermediates/linked_resources_proto_format/release/" \
+      "processReleaseResources/linked-resources-proto-format-release.ap_",
+    )
+    UI.user_error!("Packaged release manifest was not found") unless File.file?(packaged_manifest_path)
+    UI.user_error!("Linked release resources were not found") unless File.file?(proto_resources_path)
+
+    aab_manifest = Zip::File.open(aab_path) do |archive|
+      archive.find_entry("base/manifest/AndroidManifest.xml")&.get_input_stream&.read
+    end
+    proto_manifest = Zip::File.open(proto_resources_path) do |archive|
+      archive.find_entry("AndroidManifest.xml")&.get_input_stream&.read
+    end
+    if aab_manifest.to_s.empty? ||
+       Digest::SHA256.digest(aab_manifest) != Digest::SHA256.digest(proto_manifest.to_s)
+      UI.user_error!("The release AAB manifest does not match the packaged build output")
+    end
+
+    manifest = File.read(packaged_manifest_path)
+    manifest_root = REXML::Document.new(manifest).root
+    version_name = manifest_root.attributes["android:versionName"]
+    version_code = manifest_root.attributes["android:versionCode"]
+
+    UI.user_error!("AAB version name is #{version_name}, not #{options[:app_version]}") unless version_name == options[:app_version].to_s
+    UI.user_error!("AAB version code is #{version_code}, not #{options[:build_number]}") unless version_code == options[:build_number].to_s
+    unless manifest.include?("com.roadmapik.uneconly.UWidget") &&
+           manifest.include?("android.appwidget.action.APPWIDGET_UPDATE")
+      UI.user_error!("Android widget receiver is missing from the release AAB")
+    end
+
+    UI.success(
+      "Verified signed AAB #{version_name}(#{version_code}) with the Android widget receiver"
+    )
+  end
+
+  private_lane :upload_release do |options|
+    upload_to_play_store(
+      json_key: google_play_json_key,
+      package_name: PACKAGE_NAME,
+      aab: options[:aab],
+      track: "production",
+      release_status: "completed",
+      metadata_path: File.join(PROJECT_ROOT, "android/fastlane/metadata/android"),
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false,
+      validate_only: options[:validate_only],
+    )
+  end
+
+  desc "Verify Google Play API access without changing store state"
+  lane :verify_google_play_connection do
+    key_path = google_play_json_key
+    validate_play_store_json_key(json_key: key_path)
+    codes = google_play_track_version_codes(
+      json_key: key_path,
+      package_name: PACKAGE_NAME,
+      track: "production",
+    )
+    UI.success("Google Play production version codes: #{codes.join(', ')}")
+  end
+
+  desc "Build, inspect, and validate a production release without publishing it"
+  lane :validate_release do |options|
+    app_version = options[:app_version].to_s
+    build_number = options[:build_number].to_s
+    UI.user_error!("app_version is required") if app_version.empty?
+    UI.user_error!("build_number is required") if build_number.empty?
+
+    verify_core_release_gate(app_version: app_version, build_number: build_number)
+    aab_path = build_release_aab(app_version: app_version, build_number: build_number)
+    verify_release_aab(aab: aab_path, app_version: app_version, build_number: build_number)
+    upload_release(
+      aab: aab_path,
+      app_version: app_version,
+      build_number: build_number,
+      validate_only: true,
+    )
+  end
+
+  desc "Build, validate, and publish a completed production release to Google Play"
+  lane :release do |options|
+    app_version = options[:app_version].to_s
+    build_number = options[:build_number].to_s
+    UI.user_error!("app_version is required") if app_version.empty?
+    UI.user_error!("build_number is required") if build_number.empty?
+
+    verify_core_release_gate(app_version: app_version, build_number: build_number)
+    key_path = google_play_json_key
+    current_codes = google_play_track_version_codes(
+      json_key: key_path,
+      package_name: PACKAGE_NAME,
+      track: "production",
+    ).map(&:to_i)
+    requested_code = Integer(build_number, 10)
+    if current_codes.include?(requested_code)
+      UI.user_error!("Google Play production already contains version code #{requested_code}")
+    end
+    if current_codes.any? && requested_code <= current_codes.max
+      UI.user_error!(
+        "Version code #{requested_code} must be greater than production #{current_codes.max}"
+      )
+    end
+
+    aab_path = build_release_aab(app_version: app_version, build_number: build_number)
+    verify_release_aab(aab: aab_path, app_version: app_version, build_number: build_number)
+    upload_release(
+      aab: aab_path,
+      app_version: app_version,
+      build_number: build_number,
+      validate_only: true,
+    )
+    upload_release(
+      aab: aab_path,
+      app_version: app_version,
+      build_number: build_number,
+      validate_only: false,
+    )
+
+    published_codes = google_play_track_version_codes(
+      json_key: key_path,
+      package_name: PACKAGE_NAME,
+      track: "production",
+    ).map(&:to_i)
+    UI.user_error!("Version code #{requested_code} is missing from production") unless published_codes.include?(requested_code)
+
+    UI.success("Google Play production contains #{app_version}(#{requested_code})")
+  rescue ArgumentError
+    UI.user_error!("build_number must be an integer")
+  end
+
+  desc "Backward-compatible alias for the production release lane"
+  lane :deploy do |options|
+    release(options)
   end
 end

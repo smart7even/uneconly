@@ -15,21 +15,29 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## Android
 
-### android test
+### android verify_google_play_connection
 
 ```sh
-[bundle exec] fastlane android test
+[bundle exec] fastlane android verify_google_play_connection
 ```
 
-Runs all the tests
+Verify Google Play API access without changing store state
 
-### android beta
+### android validate_release
 
 ```sh
-[bundle exec] fastlane android beta
+[bundle exec] fastlane android validate_release
 ```
 
-Submit a new Beta Build to Crashlytics Beta
+Build, inspect, and validate a production release without publishing it
+
+### android release
+
+```sh
+[bundle exec] fastlane android release
+```
+
+Build, validate, and publish a completed production release to Google Play
 
 ### android deploy
 
@@ -37,7 +45,7 @@ Submit a new Beta Build to Crashlytics Beta
 [bundle exec] fastlane android deploy
 ```
 
-Deploy a new version to the Google Play
+Backward-compatible alias for the production release lane
 
 ----
 
