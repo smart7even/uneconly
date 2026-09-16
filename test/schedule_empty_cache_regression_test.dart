@@ -84,7 +84,9 @@ void main() {
     final database = MyDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
     final provider = ScheduleLocalDataProvider(database);
-    final periodStart = DateTime(2026, 9, 14);
+    // Keep the fixture away from the wall clock so an actual date inside the
+    // sample week cannot split the consecutive-free-days presentation.
+    final periodStart = DateTime(2030, 9, 9);
 
     await provider.saveSchedule(
       Schedule(
@@ -94,13 +96,13 @@ void main() {
           7,
           (index) => DaySchedule.empty(periodStart.add(Duration(days: index))),
         ),
-        academicYearStart: 2026,
+        academicYearStart: 2030,
         periodStart: periodStart,
-        periodEnd: DateTime(2026, 9, 20),
+        periodEnd: DateTime(2030, 9, 15),
       ),
     );
 
-    final cached = await provider.getSchedule(3, info, 2026);
+    final cached = await provider.getSchedule(3, info, 2030);
     expect(cached, isNotNull);
     expect(cached!.schedule.daySchedules, hasLength(7));
 
