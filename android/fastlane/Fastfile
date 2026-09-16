@@ -175,6 +175,21 @@ platform :android do
     )
   end
 
+  private_lane :upload_store_listing do |options|
+    upload_to_play_store(
+      json_key: google_play_json_key,
+      package_name: PACKAGE_NAME,
+      metadata_path: File.join(PROJECT_ROOT, "android/fastlane/metadata/android"),
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_changelogs: true,
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
+      validate_only: options[:validate_only],
+    )
+  end
+
   desc "Verify Google Play API access without changing store state"
   lane :verify_google_play_connection do
     key_path = google_play_json_key
@@ -185,6 +200,16 @@ platform :android do
       track: "production",
     )
     UI.success("Google Play production version codes: #{codes.join(', ')}")
+  end
+
+  desc "Validate Google Play metadata and graphics without publishing them"
+  lane :validate_store_listing do
+    upload_store_listing(validate_only: true)
+  end
+
+  desc "Publish Google Play metadata and graphics without uploading an app build"
+  lane :publish_store_listing do
+    upload_store_listing(validate_only: false)
   end
 
   desc "Build, inspect, and validate a production release without publishing it"

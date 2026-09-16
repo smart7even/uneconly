@@ -23,6 +23,22 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Verify Google Play API access without changing store state
 
+### android validate_store_listing
+
+```sh
+[bundle exec] fastlane android validate_store_listing
+```
+
+Validate Google Play metadata and graphics without publishing them
+
+### android publish_store_listing
+
+```sh
+[bundle exec] fastlane android publish_store_listing
+```
+
+Publish Google Play metadata and graphics without uploading an app build
+
 ### android validate_release
 
 ```sh
