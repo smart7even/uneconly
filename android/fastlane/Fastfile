@@ -186,6 +186,7 @@ platform :android do
       skip_upload_metadata: false,
       skip_upload_images: false,
       skip_upload_screenshots: false,
+      sync_image_upload: true,
       validate_only: options[:validate_only],
     )
   end
