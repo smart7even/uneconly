@@ -4,15 +4,23 @@ import com.google.gson.annotations.SerializedName
 import java.util.Date
 
 data class Lesson(
-        @SerializedName("name") val name: String,
-        @SerializedName("start") val start: Date,
-        @SerializedName("end") val end: Date,
-        @SerializedName("professor") val professor: String?,
-        @SerializedName("location") val location: String
-)
-
-// Note: Kotlin's kotlinx.serialization handles the naming convention translation (like day_of_week to dayOfWeek) automatically if you use @SerialName annotation.
-// However, in this case, those fields are commented out in the Swift code, so they're not included here.
-
-// The Date class from java.util is used as an equivalent to Swift's Date.
-// However, for more complex date-time operations, you might want to use java.time classes (e.g., LocalDateTime) which require API level 26 or higher on Android.
+    @SerializedName("name") val name: String,
+    @SerializedName("start") val start: Date,
+    @SerializedName("end") val end: Date,
+    @SerializedName("professor") val professor: String?,
+    @SerializedName("location") val location: String,
+    @SerializedName("lesson_type") val lessonType: String?,
+    @SerializedName("group") val group: String?,
+) {
+    val displayName: String
+        get() {
+            val type = lessonType?.trim().orEmpty()
+            if (type.isEmpty()) return name
+            val suffix = " ($type)"
+            return if (name.endsWith(suffix, ignoreCase = true)) {
+                name.dropLast(suffix.length)
+            } else {
+                name
+            }
+        }
+}

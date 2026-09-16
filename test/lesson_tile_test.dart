@@ -110,14 +110,14 @@ void main() {
     expect(find.textContaining('Экзамен · Левоева'), findsNothing);
   });
 
-  testWidgets('past lessons are muted as one semantic row', (tester) async {
+  testWidgets('past lessons remain fully readable as one semantic row', (
+    tester,
+  ) async {
     final value = lesson(start: DateTime(2026, 9, 14, 10, 45));
     await pumpLesson(tester, value, now: DateTime(2026, 9, 15, 11, 16));
 
-    final opacity = tester.widget<AnimatedOpacity>(
-      find.byType(AnimatedOpacity),
-    );
-    expect(opacity.opacity, 0.55);
+    expect(find.byType(AnimatedOpacity), findsNothing);
+    expect(find.text(lessonDisplayName(value)), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('Лабораторная')), findsOneWidget);
   });
 }

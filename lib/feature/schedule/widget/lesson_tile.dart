@@ -238,7 +238,6 @@ class _LessonTileState extends State<LessonTile> {
         sameDay &&
         !widget.currentTime.isBefore(lesson.start) &&
         widget.currentTime.isBefore(lesson.end);
-    final isPast = widget.currentTime.isAfter(lesson.end);
     final canOpenDetails = selected != null;
     final VoidCallback? onTap =
         widget.cluster.hasAlternatives && selected == null
@@ -277,133 +276,125 @@ class _LessonTileState extends State<LessonTile> {
       button: onTap != null,
       label: semanticLabel,
       child: ExcludeSemantics(
-        child: AnimatedOpacity(
-          opacity: isPast ? 0.55 : 1,
-          duration: const Duration(milliseconds: 180),
-          child: Material(
-            color: isCurrent ? palette.currentSurface : Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 14,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 56,
-                      child: Text(
-                        '${DateFormat('HH:mm').format(lesson.start)}\n'
-                        '${DateFormat('HH:mm').format(lesson.end)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          height: 1.5,
-                          fontSize: 14,
-                          color: isCurrent ? palette.accent : palette.muted,
-                          fontWeight: FontWeight.w500,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
+        child: Material(
+          color: isCurrent ? palette.currentSurface : Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 56,
+                    child: Text(
+                      '${DateFormat('HH:mm').format(lesson.start)}\n'
+                      '${DateFormat('HH:mm').format(lesson.end)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        height: 1.5,
+                        fontSize: 14,
+                        color: isCurrent ? palette.accent : palette.muted,
+                        fontWeight: FontWeight.w500,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(text: lessonDisplayName(lesson)),
-                                      if (isImportantType)
-                                        WidgetSpan(
-                                          alignment:
-                                              PlaceholderAlignment.middle,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                              left: 7,
-                                            ),
-                                            child: _ImportantTypeLabel(
-                                              label: lesson.lessonType!
-                                                  .toUpperCase(),
-                                            ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(text: lessonDisplayName(lesson)),
+                                    if (isImportantType)
+                                      WidgetSpan(
+                                        alignment: PlaceholderAlignment.middle,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 7,
+                                          ),
+                                          child: _ImportantTypeLabel(
+                                            label: lesson.lessonType!
+                                                .toUpperCase(),
                                           ),
                                         ),
-                                    ],
-                                  ),
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    height: 1.3,
-                                    fontSize: 16.5,
-                                    color: palette.ink,
+                                      ),
+                                  ],
+                                ),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  height: 1.3,
+                                  fontSize: 16.5,
+                                  color: palette.ink,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            if (isCurrent) ...[
+                              const SizedBox(width: 7),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  context.string.currentLesson.toUpperCase(),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: palette.accent,
+                                    fontSize: 11.5,
                                     fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.7,
                                   ),
                                 ),
                               ),
-                              if (isCurrent) ...[
-                                const SizedBox(width: 7),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 2),
-                                  child: Text(
-                                    context.string.currentLesson.toUpperCase(),
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: palette.accent,
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.7,
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ],
-                          ),
-                          const SizedBox(height: 4),
-                          if (widget.cluster.hasAlternatives &&
-                              selected == null &&
-                              !savedChoiceMissing)
-                            _InlinePrompt(
-                              text: context.string.subgroupPrompt(
-                                widget.cluster.alternatives.length,
-                              ),
-                            )
-                          else if (savedChoiceMissing)
-                            _InlinePrompt(
-                              text: context.string.professorMissingToday,
-                              warning: true,
-                            )
-                          else if (metadata.isNotEmpty)
-                            Text(
-                              metadata,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                height: 1.45,
-                                fontSize: 13.5,
-                                color: isCurrent
-                                    ? palette.ink.withValues(alpha: 0.85)
-                                    : palette.muted,
-                              ),
-                            ),
-                          if (selected != null &&
-                              widget.cluster.hasAlternatives) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              '● ${context.string.yourSubgroup}',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: palette.muted,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 0,
-                              ),
-                            ),
                           ],
+                        ),
+                        const SizedBox(height: 4),
+                        if (widget.cluster.hasAlternatives &&
+                            selected == null &&
+                            !savedChoiceMissing)
+                          _InlinePrompt(
+                            text: context.string.subgroupPrompt(
+                              widget.cluster.alternatives.length,
+                            ),
+                          )
+                        else if (savedChoiceMissing)
+                          _InlinePrompt(
+                            text: context.string.professorMissingToday,
+                            warning: true,
+                          )
+                        else if (metadata.isNotEmpty)
+                          Text(
+                            metadata,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              height: 1.45,
+                              fontSize: 13.5,
+                              color: isCurrent
+                                  ? palette.ink.withValues(alpha: 0.85)
+                                  : palette.muted,
+                            ),
+                          ),
+                        if (selected != null &&
+                            widget.cluster.hasAlternatives) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            '● ${context.string.yourSubgroup}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: palette.muted,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0,
+                            ),
+                          ),
                         ],
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
