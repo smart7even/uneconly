@@ -813,15 +813,10 @@ class _SchedulePageState extends State<SchedulePage>
         foregroundColor: context.palette.ink,
         centerTitle: false,
         titleSpacing: 4,
-        title: Text(
-          scheduleTitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.3,
-          ),
+        title: ScheduleWeekAppBarTitle(
+          title: scheduleTitle,
+          selectedWeek: selectedWeek,
+          schedule: selectedDetails?.schedule,
         ),
         actions: [
           if (!widget.isViewMode)

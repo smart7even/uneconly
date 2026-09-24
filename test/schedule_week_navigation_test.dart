@@ -29,6 +29,7 @@ void main() {
     required int selectedWeek,
     required int currentWeek,
     required Schedule value,
+    String title = 'БИ-2602',
     VoidCallback? onPrevious,
     VoidCallback? onNext,
     TextScaler? textScaler,
@@ -41,7 +42,15 @@ void main() {
             child: child!,
           ),
     home: Scaffold(
-      appBar: AppBar(title: const Text('БИ-2602')),
+      appBar: AppBar(
+        toolbarHeight: 62,
+        title: ScheduleWeekAppBarTitle(
+          title: title,
+          selectedWeek: selectedWeek,
+          schedule: value,
+        ),
+        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.share))],
+      ),
       body: ListView(
         key: const ValueKey('week-scroll'),
         children: const [SizedBox(height: 1400, child: Text('Расписание'))],
@@ -79,6 +88,7 @@ void main() {
     );
 
     expect(find.text('21–27 сентября'), findsOneWidget);
+    expect(find.text('Неделя 4 · 21–27 сентября'), findsOneWidget);
     expect(find.text('Неделя 4 · чётная · эта неделя'), findsOneWidget);
     expect(find.byTooltip('Предыдущая неделя, 3'), findsOneWidget);
     expect(find.byTooltip('Следующая неделя, 5'), findsOneWidget);
@@ -87,6 +97,38 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('next-week-button')));
     expect(previousTaps, 1);
     expect(nextTaps, 1);
+  });
+
+  testWidgets('app bar follows the selected week without another state', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      host(
+        selectedWeek: 4,
+        currentWeek: 4,
+        value: schedule(
+          week: 4,
+          start: DateTime(2026, 9, 21),
+          end: DateTime(2026, 9, 27),
+        ),
+      ),
+    );
+    expect(find.text('Неделя 4 · 21–27 сентября'), findsOneWidget);
+
+    await tester.pumpWidget(
+      host(
+        selectedWeek: 5,
+        currentWeek: 4,
+        value: schedule(
+          week: 5,
+          start: DateTime(2026, 9, 28),
+          end: DateTime(2026, 10, 4),
+        ),
+      ),
+    );
+    expect(find.text('Неделя 4 · 21–27 сентября'), findsNothing);
+    expect(find.text('Неделя 5 · 28 сент. – 4 окт.'), findsOneWidget);
+    expect(find.text('28 сент. – 4 окт.'), findsOneWidget);
   });
 
   testWidgets('disables only the unavailable semester boundary', (
@@ -138,11 +180,13 @@ void main() {
           start: DateTime(2026, 9, 21),
           end: DateTime(2026, 9, 27),
         ),
+        title: 'Очень длинное название расписания преподавателя',
         textScaler: const TextScaler.linear(2),
       ),
     );
 
     expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('week-appbar-subtitle')), findsOneWidget);
     final previousSize = tester.getSize(
       find.byKey(const ValueKey('previous-week-button')),
     );

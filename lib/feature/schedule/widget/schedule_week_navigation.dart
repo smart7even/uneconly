@@ -4,6 +4,69 @@ import 'package:uneconly/common/theme/app_theme.dart';
 import 'package:uneconly/common/utils/schedule_week_utils.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 
+/// Passive week context in the app bar; the controls remain in the bottom bar.
+class ScheduleWeekAppBarTitle extends StatelessWidget {
+  const ScheduleWeekAppBarTitle({
+    super.key,
+    required this.title,
+    required this.selectedWeek,
+    required this.schedule,
+  });
+
+  final String title;
+  final int? selectedWeek;
+  final Schedule? schedule;
+
+  @override
+  Widget build(BuildContext context) {
+    final week = selectedWeek;
+    final period = schedule == null
+        ? null
+        : formatSchedulePeriod(schedule!.periodStart, schedule!.periodEnd);
+    final subtitle = week == null
+        ? null
+        : period == null
+        ? 'Неделя $week'
+        : 'Неделя $week · $period';
+
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.4,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            key: const ValueKey('schedule-appbar-title'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+            ),
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              key: const ValueKey('week-appbar-subtitle'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.1,
+                fontWeight: FontWeight.w500,
+                color: context.palette.muted,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class ScheduleWeekNavigation extends StatelessWidget {
   const ScheduleWeekNavigation({
     super.key,

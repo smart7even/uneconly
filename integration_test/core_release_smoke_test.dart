@@ -44,6 +44,7 @@ void main() {
     );
 
     final initialWeek = _weekSubtitle(tester, groupName: 'БИ-2604');
+    _expectWeekTitleMatchesNavigation(tester);
     await tester.drag(
       find.byKey(const ValueKey('schedule-week-page-view')),
       const Offset(-800, 0),
@@ -52,6 +53,7 @@ void main() {
       tester,
       () => _weekSubtitle(tester, groupName: 'БИ-2604') != initialWeek,
     );
+    _expectWeekTitleMatchesNavigation(tester);
     await tester.drag(
       find.byKey(const ValueKey('schedule-week-page-view')),
       const Offset(800, 0),
@@ -60,6 +62,7 @@ void main() {
       tester,
       () => _weekSubtitle(tester, groupName: 'БИ-2604') == initialWeek,
     );
+    _expectWeekTitleMatchesNavigation(tester);
     expect(tester.getTopLeft(weekNavigation).dy, fixedNavigationTop);
 
     await _tapVisible(tester, find.byKey(const ValueKey('next-week-button')));
@@ -67,6 +70,7 @@ void main() {
       tester,
       () => _weekSubtitle(tester, groupName: 'БИ-2604') != initialWeek,
     );
+    _expectWeekTitleMatchesNavigation(tester);
     await _tapVisible(
       tester,
       find.byKey(const ValueKey('previous-week-button')),
@@ -75,6 +79,7 @@ void main() {
       tester,
       () => _weekSubtitle(tester, groupName: 'БИ-2604') == initialWeek,
     );
+    _expectWeekTitleMatchesNavigation(tester);
 
     await _tapVisible(tester, find.byTooltip('Поделиться'));
     await _pumpUntil(
@@ -226,6 +231,24 @@ String _weekSubtitle(WidgetTester tester, {required String groupName}) {
   return tester
       .widget<Text>(find.byKey(const ValueKey('week-period-label')))
       .data!;
+}
+
+void _expectWeekTitleMatchesNavigation(WidgetTester tester) {
+  final weekContext = tester
+      .widget<Text>(find.byKey(const ValueKey('week-context-label')))
+      .data!;
+  final week = RegExp(r'^Неделя (\d+)').firstMatch(weekContext)?.group(1);
+  expect(week, isNotNull);
+  final header = tester
+      .widget<Text>(find.byKey(const ValueKey('week-appbar-subtitle')))
+      .data;
+  final period = tester
+      .widget<Text>(find.byKey(const ValueKey('week-period-label')))
+      .data!;
+  expect(
+    header,
+    period.startsWith('Неделя ') ? 'Неделя $week' : 'Неделя $week · $period',
+  );
 }
 
 Future<void> _selectAccent(WidgetTester tester, String accent) async {
