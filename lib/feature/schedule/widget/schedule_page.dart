@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:octopus/octopus.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:uneconly/common/analytics/analytics_repository.dart';
 import 'package:uneconly/common/localization/localization.dart';
 import 'package:uneconly/common/model/dependencies.dart';
 import 'package:uneconly/common/routing/routes.dart';
@@ -20,6 +22,8 @@ import 'package:uneconly/feature/schedule/data/lesson_choice_repository.dart';
 import 'package:uneconly/feature/schedule/data/schedule_local_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_network_data_provider.dart';
 import 'package:uneconly/feature/schedule/data/schedule_repository.dart';
+import 'package:uneconly/feature/schedule/domain/schedule_share_document.dart';
+import 'package:uneconly/feature/schedule/domain/schedule_share_image_renderer.dart';
 import 'package:uneconly/feature/schedule/model/app_config.dart';
 import 'package:uneconly/feature/schedule/model/schedule.dart';
 import 'package:uneconly/feature/schedule/model/schedule_details.dart';
@@ -73,6 +77,7 @@ class _SchedulePageState extends State<SchedulePage>
 
   Timer? _rebuildTimer;
   bool _reviewQualificationScheduled = false;
+  bool _sharing = false;
 
   /* #region Lifecycle */
   @override
@@ -533,57 +538,211 @@ class _SchedulePageState extends State<SchedulePage>
     );
   }
 
-  void onSharePressed(BuildContext context, ScheduleState state) {
-    final bloc = context.read<ScheduleBLoC>();
+  Future<void> onSharePressed(BuildContext context, ScheduleState state) async {
+    if (_sharing) return;
+    final details = state.getSelectedScheduleDetails();
+    if (details == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.string.shareNoSchedule)));
+      return;
+    }
 
-    bloc.add(
-      ScheduleEvent.share((content) async {
-        await SharePlus.instance.share(ShareParams(text: content));
-
-        // final groupInfo = state.shortGroupInfo;
-
-        // if (groupInfo == null) {
-        //   return;
-        // }
-
-        // final groupName = groupInfo.groupName;
-
-        // if (groupName == null) {
-        //   return;
-        // }
-
-        // final navigationState = OctopusState.fromNodes([
-        //   Routes.home.node(),
-        //   Routes.schedule.node(
-        //     arguments: <String, String>{
-        //       'groupId': groupInfo.groupId.toString(),
-        //       'groupName': groupName,
-        //     },
-        //   ),
-        // ]);
-
-        // print(navigationState.location);
-
-        // await Share.shareUri(Uri.parse(
-        //   'https://roadmapik.com${navigationState.location}',
-        // ));
-
-        // await showDialog(
-        //   context: context,
-        //   builder: (context) {
-        //     return Material(
-        //       child: GestureDetector(
-        //         onTap: () {
-        //           Navigator.of(context).pop();
-        //         },
-        //         child: SingleChildScrollView(child: Text(content)),
-        //       ),
-        //     );
-        //   },
-        // );
-      }),
+    final document = ScheduleShareDocument.fromSchedule(
+      details.schedule,
+      title: state.scheduleInfo?.title ?? '',
+      choiceRepository: LessonChoiceRepository(
+        Dependencies.of(context).sharedPreferences,
+      ),
+      updatedAt: details.updatedAt,
     );
+    final analytics = Dependencies.of(context).analyticsRepository;
+    final surface = widget.isHomePage
+        ? ScheduleShareSurface.home
+        : ScheduleShareSurface.viewed;
+    final group = details.schedule.info.map(
+      group: (value) => value.shortGroupInfo,
+      professor: (_) => null,
+    );
+    final scope = group == null
+        ? ScheduleShareScope.professor
+        : ScheduleShareScope.group;
+    void track(
+      ScheduleShareStage stage, {
+      ScheduleShareFormat? format,
+      ScheduleShareResult? result,
+    }) => unawaited(
+      analytics.logScheduleShare(
+        stage: stage,
+        surface: surface,
+        scope: scope,
+        groupId: group?.groupId,
+        groupName: group?.groupName,
+        format: format,
+        result: result,
+      ),
+    );
+
+    track(ScheduleShareStage.chooserOpened);
+    final format = await showModalBottomSheet<ScheduleShareFormat>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(
+                context.string.shareSchedule,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            ListTile(
+              key: const ValueKey('share-as-text'),
+              leading: const Icon(Icons.text_snippet_outlined),
+              title: Text(context.string.shareAsText),
+              subtitle: Text(context.string.shareAsTextDescription),
+              onTap: () =>
+                  Navigator.of(sheetContext).pop(ScheduleShareFormat.text),
+            ),
+            ListTile(
+              key: const ValueKey('share-as-image'),
+              leading: const Icon(Icons.image_outlined),
+              title: Text(context.string.shareAsImage),
+              subtitle: Text(context.string.shareAsImageDescription),
+              onTap: () =>
+                  Navigator.of(sheetContext).pop(ScheduleShareFormat.image),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+    if (!mounted) return;
+    if (format == null) {
+      track(ScheduleShareStage.chooserDismissed);
+      return;
+    }
+    track(ScheduleShareStage.formatSelected, format: format);
+
+    setState(() => _sharing = true);
+    try {
+      if (format == ScheduleShareFormat.text) {
+        track(ScheduleShareStage.sheetOpened, format: format);
+        final result = await SharePlus.instance.share(
+          ShareParams(
+            text: document.toPlainText(),
+            subject: '${document.title} · ${document.periodLabel}',
+            sharePositionOrigin: _shareOrigin(this.context),
+          ),
+        );
+        track(
+          ScheduleShareStage.completed,
+          format: format,
+          result: _shareResult(result.status),
+        );
+      } else {
+        final image = await ScheduleShareImageRenderer().render(document);
+        if (!mounted) return;
+        final confirmed = await _previewShareImage(this.context, image);
+        if (!mounted) return;
+        if (!confirmed) {
+          track(ScheduleShareStage.previewDismissed, format: format);
+          return;
+        }
+        track(ScheduleShareStage.sheetOpened, format: format);
+        final result = await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile.fromData(image, mimeType: 'image/png')],
+            fileNameOverrides: [
+              'uneconly_week_${document.week}_'
+                  '${document.periodStart.year}_'
+                  '${document.periodStart.month}_'
+                  '${document.periodStart.day}.png',
+            ],
+            subject: '${document.title} · ${document.periodLabel}',
+            sharePositionOrigin: _shareOrigin(this.context),
+          ),
+        );
+        track(
+          ScheduleShareStage.completed,
+          format: format,
+          result: _shareResult(result.status),
+        );
+      }
+    } on Object catch (error, stackTrace) {
+      log('Schedule sharing failed', error: error, stackTrace: stackTrace);
+      if (mounted) {
+        track(ScheduleShareStage.failed, format: format);
+        ScaffoldMessenger.of(this.context).showSnackBar(
+          SnackBar(content: Text(this.context.string.shareFailed)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _sharing = false);
+    }
   }
+
+  ScheduleShareResult _shareResult(ShareResultStatus status) =>
+      switch (status) {
+        ShareResultStatus.success => ScheduleShareResult.success,
+        ShareResultStatus.dismissed => ScheduleShareResult.dismissed,
+        ShareResultStatus.unavailable => ScheduleShareResult.unavailable,
+      };
+
+  Rect _shareOrigin(BuildContext context) {
+    final box = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final center = box.localToGlobal(box.size.center(Offset.zero));
+    return Rect.fromCenter(center: center, width: 1, height: 1);
+  }
+
+  Future<bool> _previewShareImage(
+    BuildContext context,
+    Uint8List image,
+  ) async =>
+      await showModalBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (sheetContext) => SafeArea(
+          child: SizedBox(
+            height: MediaQuery.sizeOf(sheetContext).height * 0.85,
+            child: Column(
+              children: [
+                Text(
+                  context.string.shareImagePreview,
+                  style: Theme.of(sheetContext).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Image.memory(
+                      image,
+                      key: const ValueKey('share-image-preview'),
+                      width: MediaQuery.sizeOf(sheetContext).width - 32,
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      key: const ValueKey('confirm-share-image'),
+                      onPressed: () => Navigator.of(sheetContext).pop(true),
+                      icon: const Icon(Icons.ios_share_outlined),
+                      label: Text(context.string.shareImageNow),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ) ??
+      false;
 
   Widget _buildPageView(
     BuildContext context,
@@ -659,7 +818,7 @@ class _SchedulePageState extends State<SchedulePage>
         actions: [
           if (!widget.isViewMode)
             IconButton(
-              onPressed: () => onSharePressed(context, state),
+              onPressed: _sharing ? null : () => onSharePressed(context, state),
               tooltip: context.string.share,
               icon: const Icon(Icons.ios_share_outlined),
             )

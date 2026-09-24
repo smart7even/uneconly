@@ -152,6 +152,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get share => 'Share';
 
   @override
+  String get shareSchedule => 'Share schedule';
+
+  @override
+  String get shareAsText => 'As text';
+
+  @override
+  String get shareAsTextDescription => 'Easy to send in a chat or copy';
+
+  @override
+  String get shareAsImage => 'As an image';
+
+  @override
+  String get shareAsImageDescription => 'The whole selected week in one image';
+
+  @override
+  String get shareImagePreview => 'Preview the image before sharing';
+
+  @override
+  String get shareImageNow => 'Share image';
+
+  @override
+  String get shareNoSchedule => 'Load the schedule first';
+
+  @override
+  String get shareFailed => 'Could not share the schedule. Please try again';
+
+  @override
   String get lastWeekOfCurrentStudyYear =>
       'This is the last week of current study year. Next study year schedule should be available soon';
 

@@ -2,6 +2,24 @@ import 'dart:developer';
 
 import 'package:uneconly/common/logging/logging_repository.dart';
 
+enum ScheduleShareStage {
+  chooserOpened,
+  chooserDismissed,
+  formatSelected,
+  previewDismissed,
+  sheetOpened,
+  completed,
+  failed,
+}
+
+enum ScheduleShareFormat { text, image }
+
+enum ScheduleShareResult { success, dismissed, unavailable }
+
+enum ScheduleShareSurface { home, viewed }
+
+enum ScheduleShareScope { group, professor }
+
 abstract class IAnalyticsRepository {
   Future<void> logPageOpen(String pageName, Map<String, dynamic> parameters);
   Future<void> logPageClose(String pageName, Map<String, dynamic> parameters);
@@ -10,6 +28,15 @@ abstract class IAnalyticsRepository {
     required String groupName,
     required int course,
     required int facultyId,
+  });
+  Future<void> logScheduleShare({
+    required ScheduleShareStage stage,
+    required ScheduleShareSurface surface,
+    required ScheduleShareScope scope,
+    int? groupId,
+    String? groupName,
+    ScheduleShareFormat? format,
+    ScheduleShareResult? result,
   });
 }
 
@@ -62,6 +89,46 @@ class AnalyticsRepository implements IAnalyticsRepository {
       // product flow or recursively reporting it through the same logger.
       log(
         'Failed to report schedule/home_open',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> logScheduleShare({
+    required ScheduleShareStage stage,
+    required ScheduleShareSurface surface,
+    required ScheduleShareScope scope,
+    int? groupId,
+    String? groupName,
+    ScheduleShareFormat? format,
+    ScheduleShareResult? result,
+  }) async {
+    try {
+      await _loggingRepository.logEvent('schedule/share', {
+        'schema_version': 1,
+        'stage': switch (stage) {
+          ScheduleShareStage.chooserOpened => 'chooser_opened',
+          ScheduleShareStage.chooserDismissed => 'chooser_dismissed',
+          ScheduleShareStage.formatSelected => 'format_selected',
+          ScheduleShareStage.previewDismissed => 'preview_dismissed',
+          ScheduleShareStage.sheetOpened => 'sheet_opened',
+          ScheduleShareStage.completed => 'completed',
+          ScheduleShareStage.failed => 'failed',
+        },
+        'surface': surface.name,
+        'schedule_scope': scope.name,
+        if (scope == ScheduleShareScope.group && groupId != null)
+          'group_id': groupId.toString(),
+        if (scope == ScheduleShareScope.group)
+          'group_name': _normalizeGroupName(groupName ?? ''),
+        if (format != null) 'format': format.name,
+        if (result != null) 'result': result.name,
+      });
+    } on Object catch (error, stackTrace) {
+      log(
+        'Failed to report schedule/share',
         error: error,
         stackTrace: stackTrace,
       );

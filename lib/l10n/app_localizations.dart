@@ -374,6 +374,60 @@ abstract class AppLocalizations {
   /// **'Share'**
   String get share;
 
+  /// No description provided for @shareSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Share schedule'**
+  String get shareSchedule;
+
+  /// No description provided for @shareAsText.
+  ///
+  /// In en, this message translates to:
+  /// **'As text'**
+  String get shareAsText;
+
+  /// No description provided for @shareAsTextDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy to send in a chat or copy'**
+  String get shareAsTextDescription;
+
+  /// No description provided for @shareAsImage.
+  ///
+  /// In en, this message translates to:
+  /// **'As an image'**
+  String get shareAsImage;
+
+  /// No description provided for @shareAsImageDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The whole selected week in one image'**
+  String get shareAsImageDescription;
+
+  /// No description provided for @shareImagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview the image before sharing'**
+  String get shareImagePreview;
+
+  /// No description provided for @shareImageNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Share image'**
+  String get shareImageNow;
+
+  /// No description provided for @shareNoSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Load the schedule first'**
+  String get shareNoSchedule;
+
+  /// No description provided for @shareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share the schedule. Please try again'**
+  String get shareFailed;
+
   /// No description provided for @lastWeekOfCurrentStudyYear.
   ///
   /// In en, this message translates to:

@@ -59,6 +59,67 @@ void main() {
       completes,
     );
   });
+
+  test('share reports a bounded group and format contract', () async {
+    final logger = _FakeLoggingRepository();
+    final analytics = AnalyticsRepository(loggingRepository: logger);
+
+    await analytics.logScheduleShare(
+      stage: ScheduleShareStage.completed,
+      surface: ScheduleShareSurface.home,
+      scope: ScheduleShareScope.group,
+      groupId: 2604,
+      groupName: '  БИ-2604 ',
+      format: ScheduleShareFormat.image,
+      result: ScheduleShareResult.success,
+    );
+
+    expect(logger.events.single.$1, 'schedule/share');
+    expect(logger.events.single.$2, {
+      'schema_version': 1,
+      'stage': 'completed',
+      'surface': 'home',
+      'schedule_scope': 'group',
+      'group_id': '2604',
+      'group_name': 'БИ-2604',
+      'format': 'image',
+      'result': 'success',
+    });
+  });
+
+  test('professor share has no group attribution', () async {
+    final logger = _FakeLoggingRepository();
+    final analytics = AnalyticsRepository(loggingRepository: logger);
+
+    await analytics.logScheduleShare(
+      stage: ScheduleShareStage.chooserOpened,
+      surface: ScheduleShareSurface.viewed,
+      scope: ScheduleShareScope.professor,
+    );
+
+    expect(logger.events.single.$2, {
+      'schema_version': 1,
+      'stage': 'chooser_opened',
+      'surface': 'viewed',
+      'schedule_scope': 'professor',
+    });
+  });
+
+  test('analytics failure does not escape into sharing', () async {
+    final analytics = AnalyticsRepository(
+      loggingRepository: _ThrowingLoggingRepository(),
+    );
+
+    await expectLater(
+      analytics.logScheduleShare(
+        stage: ScheduleShareStage.formatSelected,
+        surface: ScheduleShareSurface.home,
+        scope: ScheduleShareScope.group,
+        format: ScheduleShareFormat.text,
+      ),
+      completes,
+    );
+  });
 }
 
 class _FakeLoggingRepository implements ILoggingRepository {

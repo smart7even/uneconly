@@ -153,6 +153,35 @@ class AppLocalizationsRu extends AppLocalizations {
   String get share => 'Поделиться';
 
   @override
+  String get shareSchedule => 'Поделиться расписанием';
+
+  @override
+  String get shareAsText => 'Текстом';
+
+  @override
+  String get shareAsTextDescription => 'Удобно отправить в чат или скопировать';
+
+  @override
+  String get shareAsImage => 'Картинкой';
+
+  @override
+  String get shareAsImageDescription =>
+      'Вся выбранная неделя на одной картинке';
+
+  @override
+  String get shareImagePreview => 'Посмотрите картинку перед отправкой';
+
+  @override
+  String get shareImageNow => 'Поделиться картинкой';
+
+  @override
+  String get shareNoSchedule => 'Сначала загрузите расписание';
+
+  @override
+  String get shareFailed =>
+      'Не удалось поделиться расписанием. Попробуйте ещё раз';
+
+  @override
   String get lastWeekOfCurrentStudyYear =>
       'Это последняя неделя текущего учебного года. Скоро должно появиться расписание для следующего учебного года';
 

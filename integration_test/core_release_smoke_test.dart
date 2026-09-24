@@ -67,6 +67,27 @@ void main() {
       () => _weekSubtitle(tester, groupName: 'БИ-2604') == initialWeek,
     );
 
+    await _tapVisible(tester, find.byTooltip('Поделиться'));
+    await _pumpUntil(
+      tester,
+      () => find.byKey(const ValueKey('share-as-image')).evaluate().isNotEmpty,
+    );
+    expect(find.byKey(const ValueKey('share-as-text')), findsOneWidget);
+    await _tapVisible(tester, find.byKey(const ValueKey('share-as-image')));
+    await _pumpUntil(
+      tester,
+      () => find
+          .byKey(const ValueKey('share-image-preview'))
+          .evaluate()
+          .isNotEmpty,
+    );
+    await tester.tapAt(const Offset(8, 8));
+    await _pumpUntil(
+      tester,
+      () =>
+          find.byKey(const ValueKey('share-image-preview')).evaluate().isEmpty,
+    );
+
     // Exercise the real drawer/settings route, the university default, and
     // persistence through the settings repository before restoring the
     // release default for the remainder of the smoke test.

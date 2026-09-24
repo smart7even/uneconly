@@ -38,3 +38,33 @@ a multi-day unique-user total.
 Never add lesson contents, notes, professor names, notification payloads,
 credentials, tokens, full URLs, or other user-authored/free-form values to this
 event.
+
+## `schedule/share` (schema version 1)
+
+Product question: how many distinct people start sharing a schedule, which
+format do they choose, and where do they leave the flow? The app records a
+bounded `stage` on each meaningful transition:
+
+- `chooser_opened` and `chooser_dismissed`;
+- `format_selected` with `format=text|image`;
+- `preview_dismissed` for an image not sent from its preview;
+- `sheet_opened` immediately before the native share sheet;
+- `completed` with `result=success|dismissed|unavailable` from the share plugin;
+- `failed` if image generation or native sharing throws.
+
+Every event includes `schema_version=1`, `surface=home|viewed`, and
+`schedule_scope=group|professor`. Group schedules also include the public
+`group_id` and normalized `group_name` from the selected schedule, including
+when it is a temporarily viewed group. Professor schedules have no group
+attribution. `format` appears once chosen. The result refers to the native
+share sheet: `success` means an action was selected, not that a recipient
+received the content; `unavailable` means the platform could not report the
+user action. There is no destination-app or recipient tracking.
+
+For reporting, use AppMetrica's deduplicated users on `chooser_opened` and
+`format_selected` for adoption, split by format, group, surface, app version,
+and complete days in the same timezone. Event totals count repeated attempts;
+do not sum daily unique users to obtain period uniques. Compare stages as a
+funnel only within the same app version and matched dates. This event excludes
+lesson contents, room/professor details, screenshots, free-form text, and
+recipient information. Analytics calls are fail-open and do not gate sharing.
