@@ -155,12 +155,16 @@ Future<void> _searchAndOpenGroup(WidgetTester tester, String groupName) async {
     timeout: const Duration(seconds: 30),
   );
   await tester.enterText(find.byType(TextField), groupName);
+  final groupTile = find.ancestor(
+    of: find.text(groupName),
+    matching: find.byType(ListTile),
+  );
   await _pumpUntil(
     tester,
-    () => find.text(groupName).hitTestable().evaluate().isNotEmpty,
+    () => groupTile.hitTestable().evaluate().isNotEmpty,
     timeout: const Duration(seconds: 30),
   );
-  await _tapVisible(tester, find.text(groupName));
+  await _tapVisible(tester, groupTile);
 }
 
 Future<void> _waitForSchedule(
