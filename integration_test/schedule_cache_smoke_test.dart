@@ -67,10 +67,7 @@ void main() {
       );
 
       expect(find.textContaining('7–13 сентября'), findsOneWidget);
-      expect(
-        find.textContaining('Понедельник · 7 сентября'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Понедельник · 7 сентября'), findsOneWidget);
       _expectMondayHasLessons();
 
       await _pumpUntil(
@@ -172,10 +169,7 @@ void main() {
         () => find.textContaining('7–13 сентября').evaluate().isNotEmpty,
         timeout: const Duration(seconds: 3),
       );
-      expect(
-        find.textContaining('Понедельник · 7 сентября'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Понедельник · 7 сентября'), findsOneWidget);
       _expectMondayHasLessons();
       await _pumpUntil(
         tester,
@@ -186,12 +180,6 @@ void main() {
         timeout: const Duration(seconds: 3),
       );
 
-      await tester.fling(
-        find.byType(CustomScrollView).first,
-        const Offset(0, -10000),
-        3000,
-      );
-      await tester.pump(const Duration(seconds: 1));
       expect(find.byKey(const ValueKey('week-navigation')), findsOneWidget);
 
       final overlay = find.byKey(const ValueKey('schedule-refresh-card'));
@@ -208,31 +196,19 @@ void _openSchedule(
   required Map<String, String> arguments,
 }) {
   final context = tester.element(find.byType(Scaffold).first);
-  Octopus.of(context).setState(
-    (state) => state..add(Routes.schedule.node(arguments: arguments)),
-  );
+  Octopus.of(
+    context,
+  ).setState((state) => state..add(Routes.schedule.node(arguments: arguments)));
 }
 
 Future<void> _waitForRefreshToFinish(WidgetTester tester) => _pumpUntil(
-      tester,
-      () => find
-          .byKey(const ValueKey('schedule-refresh-card'))
-          .evaluate()
-          .isEmpty,
-      timeout: const Duration(seconds: 30),
-    );
+  tester,
+  () => find.byKey(const ValueKey('schedule-refresh-card')).evaluate().isEmpty,
+  timeout: const Duration(seconds: 30),
+);
 
 Future<void> _tapNextWeek(WidgetTester tester) async {
-  final navigation = find.byKey(const ValueKey('week-navigation'));
-  await tester.dragUntilVisible(
-    navigation,
-    find.byType(CustomScrollView).first,
-    const Offset(0, -600),
-  );
-  final nextButton = find.descendant(
-    of: navigation,
-    matching: find.byIcon(Icons.arrow_forward),
-  );
+  final nextButton = find.byKey(const ValueKey('next-week-button'));
   expect(nextButton, findsOneWidget);
   await tester.tap(nextButton);
   await tester.pump(const Duration(milliseconds: 500));
@@ -252,10 +228,7 @@ void _expectMondayHasLessons() {
     findsOneWidget,
   );
   expect(
-    find.descendant(
-      of: mondayHeaderRow,
-      matching: find.text('нет пар'),
-    ),
+    find.descendant(of: mondayHeaderRow, matching: find.text('нет пар')),
     findsNothing,
   );
 }

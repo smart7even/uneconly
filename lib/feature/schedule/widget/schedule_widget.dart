@@ -7,7 +7,6 @@ import 'package:uneconly/common/routing/routes.dart';
 import 'package:uneconly/common/theme/app_theme.dart';
 import 'package:uneconly/common/utils/date_utils.dart';
 import 'package:uneconly/common/utils/lesson_utils.dart';
-import 'package:uneconly/common/utils/schedule_week_utils.dart';
 import 'package:uneconly/common/utils/string_utils.dart';
 import 'package:uneconly/feature/calendar/calendar_block.dart';
 import 'package:uneconly/feature/schedule/data/lesson_choice_repository.dart';
@@ -23,8 +22,6 @@ import 'package:uneconly/feature/schedule/widget/schedule_widget_content.dart';
 /// {@endtemplate}
 class ScheduleWidget extends StatefulWidget {
   final Schedule? schedule;
-  final VoidCallback? onNextWeek;
-  final VoidCallback? onPreviousWeek;
   final bool showCalendarBlock;
   final VoidCallback onUpdate;
   final AppConfig appConfig;
@@ -33,8 +30,6 @@ class ScheduleWidget extends StatefulWidget {
   const ScheduleWidget({
     super.key,
     required this.schedule,
-    this.onNextWeek,
-    this.onPreviousWeek,
     required this.showCalendarBlock,
     required this.onUpdate,
     required this.appConfig,
@@ -257,18 +252,6 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
 
     slivers.add(
       SliverToBoxAdapter(
-        child: ScheduleWidgetContent(
-          child: _WeekNavigation(
-            schedule: currentSchedule,
-            onPrevious: widget.onPreviousWeek,
-            onNext: widget.onNextWeek,
-          ),
-        ),
-      ),
-    );
-
-    slivers.add(
-      SliverToBoxAdapter(
         child: SizedBox(
           height:
               MediaQuery.of(context).padding.bottom +
@@ -323,15 +306,9 @@ class _ScheduleWidgetState extends State<ScheduleWidget> {
               ),
               const SizedBox(height: 10),
               Text(
-                _emptyWeekNavigationHint(context, currentSchedule.week),
+                context.string.noScheduleDescription,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: context.palette.muted),
-              ),
-              const SizedBox(height: 24),
-              _WeekNavigation(
-                schedule: currentSchedule,
-                onPrevious: widget.onPreviousWeek,
-                onNext: widget.onNextWeek,
               ),
             ],
           ),
@@ -356,16 +333,6 @@ String _sectionTitle(BuildContext context, DateTime day, int difference) {
     _ => capitalize(DateFormat('EEEE', 'ru').format(day)),
   };
   return '$relative · $date, $weekday';
-}
-
-String _emptyWeekNavigationHint(BuildContext context, int week) {
-  if (week <= minScheduleWeek) {
-    return 'Свайпните влево, чтобы посмотреть следующую неделю.';
-  }
-  if (week >= maxScheduleWeek) {
-    return 'Свайпните вправо, чтобы посмотреть предыдущую неделю.';
-  }
-  return context.string.noScheduleDescription;
 }
 
 String _emptyRangeTitle(DateTime first, DateTime last) {
@@ -408,54 +375,6 @@ class _ScheduleActionSurface extends StatelessWidget {
       onTap: onTap,
     ),
   );
-}
-
-class _WeekNavigation extends StatelessWidget {
-  const _WeekNavigation({
-    required this.schedule,
-    required this.onPrevious,
-    required this.onNext,
-  });
-
-  final Schedule schedule;
-  final VoidCallback? onPrevious;
-  final VoidCallback? onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    final previous = schedule.week > minScheduleWeek
-        ? schedulePeriodStartForWeek(
-            week: schedule.week - 1,
-            academicYearStart: schedule.academicYearStart,
-          )
-        : schedule.periodStart;
-    final next = schedule.week < maxScheduleWeek
-        ? schedulePeriodStartForWeek(
-            week: schedule.week + 1,
-            academicYearStart: schedule.academicYearStart,
-          )
-        : schedule.periodStart;
-    return Row(
-      key: const ValueKey('week-navigation'),
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: schedule.week > minScheduleWeek ? onPrevious : null,
-            icon: const Icon(Icons.arrow_back, size: 18),
-            label: Text(DateFormat('d MMM', 'ru').format(previous)),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: schedule.week < maxScheduleWeek ? onNext : null,
-            icon: const Icon(Icons.arrow_forward, size: 18),
-            label: Text(DateFormat('d MMM', 'ru').format(next)),
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 class _ScheduleSkeleton extends StatelessWidget {

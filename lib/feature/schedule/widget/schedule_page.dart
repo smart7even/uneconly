@@ -5,7 +5,6 @@ import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
 import 'package:octopus/octopus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uneconly/common/localization/localization.dart';
@@ -28,6 +27,7 @@ import 'package:uneconly/feature/schedule/model/schedule_info.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_actions_popup.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_drawer.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_refresh_overlay.dart';
+import 'package:uneconly/feature/schedule/widget/schedule_week_navigation.dart';
 import 'package:uneconly/feature/schedule/widget/schedule_widget.dart';
 import 'package:uneconly/feature/select/data/group_network_data_provider.dart';
 import 'package:uneconly/feature/select/data/group_repository.dart';
@@ -620,67 +620,41 @@ class _SchedulePageState extends State<SchedulePage>
     }
 
     final scheduleTitle = state.scheduleInfo?.title ?? '';
-    String weekSubtitle = '';
-
-    if (selectedWeek != null) {
-      final selectedSchedule = data[selectedWeek]?.schedule;
-      weekSubtitle = selectedSchedule == null
-          ? '${context.string.week} $selectedWeek'
-          : _weekRange(
-              selectedSchedule.periodStart,
-              selectedSchedule.periodEnd,
-            );
-      weekSubtitle += selectedWeek.isOdd ? ' · нечётная' : ' · чётная';
-      if (week != null && week == selectedWeek) weekSubtitle += ' · эта неделя';
-    }
-
     final isGroupSchedule = widget.scheduleInfo.map(
       group: (group) => true,
       professor: (professor) => false,
     );
-    if (!isGroupSchedule && weekSubtitle.isNotEmpty) {
-      weekSubtitle = 'Преподаватель · $weekSubtitle';
-    }
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: context.palette.surface,
       drawer: !widget.isViewMode ? _buildDrawer(context, state) : null,
       appBar: AppBar(
-        toolbarHeight: 70,
+        toolbarHeight: 62,
         elevation: 0,
         backgroundColor: context.palette.surface,
         foregroundColor: context.palette.ink,
         centerTitle: false,
         titleSpacing: 4,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              scheduleTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-              ),
-            ),
-            if (weekSubtitle.isNotEmpty)
-              Text(
-                weekSubtitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: context.palette.muted,
-                ),
-              ),
-          ],
+        title: Text(
+          scheduleTitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
+          ),
         ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, color: context.palette.hairline),
+          preferredSize: const Size.fromHeight(62),
+          child: ScheduleWeekNavigation(
+            selectedWeek: selectedWeek,
+            currentWeek: week,
+            schedule: selectedDetails?.schedule,
+            onPrevious: () => onPreviousWeek(context),
+            onNext: () => onNextWeek(context),
+          ),
         ),
         actions: [
           if (!widget.isViewMode)
@@ -755,8 +729,6 @@ class _SchedulePageState extends State<SchedulePage>
                       if (currentWeek == null) {
                         return ScheduleWidget(
                           schedule: null,
-                          onNextWeek: () => onNextWeek(context),
-                          onPreviousWeek: () => onPreviousWeek(context),
                           showCalendarBlock: widget.isHomePage,
                           onUpdate: () => onUpdate(context, state),
                           appConfig: _appConfig,
@@ -773,8 +745,6 @@ class _SchedulePageState extends State<SchedulePage>
 
                       return ScheduleWidget(
                         schedule: data[currentWeek]?.schedule,
-                        onNextWeek: () => onNextWeek(context),
-                        onPreviousWeek: () => onPreviousWeek(context),
                         showCalendarBlock: widget.isHomePage,
                         onUpdate: () => onUpdate(context, state),
                         appConfig: _appConfig,
@@ -852,17 +822,6 @@ class _SchedulePageState extends State<SchedulePage>
     );
   }
 }
-
-String _weekRange(DateTime start, DateTime end) {
-  if (start.month == end.month) {
-    return '${start.day}–${end.day} ${_monthInDate(end)}';
-  }
-  return '${start.day} ${DateFormat('MMM', 'ru').format(start)} – '
-      '${end.day} ${DateFormat('MMM', 'ru').format(end)}';
-}
-
-String _monthInDate(DateTime date) =>
-    DateFormat('d MMMM', 'ru').format(date).replaceFirst('${date.day} ', '');
 
 class _OfflineBanner extends StatelessWidget {
   const _OfflineBanner({required this.onRetry});

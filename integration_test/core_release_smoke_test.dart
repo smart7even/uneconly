@@ -53,6 +53,20 @@ void main() {
       () => _weekSubtitle(tester, groupName: 'БИ-2604') == initialWeek,
     );
 
+    await _tapVisible(tester, find.byKey(const ValueKey('next-week-button')));
+    await _pumpUntil(
+      tester,
+      () => _weekSubtitle(tester, groupName: 'БИ-2604') != initialWeek,
+    );
+    await _tapVisible(
+      tester,
+      find.byKey(const ValueKey('previous-week-button')),
+    );
+    await _pumpUntil(
+      tester,
+      () => _weekSubtitle(tester, groupName: 'БИ-2604') == initialWeek,
+    );
+
     // Exercise the real drawer/settings route, the university default, and
     // persistence through the settings repository before restoring the
     // release default for the remainder of the smoke test.
@@ -175,13 +189,9 @@ Future<void> _waitForSchedule(
 }
 
 String _weekSubtitle(WidgetTester tester, {required String groupName}) {
-  final appBarTexts = tester.widgetList<Text>(
-    find.descendant(of: find.byType(AppBar), matching: find.byType(Text)),
-  );
-  return appBarTexts
-      .map((text) => text.data)
-      .whereType<String>()
-      .firstWhere((text) => text.isNotEmpty && text != groupName);
+  return tester
+      .widget<Text>(find.byKey(const ValueKey('week-period-label')))
+      .data!;
 }
 
 Future<void> _selectAccent(WidgetTester tester, String accent) async {
