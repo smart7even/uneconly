@@ -45,7 +45,7 @@ class ScheduleWeekNavigation extends StatelessWidget {
         height: 62,
         padding: const EdgeInsets.fromLTRB(12, 7, 12, 8),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: context.palette.hairline)),
+          border: Border(top: BorderSide(color: context.palette.hairline)),
         ),
         child: MediaQuery.withClampedTextScaling(
           maxScaleFactor: 1.4,

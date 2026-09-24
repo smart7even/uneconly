@@ -39,6 +39,27 @@ Never add lesson contents, notes, professor names, notification payloads,
 credentials, tokens, full URLs, or other user-authored/free-form values to this
 event.
 
+## `schedule/week_change` (schema version 1)
+
+Product question: do people discover and use the fixed week buttons, or do they
+still navigate mostly by swiping? Emit once when a user-initiated PageView
+transition reaches another valid week. Do not emit for an initial page,
+automatic current-week rebase, a boundary tap, or a gesture that returns to the
+same week. This records navigation, not successful loading of that week's data.
+
+Attributes: `schema_version=1`, `source=button|swipe`,
+`direction=previous|next`, `surface=home|viewed`, and
+`schedule_scope=group|professor`. Group schedules also include public
+`group_id` and normalized `group_name`, including temporarily viewed groups;
+professor schedules have no group attribution. No lesson content, room,
+professor name, recipient, or arbitrary route value is logged.
+
+For the bottom-control experiment, compare deduplicated users with at least one
+`source=button` event against deduplicated users who viewed a schedule, and
+compare button/swipe event totals for repeated actions on matched complete
+days, app versions, and surfaces. Do not sum daily unique users or interpret a
+week change as a successful schedule fetch. Analytics errors are fail-open.
+
 ## `schedule/share` (schema version 1)
 
 Product question: how many distinct people start sharing a schedule, which

@@ -63,6 +63,9 @@ class _SchedulePageState extends State<SchedulePage>
   static const initialPageIndex = 4242;
 
   final controller = PageController(initialPage: initialPageIndex);
+  int _lastPageIndex = initialPageIndex;
+  ScheduleWeekChangeSource? _pendingWeekChangeSource;
+  int _weekNavigationIntent = 0;
 
   late final ScheduleBLoC scheduleBLoC;
   late final ScheduleNetworkDataProvider scheduleNetworkDataProvider;
@@ -206,6 +209,8 @@ class _SchedulePageState extends State<SchedulePage>
     if (shouldRebase) {
       _academicYearStart = recommendedAcademicYearStart;
       if (controller.hasClients) {
+        _pendingWeekChangeSource = null;
+        _lastPageIndex = initialPageIndex;
         controller.jumpToPage(initialPageIndex);
       }
       scheduleBLoC.add(
@@ -365,6 +370,11 @@ class _SchedulePageState extends State<SchedulePage>
       return;
     }
 
+    final previousIndex = _lastPageIndex;
+    _lastPageIndex = newIndex;
+    final source = _pendingWeekChangeSource;
+    _pendingWeekChangeSource = null;
+
     final newWeek = scheduleWeekForPageIndex(
       pageIndex: newIndex,
       basePageIndex: initialPageIndex,
@@ -388,6 +398,27 @@ class _SchedulePageState extends State<SchedulePage>
         );
       }
       return;
+    }
+
+    if (source != null && previousIndex != newIndex) {
+      final group = widget.scheduleInfo.map(
+        group: (value) => value.shortGroupInfo,
+        professor: (_) => null,
+      );
+      unawaited(
+        Dependencies.of(context).analyticsRepository.logScheduleWeekChange(
+          source: source,
+          direction: newIndex > previousIndex
+              ? ScheduleWeekChangeDirection.next
+              : ScheduleWeekChangeDirection.previous,
+          surface: widget.isHomePage
+              ? ScheduleSurface.home
+              : ScheduleSurface.viewed,
+          scope: group == null ? ScheduleScope.professor : ScheduleScope.group,
+          groupId: group?.groupId,
+          groupName: group?.groupName,
+        ),
+      );
     }
 
     unawaited(_refreshAppConfig());
@@ -428,7 +459,7 @@ class _SchedulePageState extends State<SchedulePage>
     unawaited(_loadRecommendedSchedule(refresh: true));
   }
 
-  void onNextWeek(BuildContext context) {
+  void _animateWeek(int offset) {
     final currentPage = controller.page;
     final baseWeek = scheduleBLoC.state.currentWeek;
 
@@ -436,7 +467,7 @@ class _SchedulePageState extends State<SchedulePage>
       return;
     }
 
-    final newPage = currentPage.round() + 1;
+    final newPage = currentPage.round() + offset;
     final newWeek = scheduleWeekForPageIndex(
       pageIndex: newPage,
       basePageIndex: initialPageIndex,
@@ -446,37 +477,26 @@ class _SchedulePageState extends State<SchedulePage>
       return;
     }
 
-    controller.animateToPage(
-      newPage,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeIn,
+    _pendingWeekChangeSource = ScheduleWeekChangeSource.button;
+    final intent = ++_weekNavigationIntent;
+    unawaited(
+      controller
+          .animateToPage(
+            newPage,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeIn,
+          )
+          .whenComplete(() {
+            if (_weekNavigationIntent == intent) {
+              _pendingWeekChangeSource = null;
+            }
+          }),
     );
   }
 
-  void onPreviousWeek(BuildContext context) {
-    final currentPage = controller.page;
-    final baseWeek = scheduleBLoC.state.currentWeek;
+  void onNextWeek() => _animateWeek(1);
 
-    if (currentPage == null || baseWeek == null) {
-      return;
-    }
-
-    final newPage = currentPage.round() - 1;
-    final newWeek = scheduleWeekForPageIndex(
-      pageIndex: newPage,
-      basePageIndex: initialPageIndex,
-      baseWeek: baseWeek,
-    );
-    if (!isValidScheduleWeek(newWeek)) {
-      return;
-    }
-
-    controller.animateToPage(
-      newPage,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeIn,
-    );
-  }
+  void onPreviousWeek() => _animateWeek(-1);
 
   Future<void> onFavoritePressed(
     BuildContext context,
@@ -558,15 +578,13 @@ class _SchedulePageState extends State<SchedulePage>
     );
     final analytics = Dependencies.of(context).analyticsRepository;
     final surface = widget.isHomePage
-        ? ScheduleShareSurface.home
-        : ScheduleShareSurface.viewed;
+        ? ScheduleSurface.home
+        : ScheduleSurface.viewed;
     final group = details.schedule.info.map(
       group: (value) => value.shortGroupInfo,
       professor: (_) => null,
     );
-    final scope = group == null
-        ? ScheduleShareScope.professor
-        : ScheduleShareScope.group;
+    final scope = group == null ? ScheduleScope.professor : ScheduleScope.group;
     void track(
       ScheduleShareStage stage, {
       ScheduleShareFormat? format,
@@ -805,16 +823,6 @@ class _SchedulePageState extends State<SchedulePage>
             letterSpacing: -0.3,
           ),
         ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(62),
-          child: ScheduleWeekNavigation(
-            selectedWeek: selectedWeek,
-            currentWeek: week,
-            schedule: selectedDetails?.schedule,
-            onPrevious: () => onPreviousWeek(context),
-            onNext: () => onNextWeek(context),
-          ),
-        ),
         actions: [
           if (!widget.isViewMode)
             IconButton(
@@ -844,6 +852,18 @@ class _SchedulePageState extends State<SchedulePage>
             ),
         ],
       ),
+      // A contextual control above the system gesture area. The future app
+      // destination bar belongs to HomePage, not to this week switcher.
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: ScheduleWeekNavigation(
+          selectedWeek: selectedWeek,
+          currentWeek: week,
+          schedule: selectedDetails?.schedule,
+          onPrevious: onPreviousWeek,
+          onNext: onNextWeek,
+        ),
+      ),
       body: Column(
         children: [
           if (hasNetworkError)
@@ -854,61 +874,78 @@ class _SchedulePageState extends State<SchedulePage>
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: PageView.builder(
-                    key: const ValueKey('schedule-week-page-view'),
-                    controller: controller,
-                    scrollDirection: Axis.horizontal,
-                    physics: week == null
-                        ? const PageScrollPhysics()
-                        : WeekPageScrollPhysics(
-                            minPageIndex: pageIndexForScheduleWeek(
-                              week: minScheduleWeek,
-                              basePageIndex: initialPageIndex,
-                              baseWeek: week,
-                            ),
-                            maxPageIndex: pageIndexForScheduleWeek(
-                              week: maxScheduleWeek,
-                              basePageIndex: initialPageIndex,
-                              baseWeek: week,
-                            ),
-                          ),
-                    onPageChanged: (int newIndex) =>
-                        onPageChanged(context, newIndex, week),
-                    itemBuilder: (context, index) {
-                      int? currentWeek;
-
-                      if (week != null) {
-                        currentWeek = scheduleWeekForPageIndex(
-                          pageIndex: index,
-                          basePageIndex: initialPageIndex,
-                          baseWeek: week,
-                        );
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification.depth != 0 ||
+                          notification.metrics.axis != Axis.horizontal) {
+                        return false;
                       }
+                      if (notification is ScrollStartNotification &&
+                          notification.dragDetails != null) {
+                        _weekNavigationIntent++;
+                        _pendingWeekChangeSource =
+                            ScheduleWeekChangeSource.swipe;
+                      } else if (notification is ScrollEndNotification) {
+                        _pendingWeekChangeSource = null;
+                      }
+                      return false;
+                    },
+                    child: PageView.builder(
+                      key: const ValueKey('schedule-week-page-view'),
+                      controller: controller,
+                      scrollDirection: Axis.horizontal,
+                      physics: week == null
+                          ? const PageScrollPhysics()
+                          : WeekPageScrollPhysics(
+                              minPageIndex: pageIndexForScheduleWeek(
+                                week: minScheduleWeek,
+                                basePageIndex: initialPageIndex,
+                                baseWeek: week,
+                              ),
+                              maxPageIndex: pageIndexForScheduleWeek(
+                                week: maxScheduleWeek,
+                                basePageIndex: initialPageIndex,
+                                baseWeek: week,
+                              ),
+                            ),
+                      onPageChanged: (int newIndex) =>
+                          onPageChanged(context, newIndex, week),
+                      itemBuilder: (context, index) {
+                        int? currentWeek;
 
-                      if (currentWeek == null) {
+                        if (week != null) {
+                          currentWeek = scheduleWeekForPageIndex(
+                            pageIndex: index,
+                            basePageIndex: initialPageIndex,
+                            baseWeek: week,
+                          );
+                        }
+
+                        if (currentWeek == null) {
+                          return ScheduleWidget(
+                            schedule: null,
+                            showCalendarBlock: widget.isHomePage,
+                            onUpdate: () => onUpdate(context, state),
+                            appConfig: _appConfig,
+                          );
+                        }
+
+                        if (currentWeek < minScheduleWeek) {
+                          return const SizedBox();
+                        }
+
+                        if (currentWeek > maxScheduleWeek) {
+                          return const SizedBox();
+                        }
+
                         return ScheduleWidget(
-                          schedule: null,
+                          schedule: data[currentWeek]?.schedule,
                           showCalendarBlock: widget.isHomePage,
                           onUpdate: () => onUpdate(context, state),
                           appConfig: _appConfig,
                         );
-                      }
-
-                      if (currentWeek < minScheduleWeek) {
-                        return const SizedBox();
-                      }
-
-                      if (currentWeek > maxScheduleWeek) {
-                        return const SizedBox();
-                      }
-
-                      return ScheduleWidget(
-                        schedule: data[currentWeek]?.schedule,
-                        showCalendarBlock: widget.isHomePage,
-                        onUpdate: () => onUpdate(context, state),
-                        appConfig: _appConfig,
-                      );
-                    },
+                      },
+                    ),
                   ),
                 ),
                 ScheduleRefreshOverlay(

@@ -35,6 +35,14 @@ void main() {
     await _selectPrimaryGroupIfNeeded(tester);
     await _waitForSchedule(tester, groupName: 'БИ-2604');
 
+    final weekNavigation = find.byKey(const ValueKey('week-navigation'));
+    final weekPageView = find.byKey(const ValueKey('schedule-week-page-view'));
+    final fixedNavigationTop = tester.getTopLeft(weekNavigation).dy;
+    expect(
+      tester.getBottomLeft(weekPageView).dy,
+      lessThanOrEqualTo(fixedNavigationTop),
+    );
+
     final initialWeek = _weekSubtitle(tester, groupName: 'БИ-2604');
     await tester.drag(
       find.byKey(const ValueKey('schedule-week-page-view')),
@@ -52,6 +60,7 @@ void main() {
       tester,
       () => _weekSubtitle(tester, groupName: 'БИ-2604') == initialWeek,
     );
+    expect(tester.getTopLeft(weekNavigation).dy, fixedNavigationTop);
 
     await _tapVisible(tester, find.byKey(const ValueKey('next-week-button')));
     await _pumpUntil(

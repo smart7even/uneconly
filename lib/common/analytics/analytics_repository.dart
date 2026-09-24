@@ -16,9 +16,13 @@ enum ScheduleShareFormat { text, image }
 
 enum ScheduleShareResult { success, dismissed, unavailable }
 
-enum ScheduleShareSurface { home, viewed }
+enum ScheduleSurface { home, viewed }
 
-enum ScheduleShareScope { group, professor }
+enum ScheduleScope { group, professor }
+
+enum ScheduleWeekChangeSource { button, swipe }
+
+enum ScheduleWeekChangeDirection { previous, next }
 
 abstract class IAnalyticsRepository {
   Future<void> logPageOpen(String pageName, Map<String, dynamic> parameters);
@@ -31,12 +35,20 @@ abstract class IAnalyticsRepository {
   });
   Future<void> logScheduleShare({
     required ScheduleShareStage stage,
-    required ScheduleShareSurface surface,
-    required ScheduleShareScope scope,
+    required ScheduleSurface surface,
+    required ScheduleScope scope,
     int? groupId,
     String? groupName,
     ScheduleShareFormat? format,
     ScheduleShareResult? result,
+  });
+  Future<void> logScheduleWeekChange({
+    required ScheduleWeekChangeSource source,
+    required ScheduleWeekChangeDirection direction,
+    required ScheduleSurface surface,
+    required ScheduleScope scope,
+    int? groupId,
+    String? groupName,
   });
 }
 
@@ -98,8 +110,8 @@ class AnalyticsRepository implements IAnalyticsRepository {
   @override
   Future<void> logScheduleShare({
     required ScheduleShareStage stage,
-    required ScheduleShareSurface surface,
-    required ScheduleShareScope scope,
+    required ScheduleSurface surface,
+    required ScheduleScope scope,
     int? groupId,
     String? groupName,
     ScheduleShareFormat? format,
@@ -119,9 +131,9 @@ class AnalyticsRepository implements IAnalyticsRepository {
         },
         'surface': surface.name,
         'schedule_scope': scope.name,
-        if (scope == ScheduleShareScope.group && groupId != null)
+        if (scope == ScheduleScope.group && groupId != null)
           'group_id': groupId.toString(),
-        if (scope == ScheduleShareScope.group)
+        if (scope == ScheduleScope.group)
           'group_name': _normalizeGroupName(groupName ?? ''),
         if (format != null) 'format': format.name,
         if (result != null) 'result': result.name,
@@ -129,6 +141,36 @@ class AnalyticsRepository implements IAnalyticsRepository {
     } on Object catch (error, stackTrace) {
       log(
         'Failed to report schedule/share',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> logScheduleWeekChange({
+    required ScheduleWeekChangeSource source,
+    required ScheduleWeekChangeDirection direction,
+    required ScheduleSurface surface,
+    required ScheduleScope scope,
+    int? groupId,
+    String? groupName,
+  }) async {
+    try {
+      await _loggingRepository.logEvent('schedule/week_change', {
+        'schema_version': 1,
+        'source': source.name,
+        'direction': direction.name,
+        'surface': surface.name,
+        'schedule_scope': scope.name,
+        if (scope == ScheduleScope.group && groupId != null)
+          'group_id': groupId.toString(),
+        if (scope == ScheduleScope.group)
+          'group_name': _normalizeGroupName(groupName ?? ''),
+      });
+    } on Object catch (error, stackTrace) {
+      log(
+        'Failed to report schedule/week_change',
         error: error,
         stackTrace: stackTrace,
       );

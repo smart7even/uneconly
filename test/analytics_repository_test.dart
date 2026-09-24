@@ -66,8 +66,8 @@ void main() {
 
     await analytics.logScheduleShare(
       stage: ScheduleShareStage.completed,
-      surface: ScheduleShareSurface.home,
-      scope: ScheduleShareScope.group,
+      surface: ScheduleSurface.home,
+      scope: ScheduleScope.group,
       groupId: 2604,
       groupName: '  БИ-2604 ',
       format: ScheduleShareFormat.image,
@@ -93,8 +93,8 @@ void main() {
 
     await analytics.logScheduleShare(
       stage: ScheduleShareStage.chooserOpened,
-      surface: ScheduleShareSurface.viewed,
-      scope: ScheduleShareScope.professor,
+      surface: ScheduleSurface.viewed,
+      scope: ScheduleScope.professor,
     );
 
     expect(logger.events.single.$2, {
@@ -113,9 +113,70 @@ void main() {
     await expectLater(
       analytics.logScheduleShare(
         stage: ScheduleShareStage.formatSelected,
-        surface: ScheduleShareSurface.home,
-        scope: ScheduleShareScope.group,
+        surface: ScheduleSurface.home,
+        scope: ScheduleScope.group,
         format: ScheduleShareFormat.text,
+      ),
+      completes,
+    );
+  });
+
+  test('week change records input method and public group dimension', () async {
+    final logger = _FakeLoggingRepository();
+    final analytics = AnalyticsRepository(loggingRepository: logger);
+
+    await analytics.logScheduleWeekChange(
+      source: ScheduleWeekChangeSource.button,
+      direction: ScheduleWeekChangeDirection.next,
+      surface: ScheduleSurface.home,
+      scope: ScheduleScope.group,
+      groupId: 2604,
+      groupName: '  БИ-2604 ',
+    );
+
+    expect(logger.events.single.$1, 'schedule/week_change');
+    expect(logger.events.single.$2, {
+      'schema_version': 1,
+      'source': 'button',
+      'direction': 'next',
+      'surface': 'home',
+      'schedule_scope': 'group',
+      'group_id': '2604',
+      'group_name': 'БИ-2604',
+    });
+  });
+
+  test('professor swipe has no group attribution', () async {
+    final logger = _FakeLoggingRepository();
+    final analytics = AnalyticsRepository(loggingRepository: logger);
+
+    await analytics.logScheduleWeekChange(
+      source: ScheduleWeekChangeSource.swipe,
+      direction: ScheduleWeekChangeDirection.previous,
+      surface: ScheduleSurface.viewed,
+      scope: ScheduleScope.professor,
+    );
+
+    expect(logger.events.single.$2, {
+      'schema_version': 1,
+      'source': 'swipe',
+      'direction': 'previous',
+      'surface': 'viewed',
+      'schedule_scope': 'professor',
+    });
+  });
+
+  test('analytics failure does not block a week change', () async {
+    final analytics = AnalyticsRepository(
+      loggingRepository: _ThrowingLoggingRepository(),
+    );
+
+    await expectLater(
+      analytics.logScheduleWeekChange(
+        source: ScheduleWeekChangeSource.button,
+        direction: ScheduleWeekChangeDirection.next,
+        surface: ScheduleSurface.home,
+        scope: ScheduleScope.group,
       ),
       completes,
     );

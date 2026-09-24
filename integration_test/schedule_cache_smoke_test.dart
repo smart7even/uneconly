@@ -184,9 +184,9 @@ void main() {
 
       final overlay = find.byKey(const ValueKey('schedule-refresh-card'));
       final navigation = find.byKey(const ValueKey('week-navigation'));
-      final overlayTop = tester.getTopLeft(overlay).dy;
-      final navigationBottom = tester.getBottomLeft(navigation).dy;
-      expect(navigationBottom, lessThanOrEqualTo(overlayTop));
+      final overlayBottom = tester.getBottomLeft(overlay).dy;
+      final navigationTop = tester.getTopLeft(navigation).dy;
+      expect(overlayBottom, lessThanOrEqualTo(navigationTop));
     },
   );
 }

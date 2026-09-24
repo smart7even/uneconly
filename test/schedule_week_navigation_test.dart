@@ -41,16 +41,19 @@ void main() {
             child: child!,
           ),
     home: Scaffold(
-      appBar: AppBar(
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(62),
-          child: ScheduleWeekNavigation(
-            selectedWeek: selectedWeek,
-            currentWeek: currentWeek,
-            schedule: value,
-            onPrevious: onPrevious ?? () {},
-            onNext: onNext ?? () {},
-          ),
+      appBar: AppBar(title: const Text('БИ-2602')),
+      body: ListView(
+        key: const ValueKey('week-scroll'),
+        children: const [SizedBox(height: 1400, child: Text('Расписание'))],
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: ScheduleWeekNavigation(
+          selectedWeek: selectedWeek,
+          currentWeek: currentWeek,
+          schedule: value,
+          onPrevious: onPrevious ?? () {},
+          onNext: onNext ?? () {},
         ),
       ),
     ),
@@ -150,6 +153,33 @@ void main() {
     expect(previousSize.height, greaterThanOrEqualTo(44));
     expect(nextSize.width, greaterThanOrEqualTo(44));
     expect(nextSize.height, greaterThanOrEqualTo(44));
+  });
+
+  testWidgets('stays below the schedule while its content scrolls', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      host(
+        selectedWeek: 4,
+        currentWeek: 4,
+        value: schedule(
+          week: 4,
+          start: DateTime(2026, 9, 21),
+          end: DateTime(2026, 9, 27),
+        ),
+      ),
+    );
+
+    final navigation = find.byKey(const ValueKey('week-navigation'));
+    final scroll = find.byKey(const ValueKey('week-scroll'));
+    final fixedTop = tester.getTopLeft(navigation).dy;
+    expect(tester.getBottomLeft(scroll).dy, lessThanOrEqualTo(fixedTop));
+
+    await tester.drag(scroll, const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(navigation).dy, fixedTop);
+    expect(find.byKey(const ValueKey('next-week-button')), findsOneWidget);
   });
 
   test('formats a range across two months without ambiguity', () {
