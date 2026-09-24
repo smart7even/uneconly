@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -104,9 +105,9 @@ class _HomePageState extends State<HomePage> {
   /* #endregion */
 
   Future<void> onOpen() async {
-    ISettingsRepository settingsRepository = Dependencies.of(
-      context,
-    ).settingsRepository;
+    final dependencies = Dependencies.of(context);
+    final ISettingsRepository settingsRepository =
+        dependencies.settingsRepository;
 
     final group = await settingsRepository.getGroup();
 
@@ -121,6 +122,15 @@ class _HomePageState extends State<HomePage> {
           ..add(Routes.select.node());
       });
     } else {
+      unawaited(
+        dependencies.analyticsRepository.logPrimaryGroupHomeOpen(
+          groupId: group.id,
+          groupName: group.name,
+          course: group.course,
+          facultyId: group.facultyId,
+        ),
+      );
+
       if (Platform.isAndroid || Platform.isIOS) {
         Future.wait([
           HomeWidget.saveWidgetData<int>('groupId', group.id),
