@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:math';
+import 'package:uneconly/common/logging/telemetry_identity.dart';
 import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -9,11 +9,6 @@ import 'package:uneconly/common/logging/logging_repository.dart';
 import 'package:uneconly/common/logging/routing_logging_repository.dart';
 import 'package:uneconly/common/logging/telemetry_config.dart';
 import 'package:uneconly/constants.dart';
-
-String telemetryId() => List.generate(
-  16,
-  (_) => Random.secure().nextInt(256).toRadixString(16).padLeft(2, '0'),
-).join();
 
 class AppMetricaTelemetrySink extends AppMetricaLoggingRepository
     implements TelemetrySink {
@@ -94,9 +89,7 @@ class SentryTelemetrySink implements TelemetrySink {
 
   Future<void> _initialize(String dsn) async {
     final preferences = await SharedPreferences.getInstance();
-    _installation =
-        preferences.getString('telemetry.installation_id') ?? telemetryId();
-    await preferences.setString('telemetry.installation_id', _installation);
+    _installation = await installationId(preferences);
     final info = await PackageInfo.fromPlatform();
     _version = '${info.version}+${info.buildNumber}';
     await SentryFlutter.init((options) {
@@ -138,6 +131,10 @@ class SentryTelemetrySink implements TelemetrySink {
       'schema_version': SentryAttribute.int(1),
     };
     const allowed = {
+      'request_id',
+      'http_method',
+      'http_status_code',
+      'error_type',
       'relationship',
       'scope',
       'group_id',
@@ -186,6 +183,8 @@ class SentryTelemetrySink implements TelemetrySink {
       stackTrace: stackTrace,
       hint: Hint.withMap({'uneconly_manual': true}),
       withScope: (scope) {
+        scope.setTag('installation_id', _installation);
+        scope.setTag('session_id', _session);
         scope.level = fatal ? SentryLevel.fatal : SentryLevel.error;
       },
     );

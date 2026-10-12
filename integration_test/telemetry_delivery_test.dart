@@ -32,48 +32,48 @@ class PolicySource implements IAppConfigNetworkDataProvider {
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  testWidgets(
-    'native providers follow live config without application restart',
-    (tester) async {
-      final flutterError = FlutterError.onError;
-      final platformError = PlatformDispatcher.instance.onError;
-      final logger = RoutingLoggingRepository(
-        appmetrica: AppMetricaTelemetrySink(),
-        sentry: SentryTelemetrySink(),
-      );
-      final source = PolicySource();
-      final prefs = await SharedPreferences.getInstance();
-      final config = AppConfigService(
-        preferences: prefs,
-        networkDataProvider: source,
-        platform: 'test',
-      );
-      config.addListener(() => logger.configure(config.current.telemetry));
-      config.start(groupId: -999);
-      for (final mode in ['appmetrica', 'both', 'sentry', 'off']) {
-        source.mode = mode;
-        await config.refreshIfDue(force: true);
-        await logger.drain();
-        FlutterError.onError = flutterError;
-        PlatformDispatcher.instance.onError = platformError;
-        expect(config.current.telemetry.mode, mode);
-        await logger.logEvent('telemetry/routing/$mode', {
-          'group_name': const String.fromEnvironment('TELEMETRY_TEST_RUN'),
-        });
-        if (mode == 'both')
-          await logger.logError(
-            StateError('Synthetic telemetry delivery verification'),
-            StackTrace.current,
-          );
-        await logger.drain();
-        // The SDK batches logs for five seconds. Allow delivery before switching.
-      await Future<void>.delayed(const Duration(seconds: 7));
-      }
-      config.dispose();
-      await prefs.remove(AppConfigService.cacheKeyForGroup(-999));
-      await Sentry.close();
+  testWidgets('native providers follow live config without application restart', (
+    tester,
+  ) async {
+    final flutterError = FlutterError.onError;
+    final platformError = PlatformDispatcher.instance.onError;
+    final logger = RoutingLoggingRepository(
+      appmetrica: AppMetricaTelemetrySink(),
+      sentry: SentryTelemetrySink(),
+    );
+    final source = PolicySource();
+    final prefs = await SharedPreferences.getInstance();
+    final config = AppConfigService(
+      preferences: prefs,
+      networkDataProvider: source,
+      platform: 'test',
+    );
+    config.addListener(() => logger.configure(config.current.telemetry));
+    config.start(groupId: -999);
+    for (final mode in ['appmetrica', 'both', 'sentry', 'off']) {
+      source.mode = mode;
+      await config.refreshIfDue(force: true);
+      await logger.drain();
       FlutterError.onError = flutterError;
       PlatformDispatcher.instance.onError = platformError;
-    },
-  );
+      expect(config.current.telemetry.mode, mode);
+      await logger.logEvent('telemetry/routing/$mode', {
+        'group_name': const String.fromEnvironment('TELEMETRY_TEST_RUN'),
+      });
+      if (mode == 'both') {
+        await logger.logError(
+          StateError('Synthetic telemetry delivery verification'),
+          StackTrace.current,
+        );
+      }
+      await logger.drain();
+      // The SDK batches logs for five seconds. Allow delivery before switching.
+      await Future<void>.delayed(const Duration(seconds: 7));
+    }
+    config.dispose();
+    await prefs.remove(AppConfigService.cacheKeyForGroup(-999));
+    await Sentry.close();
+    FlutterError.onError = flutterError;
+    PlatformDispatcher.instance.onError = platformError;
+  });
 }

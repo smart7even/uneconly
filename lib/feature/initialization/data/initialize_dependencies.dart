@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:uneconly/common/network/client_identity.dart';
+import 'package:uneconly/common/logging/telemetry_identity.dart';
 import 'package:uneconly/common/logging/routing_logging_repository.dart';
 import 'dart:async';
 
@@ -94,8 +98,27 @@ Map<String, _InitializationStep> _getInitializationSteps({
         dependencies.settingsRepository = SettingsRepository(
           localDataProvider: dependencies.settingsLocalDataProvider,
         ),
-    'Initialize dio': (dependencies) async =>
-        dependencies.dio = createApiClient(baseUrl: serverAddress),
+    'Initialize dio': (dependencies) async {
+      final dio = dependencies.dio = createApiClient(baseUrl: serverAddress);
+      try {
+        final info = await PackageInfo.fromPlatform().timeout(
+          auxiliarySdkTimeout,
+        );
+        final id = await installationId(
+          dependencies.sharedPreferences,
+        ).timeout(auxiliarySdkTimeout);
+        attachClientIdentity(
+          dio,
+          version: info.version,
+          build: info.buildNumber,
+          platform: Platform.operatingSystem,
+          installation: id,
+          logger: dependencies.loggingRepository,
+        );
+      } on Object {
+        // Diagnostics metadata must never prevent schedule access.
+      }
+    },
     'Initialize app config service': (dependencies) async {
       dependencies.appConfigService = AppConfigService(
         preferences: dependencies.sharedPreferences,

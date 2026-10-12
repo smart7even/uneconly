@@ -2,6 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:uneconly/feature/schedule/model/app_config.dart';
 
 void main() {
+  test('autoscroll is disabled by default', () {
+    expect(const AppConfig.safeDefaults().scheduleAutoScrollToday, isFalse);
+    expect(AppConfig.fromJson({}).scheduleAutoScrollToday, isFalse);
+  });
   test('app config parses explicit feature flags', () {
     final config = AppConfig.fromJson({
       'version': 1,

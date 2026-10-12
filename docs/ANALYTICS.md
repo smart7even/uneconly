@@ -89,3 +89,13 @@ do not sum daily unique users to obtain period uniques. Compare stages as a
 funnel only within the same app version and matched dates. This event excludes
 lesson contents, room/professor details, screenshots, free-form text, and
 recipient information. Analytics calls are fail-open and do not gate sharing.
+
+## Request correlation (2.0.4)
+
+The API client sends app version, build and platform in User-Agent and X-App-*
+headers. X-Installation-ID shares the random persisted Sentry installation ID;
+it is not an account or hardware ID. X-Request-ID changes for every request and
+is echoed by the backend after validation. The api/request_failed event contains
+that ID, HTTP method/status and error category, never query strings or bodies.
+Server client hints are untrusted, format-validated log fields, not metric labels
+or authentication. Autoscroll remains disabled in defaults and live config.

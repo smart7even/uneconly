@@ -5,7 +5,7 @@ class AppConfig {
   const AppConfig({
     required this.roomMapButtonEnabled,
     required this.roomMapCaptionEnabled,
-    this.scheduleAutoScrollToday = true,
+    this.scheduleAutoScrollToday = false,
     this.revision = 0,
     this.refreshIntervalSeconds = 300,
     this.payload = const {},
@@ -14,10 +14,10 @@ class AppConfig {
   const AppConfig.safeDefaults()
     : roomMapButtonEnabled = false,
       roomMapCaptionEnabled = false,
-      scheduleAutoScrollToday = true,
+      scheduleAutoScrollToday = false,
       revision = 0,
       refreshIntervalSeconds = 300,
-      payload = const {'schedule_auto_scroll_today': true};
+      payload = const {'schedule_auto_scroll_today': false};
 
   factory AppConfig.fromJson(Map<String, dynamic> json) {
     final rawPayload = json['payload'];
@@ -30,7 +30,7 @@ class AppConfig {
         payload['schedule_auto_scroll_today'];
     final scheduleAutoScrollToday = autoScrollValue is bool
         ? autoScrollValue
-        : true;
+        : false;
     payload.putIfAbsent(
       'schedule_auto_scroll_today',
       () => scheduleAutoScrollToday,
