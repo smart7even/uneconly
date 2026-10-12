@@ -8,6 +8,7 @@ import 'package:uneconly/common/push/push_notification_service.dart';
 import 'package:uneconly/common/review/app_review_service.dart';
 import 'package:uneconly/feature/initialization/widget/inherited_dependencies.dart';
 import 'package:uneconly/feature/schedule/data/day_schedule_repository.dart';
+import 'package:uneconly/feature/schedule/data/app_config_service.dart';
 import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
 import 'package:uneconly/feature/tutorials/data/tutorial_network_data_provider.dart';
@@ -28,6 +29,7 @@ class Dependencies {
   late final IAssetNetworkDataProvider assetNetworkDataProvider;
   late final ITutorialRepository tutorialRepository;
   late final IDayScheduleRepository dayScheduleRepository;
+  late final AppConfigService appConfigService;
 
   factory Dependencies.of(BuildContext context) =>
       InheritedDependencies.of(context);

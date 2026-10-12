@@ -68,3 +68,29 @@ open coverage/html/index.html
 - [Release process and core quality gate](docs/RELEASE_PROCESS.md)
 - [TestFlight deployment](ios/fastlane/TESTFLIGHT.md)
 - [Push notification verification](docs/PUSH_NOTIFICATIONS.md)
+
+## Remotely configured telemetry
+
+Version 2.0.4 adds the `telemetry` object in `/app/config` → `payload`:
+`mode` is `appmetrica`, `sentry`, `both`, or `off`. Sentry modes also require a
+public ingestion DSN on the allowlisted HTTPS collector. Server-side CLI and
+configuration history are documented in the backend repository.
+
+The global configuration starts before group selection, loads synchronously
+from the last valid cache, refreshes in the background (default five minutes),
+and checks again when the app resumes. Invalid, stale, or unavailable responses
+keep the previous configuration. Each SDK has a separate bounded queue; errors
+in analytics do not block navigation. A mode change discards queued old-policy
+events and disables the deselected SDK. Requests already in flight cannot be
+recalled. Native crash reporting is enabled for the active provider.
+
+Sentry receives structured product Logs and exceptions. Product attributes are
+allowlisted; installation/session IDs are random and do not identify people.
+Replay, tracing and automatic breadcrumbs are disabled. SDK 9.30.1 preserves
+the existing Android minimum; SDK 10 requires a higher Android minimum.
+
+`integration_test/telemetry_delivery_test.dart` runs the real SDKs while the
+configuration service switches through all four modes. Provide
+`SENTRY_TEST_DSN` and `TELEMETRY_TEST_RUN` via an ignored local dart-define file.
+Use a separate verification project, never production credentials in tests.
+Check collector results for exactly the `both` and `sentry` probe events.

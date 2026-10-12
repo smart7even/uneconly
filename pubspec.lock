@@ -552,18 +552,10 @@ packages:
     dependency: transitive
     description:
       name: jni
-      sha256: c2230682d5bc2362c1c9e8d3c7f406d9cbba23ab3f2e203a025dd47e0fb2e68f
+      sha256: d2c361082d554d4593c3012e26f6b188f902acd291330f13d6427641a92b3da1
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
-  jni_flutter:
-    dependency: transitive
-    description:
-      name: jni_flutter
-      sha256: "8b59e590786050b1cd866677dddaf76b1ade5e7bc751abe04b86e84d379d3ba6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
+    version: "0.14.2"
   json_annotation:
     dependency: "direct main"
     description:
@@ -708,6 +700,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  package_info_plus:
+    dependency: "direct main"
+    description:
+      name: package_info_plus
+      sha256: "73ef2cd5c11a7548f9b7f6fc2a4f6113de2e64aa2a70de63feede95548822908"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.2.2"
+  package_info_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: package_info_plus_platform_interface
+      sha256: db762cb2f4f25ee60fb6359773861b0f199e00b90d237bd85a76a1e806b46ef4
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
   path:
     dependency: "direct main"
     description:
@@ -736,10 +744,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_android
-      sha256: "69cbd515a62b94d32a7944f086b2f82b4ac40a1d45bebfc00813a430ab2dabcd"
+      sha256: "149441ca6e4f38193b2e004c0ca6376a3d11f51fa5a77552d8bd4d2b0c0912ba"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.1"
+    version: "2.2.23"
   path_provider_foundation:
     dependency: transitive
     description:
@@ -885,6 +893,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  sentry:
+    dependency: transitive
+    description:
+      name: sentry
+      sha256: "40a247686af64e497df29ab0de1303a20ca55a2e3c7c7e39b989fac47dcadf84"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.30.1"
+  sentry_flutter:
+    dependency: "direct main"
+    description:
+      name: sentry_flutter
+      sha256: bdd8897b38ce31185c42ed910628059c4eccbc0b0641213e8d1c63e2fda3f5a3
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.30.1"
   share_plus:
     dependency: "direct main"
     description:
