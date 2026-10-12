@@ -9,10 +9,7 @@ abstract class ILoggingRepository {
     String? hint,
     bool fatal = false,
   });
-  Future<void> logEvent(
-    String eventName, [
-    Map<String, Object>? attributes,
-  ]);
+  Future<void> logEvent(String eventName, [Map<String, Object>? attributes]);
 }
 
 class AppMetricaLoggingRepository implements ILoggingRepository {

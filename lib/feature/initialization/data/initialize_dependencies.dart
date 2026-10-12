@@ -1,3 +1,4 @@
+import 'package:uneconly/common/logging/routing_logging_repository.dart';
 import 'dart:async';
 
 import 'package:l/l.dart';
@@ -12,6 +13,8 @@ import 'package:uneconly/common/review/app_review_service.dart';
 import 'package:uneconly/constants.dart';
 import 'package:uneconly/feature/initialization/data/platform/platform_initialization.dart';
 import 'package:uneconly/feature/schedule/data/day_schedule_repository.dart';
+import 'package:uneconly/feature/schedule/data/app_config_network_data_provider.dart';
+import 'package:uneconly/feature/schedule/data/app_config_service.dart';
 import 'package:uneconly/feature/settings/data/settings_local_data_provider.dart';
 import 'package:uneconly/feature/settings/data/settings_repository.dart';
 import 'package:uneconly/feature/tutorials/data/tutorial_network_data_provider.dart';
@@ -79,7 +82,6 @@ Map<String, _InitializationStep> _getInitializationSteps({
         preferences: dependencies.sharedPreferences,
         loggingRepository: dependencies.loggingRepository,
       );
-      await dependencies.pushNotificationService.activate();
     },
     'Initialize database': (dependencies) async =>
         dependencies.database = MyDatabase(),
@@ -94,6 +96,30 @@ Map<String, _InitializationStep> _getInitializationSteps({
         ),
     'Initialize dio': (dependencies) async =>
         dependencies.dio = createApiClient(baseUrl: serverAddress),
+    'Initialize app config service': (dependencies) async {
+      dependencies.appConfigService = AppConfigService(
+        preferences: dependencies.sharedPreferences,
+        networkDataProvider: AppConfigNetworkDataProvider(
+          dio: dependencies.dio,
+        ),
+      );
+      final config = dependencies.appConfigService;
+      final logger = dependencies.loggingRepository;
+      config.start();
+      if (logger is RoutingLoggingRepository) {
+        void apply() => logger.configure(config.current.telemetry);
+        config.addListener(apply);
+        apply();
+        // Push requires AppMetrica activation, but neither SDK blocks startup.
+        unawaited(
+          logger.drain().then(
+            (_) => dependencies.pushNotificationService.activate(),
+          ),
+        );
+      } else {
+        unawaited(dependencies.pushNotificationService.activate());
+      }
+    },
     'Initialize asset network data provider': (dependencies) async =>
         dependencies.assetNetworkDataProvider = AssetNetworkDataProvider(
           dio: dependencies.dio,

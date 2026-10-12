@@ -1,9 +1,6 @@
-import 'dart:io';
-
-import 'package:appmetrica_plugin/appmetrica_plugin.dart';
-import 'package:flutter/foundation.dart';
 import 'package:uneconly/common/logging/logging_repository.dart';
-import 'package:uneconly/constants.dart';
+import 'package:uneconly/common/logging/routing_logging_repository.dart';
+import 'package:uneconly/common/logging/telemetry_sinks.dart';
 
 abstract class ILoggingRepositoryFactory {
   Future<ILoggingRepository> create();
@@ -11,17 +8,8 @@ abstract class ILoggingRepositoryFactory {
 
 class LoggingRepositoryFactory implements ILoggingRepositoryFactory {
   @override
-  Future<ILoggingRepository> create() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      await AppMetrica.activate(
-        kDebugMode
-            ? const AppMetricaConfig(appMetricaDevKey)
-            : const AppMetricaConfig(appMetricaProductionKey),
-      );
-
-      return AppMetricaLoggingRepository();
-    }
-
-    return LocalLoggingRepository();
-  }
+  Future<ILoggingRepository> create() async => RoutingLoggingRepository(
+    appmetrica: AppMetricaTelemetrySink(),
+    sentry: SentryTelemetrySink(),
+  );
 }
