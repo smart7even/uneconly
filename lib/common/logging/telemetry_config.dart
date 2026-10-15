@@ -1,6 +1,16 @@
 /// Public routing policy. The DSN is an ingestion address, never an API token.
 class TelemetryConfig {
-  const TelemetryConfig({this.mode = 'appmetrica', this.sentryDsn = ''});
+  // Used before the first remote response, including an offline first launch.
+  // A cached explicit policy still takes precedence (including `off`).
+  static const startupSentryDsn = String.fromEnvironment(
+    'SENTRY_STARTUP_DSN',
+    defaultValue:
+        'https://81ead9a721d9eae25f08c45b1f0ef00c@sentry.roadmapik.com/2',
+  );
+  const TelemetryConfig({
+    this.mode = 'both',
+    this.sentryDsn = startupSentryDsn,
+  });
   final String mode;
   final String sentryDsn;
   bool get appmetrica => mode == 'appmetrica' || mode == 'both';

@@ -762,11 +762,7 @@ class _SchedulePageState extends State<SchedulePage>
       ) ??
       false;
 
-  Widget _buildPageView(
-    BuildContext context,
-    ScheduleState state, {
-    bool hasNetworkError = false,
-  }) {
+  Widget _buildPageView(BuildContext context, ScheduleState state) {
     int? week = state.currentWeek;
     int? selectedWeek = state.selectedWeek;
     Map<int, ScheduleDetails> data = state.data;
@@ -859,96 +855,91 @@ class _SchedulePageState extends State<SchedulePage>
           onNext: onNextWeek,
         ),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          if (hasNetworkError)
-            _OfflineBanner(
-              onRetry: () => _loadRecommendedSchedule(refresh: true),
+          Positioned.fill(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification.depth != 0 ||
+                    notification.metrics.axis != Axis.horizontal) {
+                  return false;
+                }
+                if (notification is ScrollStartNotification &&
+                    notification.dragDetails != null) {
+                  _weekNavigationIntent++;
+                  _pendingWeekChangeSource = ScheduleWeekChangeSource.swipe;
+                } else if (notification is ScrollEndNotification) {
+                  _pendingWeekChangeSource = null;
+                }
+                return false;
+              },
+              child: PageView.builder(
+                key: const ValueKey('schedule-week-page-view'),
+                controller: controller,
+                scrollDirection: Axis.horizontal,
+                physics: week == null
+                    ? const PageScrollPhysics()
+                    : WeekPageScrollPhysics(
+                        minPageIndex: pageIndexForScheduleWeek(
+                          week: minScheduleWeek,
+                          basePageIndex: initialPageIndex,
+                          baseWeek: week,
+                        ),
+                        maxPageIndex: pageIndexForScheduleWeek(
+                          week: maxScheduleWeek,
+                          basePageIndex: initialPageIndex,
+                          baseWeek: week,
+                        ),
+                      ),
+                onPageChanged: (int newIndex) =>
+                    onPageChanged(context, newIndex, week),
+                itemBuilder: (context, index) {
+                  int? currentWeek;
+
+                  if (week != null) {
+                    currentWeek = scheduleWeekForPageIndex(
+                      pageIndex: index,
+                      basePageIndex: initialPageIndex,
+                      baseWeek: week,
+                    );
+                  }
+
+                  if (currentWeek == null) {
+                    return ScheduleWidget(
+                      schedule: null,
+                      showCalendarBlock: widget.isHomePage,
+                      onUpdate: () => onUpdate(context, state),
+                      appConfig: _appConfig,
+                    );
+                  }
+
+                  if (currentWeek < minScheduleWeek) {
+                    return const SizedBox();
+                  }
+
+                  if (currentWeek > maxScheduleWeek) {
+                    return const SizedBox();
+                  }
+
+                  return ScheduleWidget(
+                    schedule: data[currentWeek]?.schedule,
+                    showCalendarBlock: widget.isHomePage,
+                    onUpdate: () => onUpdate(context, state),
+                    appConfig: _appConfig,
+                  );
+                },
+              ),
             ),
-          Expanded(
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (notification) {
-                      if (notification.depth != 0 ||
-                          notification.metrics.axis != Axis.horizontal) {
-                        return false;
-                      }
-                      if (notification is ScrollStartNotification &&
-                          notification.dragDetails != null) {
-                        _weekNavigationIntent++;
-                        _pendingWeekChangeSource =
-                            ScheduleWeekChangeSource.swipe;
-                      } else if (notification is ScrollEndNotification) {
-                        _pendingWeekChangeSource = null;
-                      }
-                      return false;
-                    },
-                    child: PageView.builder(
-                      key: const ValueKey('schedule-week-page-view'),
-                      controller: controller,
-                      scrollDirection: Axis.horizontal,
-                      physics: week == null
-                          ? const PageScrollPhysics()
-                          : WeekPageScrollPhysics(
-                              minPageIndex: pageIndexForScheduleWeek(
-                                week: minScheduleWeek,
-                                basePageIndex: initialPageIndex,
-                                baseWeek: week,
-                              ),
-                              maxPageIndex: pageIndexForScheduleWeek(
-                                week: maxScheduleWeek,
-                                basePageIndex: initialPageIndex,
-                                baseWeek: week,
-                              ),
-                            ),
-                      onPageChanged: (int newIndex) =>
-                          onPageChanged(context, newIndex, week),
-                      itemBuilder: (context, index) {
-                        int? currentWeek;
-
-                        if (week != null) {
-                          currentWeek = scheduleWeekForPageIndex(
-                            pageIndex: index,
-                            basePageIndex: initialPageIndex,
-                            baseWeek: week,
-                          );
-                        }
-
-                        if (currentWeek == null) {
-                          return ScheduleWidget(
-                            schedule: null,
-                            showCalendarBlock: widget.isHomePage,
-                            onUpdate: () => onUpdate(context, state),
-                            appConfig: _appConfig,
-                          );
-                        }
-
-                        if (currentWeek < minScheduleWeek) {
-                          return const SizedBox();
-                        }
-
-                        if (currentWeek > maxScheduleWeek) {
-                          return const SizedBox();
-                        }
-
-                        return ScheduleWidget(
-                          schedule: data[currentWeek]?.schedule,
-                          showCalendarBlock: widget.isHomePage,
-                          onUpdate: () => onUpdate(context, state),
-                          appConfig: _appConfig,
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                ScheduleRefreshOverlay(
-                  isVisible: state.isProcessing && selectedDetails != null,
-                  details: selectedDetails,
-                ),
-              ],
+          ),
+          ScheduleRefreshOverlay(
+            isVisible: state.isProcessing,
+            details: selectedDetails,
+            hasError: state.hasError,
+            hasSucceeded: state.maybeMap(
+              successful: (_) => true,
+              orElse: () => false,
             ),
+            onRetry: () => _loadRecommendedSchedule(refresh: true),
           ),
         ],
       ),
@@ -967,7 +958,7 @@ class _SchedulePageState extends State<SchedulePage>
             successful: (state) => _buildPageView(context, state),
             error: (state) {
               if (state.hasData) {
-                return _buildPageView(context, state, hasNetworkError: true);
+                return _buildPageView(context, state);
               }
               return Scaffold(
                 appBar: AppBar(title: Text(context.string.scheduleError)),
@@ -1009,48 +1000,6 @@ class _SchedulePageState extends State<SchedulePage>
             },
           );
         },
-      ),
-    );
-  }
-}
-
-class _OfflineBanner extends StatelessWidget {
-  const _OfflineBanner({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: context.palette.nestedSurface,
-      child: InkWell(
-        onTap: onRetry,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Row(
-            children: [
-              Icon(
-                Icons.cloud_off_outlined,
-                size: 18,
-                color: context.palette.accent,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Нет связи · показана сохранённая копия',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-              Text(
-                'Обновить',
-                style: TextStyle(
-                  color: context.palette.accent,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
