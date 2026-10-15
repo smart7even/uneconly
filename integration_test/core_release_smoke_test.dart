@@ -144,6 +144,13 @@ void main() {
     await _goBack(tester);
     await _waitForSchedule(tester, groupName: 'БИ-2604');
 
+    // Returning from the secondary schedule can leave the home drawer open.
+    final scheduleScaffold = tester.state<ScaffoldState>(
+      find.ancestor(of: weekPageView, matching: find.byType(Scaffold)).first,
+    );
+    scheduleScaffold.closeDrawer();
+    await tester.pump(const Duration(milliseconds: 500));
+
     // A failed refresh must never resize the PageView or flap on retries.
     final stablePageRect = tester.getRect(weekPageView);
     final failure = InterceptorsWrapper(
