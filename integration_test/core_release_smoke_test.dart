@@ -144,6 +144,42 @@ void main() {
     await _goBack(tester);
     await _waitForSchedule(tester, groupName: 'БИ-2604');
 
+    // A failed refresh must never resize the PageView or flap on retries.
+    final stablePageRect = tester.getRect(weekPageView);
+    final failure = InterceptorsWrapper(
+      onRequest: (options, handler) {
+        handler.reject(
+          DioException(
+            requestOptions: options,
+            type: DioExceptionType.connectionError,
+            message: 'Synthetic offline check',
+          ),
+        );
+      },
+    );
+    dependencies.dio.interceptors.insert(0, failure);
+    await tester.drag(weekPageView, const Offset(0, 450));
+    await _pumpUntil(
+      tester,
+      () => find.text('Не удалось обновить расписание').evaluate().isNotEmpty,
+    );
+    expect(tester.getRect(weekPageView), stablePageRect);
+    await _tapVisible(tester, find.text('Повторить'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Не удалось обновить расписание'), findsOneWidget);
+    expect(tester.getRect(weekPageView), stablePageRect);
+    await tester.drag(weekPageView, const Offset(-800, 0));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Не удалось обновить расписание'), findsOneWidget);
+    expect(tester.getRect(weekPageView), stablePageRect);
+    dependencies.dio.interceptors.remove(failure);
+    await _tapVisible(tester, find.text('Повторить'));
+    await _pumpUntil(
+      tester,
+      () => find.text('Не удалось обновить расписание').evaluate().isEmpty,
+    );
+    expect(tester.getRect(weekPageView), stablePageRect);
+
     // Recreate the whole app while every new request remains pending. The
     // schedule must still become useful from the persisted cache promptly.
     dependencies.dio.interceptors.insert(

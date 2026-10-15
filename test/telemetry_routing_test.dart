@@ -35,7 +35,7 @@ void main() {
     final a = Sink(), s = Sink();
     final router = RoutingLoggingRepository(appmetrica: a, sentry: s);
     await router.logEvent('early');
-    router.configure(const TelemetryConfig());
+    router.configure(const TelemetryConfig(mode: 'appmetrica'));
     await router.drain();
     router.configure(const TelemetryConfig(mode: 'both'));
     await router.logEvent('both');

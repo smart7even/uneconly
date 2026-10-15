@@ -27,7 +27,13 @@ void main() {
     updatedAt: DateTime(2026, 8, 31, 2, 39),
   );
 
-  Widget host({required bool isVisible}) => MaterialApp(
+  Widget host({
+    required bool isVisible,
+    bool hasError = false,
+    bool hasSucceeded = false,
+    VoidCallback? onRetry,
+    bool hasDetails = true,
+  }) => MaterialApp(
     theme: AppTheme.light(),
     locale: const Locale('ru'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -41,7 +47,13 @@ void main() {
               color: Colors.white,
             ),
           ),
-          ScheduleRefreshOverlay(isVisible: isVisible, details: details),
+          ScheduleRefreshOverlay(
+            isVisible: isVisible,
+            details: hasDetails ? details : null,
+            hasError: hasError,
+            hasSucceeded: hasSucceeded,
+            onRetry: onRetry,
+          ),
         ],
       ),
     ),
@@ -80,5 +92,48 @@ void main() {
       contentBefore,
     );
     expect(find.text('Обновляем расписание…'), findsNothing);
+  });
+  testWidgets('failure stays stable through retry and swipe until success', (
+    tester,
+  ) async {
+    int retries = 0;
+    await tester.pumpWidget(
+      host(isVisible: false, hasError: true, onRetry: () => retries++),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    final content = tester.getRect(
+      find.byKey(const ValueKey('schedule-content')),
+    );
+    final card = tester.getRect(
+      find.byKey(const ValueKey('schedule-refresh-card')),
+    );
+    await tester.tap(find.text('Повторить'));
+    expect(retries, 1);
+    await tester.pumpWidget(host(isVisible: true, onRetry: () => retries++));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('Не удалось обновить расписание'), findsOneWidget);
+    expect(find.text('Обновляем расписание…'), findsNothing);
+    expect(
+      tester.getRect(find.byKey(const ValueKey('schedule-refresh-card'))),
+      card,
+    );
+    await tester.tap(find.text('Повторить'));
+    expect(retries, 1);
+    // A newly selected week can have no cached content. Do not claim a copy.
+    await tester.pumpWidget(host(isVisible: true, hasDetails: false));
+    expect(find.textContaining('Показана сохранённая копия'), findsNothing);
+    expect(find.text('Не удалось обновить расписание'), findsOneWidget);
+    await tester.pumpWidget(host(isVisible: false, hasError: true));
+    expect(
+      tester.getRect(find.byKey(const ValueKey('schedule-content'))),
+      content,
+    );
+    await tester.pumpWidget(host(isVisible: false, hasSucceeded: true));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('Не удалось обновить расписание'), findsNothing);
+    expect(
+      tester.getRect(find.byKey(const ValueKey('schedule-content'))),
+      content,
+    );
   });
 }
