@@ -145,11 +145,14 @@ void main() {
     await _waitForSchedule(tester, groupName: 'БИ-2604');
 
     // Returning from the secondary schedule can leave the home drawer open.
-    final scheduleScaffold = tester.state<ScaffoldState>(
-      find.ancestor(of: weekPageView, matching: find.byType(Scaffold)).first,
+    for (final element in find.byType(Scaffold).evaluate()) {
+      final scaffold = (element as StatefulElement).state as ScaffoldState;
+      if (scaffold.isDrawerOpen) scaffold.closeDrawer();
+    }
+    await _pumpUntil(
+      tester,
+      () => weekPageView.hitTestable().evaluate().isNotEmpty,
     );
-    scheduleScaffold.closeDrawer();
-    await tester.pump(const Duration(milliseconds: 500));
 
     // A failed refresh must never resize the PageView or flap on retries.
     final stablePageRect = tester.getRect(weekPageView);
@@ -165,7 +168,7 @@ void main() {
       },
     );
     dependencies.dio.interceptors.insert(0, failure);
-    await tester.drag(weekPageView, const Offset(0, 450));
+    await _tapVisible(tester, find.byKey(const ValueKey('next-week-button')));
     await _pumpUntil(
       tester,
       () => find.text('Не удалось обновить расписание').evaluate().isNotEmpty,
